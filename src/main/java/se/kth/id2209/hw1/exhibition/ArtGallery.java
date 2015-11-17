@@ -63,4 +63,17 @@ class ArtGallery {
 		return instance;
 	}
 
+	ArrayList<Integer> getArtifactList(GENRE genre) {
+		ArrayList<Integer> list = new ArrayList<>();
+
+		Iterator<Entry<Integer, Artifact>> it = artifacts.entrySet().iterator();
+		while(it.hasNext()) {		
+			Artifact artifact = it.next().getValue();
+			if(genre instanceof Artifact.GENRE) {
+				list.add(artifact.getId());
+			}
+		}
+		return list;
+	}
+
 }

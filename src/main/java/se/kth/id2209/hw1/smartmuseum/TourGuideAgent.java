@@ -5,8 +5,19 @@
  */
 package se.kth.id2209.hw1.smartmuseum;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import jade.core.Agent;
+import jade.core.behaviours.TickerBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
 import se.kth.id2209.hw1.exhibition.CuratorAgent;
+import se.kth.id2209.hw1.profiler.ProfilerAgent;
+import util.Ontologies;
 
 /**
  * Tour Guide Agent retrieves the information about artifacts in the
@@ -31,5 +42,69 @@ import se.kth.id2209.hw1.exhibition.CuratorAgent;
  * @author Kim
  */
 public class TourGuideAgent extends Agent {
-    private CuratorAgent cAgent; // temporary - register at DF instead
+	private static final long serialVersionUID = 5883088851872677769L;
+	private CuratorAgent cAgent; // temporary - register at DF instead
+	private Tour tour;
+
+	@Override
+	protected void setup() {
+		DFAgentDescription dfd = new DFAgentDescription();
+		dfd.setName(getAID());
+
+		ServiceDescription sd = new ServiceDescription();
+		sd.setType("Tour-Guide-agent");
+		sd.setName(getLocalName());
+		dfd.addServices(sd);
+
+		try {
+			DFService.register(this, dfd);
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
+	}
+
+	void createTour() {
+		tour = new Tour(this);
+	}
+
+	void deleteTour() {
+		tour = null;
+	}
+
+	public void joinTour(ProfilerAgent profiler) {
+		tour.addProfiler(profiler);
+	}
+	
+	@Override
+    protected void takeDown() {
+        try {
+            DFService.deregister(this);
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
+        System.out.println("Agent " + getAID().getName() + " is terminating.");
+    }
+	
+	class PresentBehaviour extends TickerBehaviour {
+		public PresentBehaviour(Agent a, long period) {
+			super(a, period);
+		}
+
+		@Override
+		protected void onTick() {
+			ArrayList<ProfilerAgent> profilers = tour.getProfilers();
+			Iterator<ProfilerAgent> it = profilers.iterator();
+//			while(it.hasNext()) {
+//				
+//			}
+			
+			System.out.println(myAgent.getLocalName() + " checking for items");
+			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);			
+			msg.addReceiver(cAgent.getAID());
+			msg.setOntology(Ontologies.ARTIFACT_RECOMMENDATION);
+			
+			send(msg);			
+		}
+		
+	}
 }

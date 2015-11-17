@@ -1,11 +1,14 @@
 package se.kth.id2209.hw1.exhibition;
 
+import java.util.ArrayList;
+
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
 import se.kth.id2209.hw1.profiler.ProfilerAgent;
 import se.kth.id2209.hw1.smartmuseum.TourGuideAgent;
 
@@ -35,7 +38,7 @@ public class CuratorAgent extends Agent {
 
 	protected void setup() {
 		artGallery = artGallery.getInstance();
-		
+
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
 
@@ -57,18 +60,22 @@ public class CuratorAgent extends Agent {
 	public void action() {
 		behaviour.action();		
 	}  
-	
+
 	public Artifact getArtifact(int id) {
 		return artGallery.getArtifact(id);
 	}
-		
+
 	@Override
-    protected void takeDown() {
-        try {
-            DFService.deregister(this);
-        } catch (FIPAException fe) {
-            fe.printStackTrace();
-        }
-        System.out.println("Agent " + getAID().getName() + " is terminating.");
-    }
+	protected void takeDown() {
+		try {
+			DFService.deregister(this);
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
+		System.out.println("Agent " + getAID().getName() + " is terminating.");
+	}
+
+	public ArrayList<Integer> getArtifactIdList(GENRE genre) {		
+		return artGallery.getArtifactList(genre);
+	}
 }

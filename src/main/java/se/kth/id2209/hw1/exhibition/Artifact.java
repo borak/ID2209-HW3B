@@ -8,6 +8,8 @@ package se.kth.id2209.hw1.exhibition;
 import java.io.Serializable;
 import java.util.Date;
 
+import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
+
 /**
  *  id, name, creator, date of creation, place of creation, genre etc.
  * @author Kim
@@ -17,8 +19,8 @@ public class Artifact implements Serializable {
 	private int id;
     private String name, creator, placeofCreation;
     private Date creationDate;
-    private GENRE genre;
-    enum GENRE {
+    GENRE genre;
+    public enum GENRE {
     	LITERATURE, MUSIC, PAINTING, SCULPTURE, FASHION, JEWELRY;
     }
 
@@ -70,15 +72,7 @@ public class Artifact implements Serializable {
 		this.creationDate = creationDate;
 	}
 
-	public GENRE getGenre() {
-		return genre;
-	}
-
-	public void setGenre(GENRE genre) {
-		this.genre = genre;
-	}
-
-    
+   
 }
 
 

@@ -14,4 +14,5 @@ public class Ontologies {
     public final static String ARTIFACT_RESPONSE_INFO = "artifact response";
     public final static String ARTIFACT_RECOMMENDATION = "artifact recommendation";
     public final static String ARTIFACT_RESPONSE_RECOMMENDATION = "artifact response recommmendation";
+    public static String PROFILER_REQUEST_TOUR_AGENT = "profiler request tour agent";
 }

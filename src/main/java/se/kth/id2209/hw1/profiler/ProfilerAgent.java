@@ -7,6 +7,7 @@ package se.kth.id2209.hw1.profiler;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.DataStore;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
@@ -34,25 +35,24 @@ import se.kth.id2209.hw1.util.Ontologies;
  * internet.
  *
  * The Profiler Agent interacts directly with Tour Guide Agent to get a
- * personalized virtual tour. 
- * The Profile Agent interacts with Curator Agent to obtain detailed 
- * information about each of the items stated in the virtual tour.
+ * personalized virtual tour. The Profile Agent interacts with Curator Agent to
+ * obtain detailed information about each of the items stated in the virtual
+ * tour.
  *
  * TODO: Implement behaviours. Behaviors should correspond to each category
- * below: 
- * Simple Behavior (at least 5 different behaviors): 
- *      – CyclicBehaviour, MsgReceiver, OneShotBehaviour, 
- *        SimpleAchieveREInitiator, SimpleAchieveREResponder, TickerBehaviour, 
- *        WakerBehaviour 
- * Composite Behaviors (at least 2 different behaviors): 
- *      – ParallelBehaviour, FSMBehaviour, SequentialBehaviour
+ * below: Simple Behavior (at least 5 different behaviors): – CyclicBehaviour,
+ * MsgReceiver, OneShotBehaviour, SimpleAchieveREInitiator,
+ * SimpleAchieveREResponder, TickerBehaviour, WakerBehaviour Composite Behaviors
+ * (at least 2 different behaviors): – ParallelBehaviour, FSMBehaviour,
+ * SequentialBehaviour
  *
- * CyclicBehaviour - curator checks DB
- * OneShotBehaviour - ask for information from curatorAgent
- * MsgReceiver - receiver in profiler agent, receiver in curatoragent
- * TickerBehvaiour - touragent
- * ?? - touragent
- * 
+ * CyclicBehaviour - curator listen artifact requests OneShotBehaviour - ask for
+ * information from curatorAgent MsgReceiver - receiver in profiler agent,
+ * receiver in curatoragent TickerBehaviour - touragent WakerBehaviour - curator
+ * checks DB
+ *
+ * ParallelBehaviour - curator SequentialBehaviour - touragent
+ *
  * @author Kim
  */
 public class ProfilerAgent extends Agent {
@@ -69,7 +69,11 @@ public class ProfilerAgent extends Agent {
         super.setup();
         recommendedArtifacts = new ArrayList();
         lookedUpArtifacts = new ArrayList();
-        //profile = new UserProfile(...);
+        List<String> interests = new ArrayList();
+        interests.add(Artifact.GENRE.PAINTING.toString());
+        List<Integer> visitedItems = new ArrayList();
+        profile = new UserProfile(22, "Programmer", UserProfile.GENDER.male, 
+            interests, visitedItems);
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
 
@@ -84,8 +88,47 @@ public class ProfilerAgent extends Agent {
             fe.printStackTrace();
         }
 
-        addBehaviour(new MsgReceiverBehaviour(this, null, MsgReceiver.INFINITE, 
+        addBehaviour(new CyclicBehaviour() {
+            boolean isDone = false;
+            
+            @Override
+            public void action() {
+                isDone = sendTourGuideRequest();
+            }
+            
+            public boolean isDone() {
+                return isDone;
+            }
+            
+        });
+
+        addBehaviour(new MsgReceiverBehaviour(this, null, MsgReceiver.INFINITE,
                 new DataStore(), null));
+    }
+
+    private boolean sendTourGuideRequest() {
+        DFAgentDescription dfdTGA = new DFAgentDescription();
+        ServiceDescription sdTGA = new ServiceDescription();
+        sdTGA.setType("Tour-Guide-agent");
+        dfdTGA.addServices(sdTGA);
+        AID[] aids = DFUtilities.searchDF(this, dfdTGA);
+        if (aids.length < 1) {
+            return false;
+        }
+        
+        AID tgAgent = (AID) aids[0];
+        ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+        msg.addReceiver(tgAgent);
+        msg.setLanguage(ACL_LANGUAGE);
+        msg.setOntology(Ontologies.PROFILER_REQUEST_TOUR_AGENT);
+        try {
+            msg.setContentObject(getAID());
+            send(msg);
+            return true;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return false;
     }
 
     @Override
@@ -98,24 +141,24 @@ public class ProfilerAgent extends Agent {
         //myGui.dispose();
         System.out.println("Agent " + getAID().getName() + " is terminating.");
     }
-    
+
     private class MsgReceiverBehaviour extends MsgReceiver {
-        
-        public MsgReceiverBehaviour(Agent a, MessageTemplate mt, long deadline, 
+
+        public MsgReceiverBehaviour(Agent a, MessageTemplate mt, long deadline,
                 DataStore s, java.lang.Object msgKey) {
             super(a, mt, deadline, s, msgKey);
         }
-        
+
         @Override
         public void handleMessage(ACLMessage msg) {
             if (msg == null) {
-                System.err.println("Agent " + getAID().getName() 
-                    + " received message: null.");
+                System.err.println("Agent " + getAID().getName()
+                        + " received message: null.");
                 block();
             }
-            System.out.println("Agent " + getAID().getName() 
+            System.out.println("Agent " + getAID().getName()
                     + " received message: " + msg.getOntology());
-            
+
             if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_REQUEST_INFO)) {
                 addBehaviour(new HandleArtifactInfoResponse(getAgent(), msg));
             } else if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION)) {
@@ -125,9 +168,9 @@ public class ProfilerAgent extends Agent {
     }
 
     private class HandleArtifactInfoResponse extends OneShotBehaviour {
-        
+
         private ACLMessage msg;
-        
+
         HandleArtifactInfoResponse(Agent a, ACLMessage msg) {
             super(a);
             this.msg = msg;
@@ -138,6 +181,7 @@ public class ProfilerAgent extends Agent {
             try {
                 Artifact content = (Artifact) msg.getContentObject();
                 lookedUpArtifacts.add(content);
+                profile.addVisitedItem(content.getId());
                 System.out.println("Received artifact info: " + content);
             } catch (UnreadableException ex) {
                 Logger.getLogger(ProfilerAgent.class.getName()).log(Level.SEVERE, null, ex);
@@ -145,11 +189,11 @@ public class ProfilerAgent extends Agent {
             }
         }
     }
-    
+
     private class HandleArtifactRecommendation extends OneShotBehaviour {
-        
+
         private ACLMessage msg;
-        
+
         HandleArtifactRecommendation(Agent a, ACLMessage msg) {
             super(a);
             this.msg = msg;
@@ -161,18 +205,18 @@ public class ProfilerAgent extends Agent {
             try {
                 content = (Integer) msg.getContentObject();
                 recommendedArtifacts.add(content);
-                System.out.println("Agent " + getAID().getName() 
+                System.out.println("Agent " + getAID().getName()
                         + ": was recommended artifact with ID=" + content);
             } catch (UnreadableException ex) {
                 Logger.getLogger(ProfilerAgent.class.getName()).log(Level.SEVERE, null, ex);
                 block();
             }
-            
+
             // If interested (always atm) ask for information
             addBehaviour(new ArtifactRequestBehaviour(getAgent(), content));
         }
     }
-    
+
     private class ArtifactRequestBehaviour extends OneShotBehaviour {
 
         private AID cAgent;
@@ -198,13 +242,13 @@ public class ProfilerAgent extends Agent {
             msg.setLanguage(ACL_LANGUAGE);
             msg.setOntology(Ontologies.ARTIFACT_REQUEST_INFO);
             try {
-                msg.setContentObject(artifactId); 
+                msg.setContentObject(artifactId);
                 send(msg);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }
-        
+
         @Override
         public void action() {
             sendRequest(artifactId);

@@ -1,14 +1,17 @@
-package se.kth.id2209.hw1.smartmuseum;
+package old;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import se.kth.id2209.hw1.exhibition.Artifact;
 import se.kth.id2209.hw1.profiler.ProfilerAgent;
+import se.kth.id2209.hw1.profiler.UserProfile;
+import se.kth.id2209.hw1.smartmuseum.TourGuideAgent;
 
 class Tour {
 	private TourGuideAgent tourGuide;
-	private ArrayList<Artifact> artifacts;
-	private ArrayList<ProfilerAgent> profilers;
+	private Map<ProfilerAgent, Artifact> profilers = new HashMap<>();
 
 	public Tour(TourGuideAgent tourGuide) {
 		this.setTourGuide(tourGuide);
@@ -17,17 +20,13 @@ class Tour {
 	ArrayList<Artifact> getArtifacts() {
 		return artifacts;
 	}
+	
 	void addArtifact(Artifact artifact) {
-		artifacts.add(artifact);
+		profilers.add(artifact);
 	}
+	
 	void setArtifacts(ArrayList<Artifact> artifacts) {
 		this.artifacts = artifacts;
-	}
-	ArrayList<ProfilerAgent> getProfilers() {
-		return profilers;
-	}
-	void setProfilers(ArrayList<ProfilerAgent> profilers) {
-		this.profilers = profilers;
 	}
 
 	public TourGuideAgent getTourGuide() {
@@ -38,13 +37,22 @@ class Tour {
 		this.tourGuide = tourGuide;
 	}
 
-	public void addProfiler(ProfilerAgent profiler) {
-		profilers.add(profiler);		
+	public void addProfiler(ProfilerAgent profiler, UserProfile userProfile) {
+		profilers.put(profiler, userProfile);		
 	}
 
 	public void quitTour(ProfilerAgent profiler) {
-		if(profilers.contains(profiler))
+		if(profilers.containsKey(profiler))
 			profilers.remove(profiler);
+	}
+
+	public UserProfile getUserProfile(ProfilerAgent profiler) throws NullPointerException {		
+		return profilers.get(profiler);
+	}
+
+	public Artifact getArtifact(ProfilerAgent profiler) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

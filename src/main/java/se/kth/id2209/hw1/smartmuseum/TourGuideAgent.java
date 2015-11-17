@@ -5,18 +5,30 @@
  */
 package se.kth.id2209.hw1.smartmuseum;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
 
 import jade.core.Agent;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.ParallelBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.UnreadableException;
+import jade.proto.states.MsgReceiver;
+import se.kth.id2209.hw1.exhibition.Artifact;
 import se.kth.id2209.hw1.exhibition.CuratorAgent;
 import se.kth.id2209.hw1.profiler.ProfilerAgent;
+import se.kth.id2209.hw1.profiler.UserProfile;
 import util.Ontologies;
 
 /**
@@ -44,8 +56,9 @@ import util.Ontologies;
 public class TourGuideAgent extends Agent {
 	private static final long serialVersionUID = 5883088851872677769L;
 	private CuratorAgent cAgent; // temporary - register at DF instead
-	private Tour tour;
+	private HashMap<ProfilerAgent, List<String>> map = new HashMap<>();
 
+	@SuppressWarnings("serial")
 	@Override
 	protected void setup() {
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -61,56 +74,92 @@ public class TourGuideAgent extends Agent {
 		} catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
+		
+		ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
+		par.addSubBehaviour(new MsgReceiver() {
+			// TODO: MAKE !
+		});
 	}
 
-	void createTour() {
-		tour = new Tour(this);
+	// TODO: se till att denna kallas då en profiler vill starta en tour
+	@SuppressWarnings("serial")
+	void startTour() {
+
+		SequentialBehaviour seq = new SequentialBehaviour();
+		seq.addSubBehaviour(new OneShotBehaviour() {
+
+			@Override
+			public void action() {				
+				Iterator<Entry<ProfilerAgent, List<String>>> it = map.entrySet().iterator();
+				ACLMessage msg = null;
+
+				while(it.hasNext()) {
+					Entry<ProfilerAgent, List<String>> entry = it.next();
+					ProfilerAgent profiler = entry.getKey();
+					try {
+						msg.addReceiver(cAgent.getAID()); // TODO ANVÄND DF	
+						msg.setOntology(Ontologies.ARTIFACT_RECOMMENDATION_NAME);			
+						msg.setContentObject((Serializable) profiler.getGenre());
+						send(msg);
+
+						ACLMessage recMsg = blockingReceive(); // should block until response
+
+						List<String> list = (List<String>) recMsg.getContentObject(); 
+						map.put(profiler, list);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}				
+				}
+			}
+		});
+		seq.addSubBehaviour(new PresentBehaviour(this, 10000));
+
 	}
 
-	void deleteTour() {
-		tour = null;
-	}
-
-	public void joinTour(ProfilerAgent profiler) {
-		tour.addProfiler(profiler);
-	}
-	
 	@Override
-    protected void takeDown() {
-        try {
-            DFService.deregister(this);
-        } catch (FIPAException fe) {
-            fe.printStackTrace();
-        }
-        System.out.println("Agent " + getAID().getName() + " is terminating.");
-    }
-	
+	protected void takeDown() {
+		try {
+			DFService.deregister(this);
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
+		System.out.println("Agent " + getAID().getName() + " is terminating.");
+	}
+
+	@SuppressWarnings("serial")
 	class PresentBehaviour extends TickerBehaviour {
-		ACLMessage msg;
-		int itemId = 0;
+		private Iterator<Entry<ProfilerAgent, List<String>>> it = map.entrySet().iterator();			
+		private int index;		
+
 		public PresentBehaviour(Agent a, long period) {
 			super(a, period);
+			index = 0;
 		}
 
 		@Override
-		protected void onTick() {
-			ArrayList<ProfilerAgent> profilers = tour.getProfilers();
-			Iterator<ProfilerAgent> it = profilers.iterator();
-		
-			while(it.hasNext()) {
-				ProfilerAgent profiler = it.next();
-				//msg.setContentObject(tour.getArtifacts().get(itemId));
-				//profiler.send(arg0);
+		protected void onTick() {			
+			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+			Entry<ProfilerAgent, List<String>> entry = it.next();
+			ProfilerAgent profiler = entry.getKey();
+			List<String> names = entry.getValue();
+
+			if(index > names.size()) {
+				System.out.println(profiler.getName() + ": Your tour is finished, get out of here!");
+				map.remove(profiler);
+			} else {
+				String name = names.get(index);
+
+				msg.addReceiver(profiler.getAID());
+				try {
+					msg.setContentObject(name);
+					send(msg);
+
+					System.out.println(myAgent + ": presenting item " + name + " to " + profiler);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
-			
-			System.out.println(myAgent.getLocalName() + " checking for items");
-			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);			
-			msg.addReceiver(cAgent.getAID());
-			msg.setOntology(Ontologies.ARTIFACT_RECOMMENDATION);
-			
-			send(msg);		
-			itemId++;
-		}
-		
+			index++; 
+		}			
 	}
 }

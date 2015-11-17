@@ -12,6 +12,9 @@ package util;
 public class Ontologies {
     public final static String ARTIFACT_REQUEST_INFO = "artifact request";
     public final static String ARTIFACT_RESPONSE_INFO = "artifact response";
-    public final static String ARTIFACT_RECOMMENDATION = "artifact recommendation";
-	public final static String ARTIFACT_RESPONSE_RECOMMENDATION = "artifact recommendation response";
+    public final static String ARTIFACT_RECOMMENDATION_ID = "artifact recommendation";
+	public final static String ARTIFACT_RESPONSE_RECOMMENDATION_ID = "artifact recommendation response";
+	public static final String ARTIFACT_RESPONSE_RECOMMENDATION_NAMES = "names";
+	public static final String ARTIFACT_RECOMMENDATION_NAME = "names response";
+	
 }

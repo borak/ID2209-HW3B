@@ -18,6 +18,7 @@ import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 import jade.proto.states.MsgReceiver;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -128,7 +129,7 @@ public class ProfilerAgent extends Agent {
             
             if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_REQUEST_INFO)) {
                 addBehaviour(new HandleArtifactInfoResponse(getAgent(), msg));
-            } else if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION)) {
+            } else if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION_ID)) {
                 addBehaviour(new HandleArtifactRecommendation(getAgent(), msg));
             }
         }
@@ -220,4 +221,9 @@ public class ProfilerAgent extends Agent {
         }
 
     }
+
+	public Serializable getGenre() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

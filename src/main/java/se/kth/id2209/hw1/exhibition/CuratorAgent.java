@@ -1,5 +1,6 @@
 package se.kth.id2209.hw1.exhibition;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import jade.core.Agent;
@@ -76,6 +77,11 @@ public class CuratorAgent extends Agent {
 	}
 
 	public ArrayList<Integer> getArtifactIdList(GENRE genre) {		
-		return artGallery.getArtifactList(genre);
+		return artGallery.getArtifactIdList(genre);
 	}
+
+	public ArrayList<String> getArtifactNameList(GENRE genre) {		
+		return artGallery.getArtifactNameList(genre);
+	}
+	
 }

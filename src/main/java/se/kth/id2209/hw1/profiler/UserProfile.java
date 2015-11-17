@@ -16,6 +16,7 @@ import java.util.List;
  * 
  * @author Kim
  */
+@SuppressWarnings("serial")
 public class UserProfile implements Serializable {
     private int age;
     private String occupation;

@@ -5,6 +5,7 @@
  */
 
 package se.kth.id2209.hw1.exhibition;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
  */
 class ArtGallery {
 
-	Map<Integer, Artifact> artifacts = new HashMap<Integer, Artifact>();
+	HashMap<Integer, Artifact> map = new HashMap<Integer, Artifact>();
 	private static ArtGallery instance;
 	
 	private ArtGallery(){
@@ -32,7 +33,7 @@ class ArtGallery {
 	ArrayList<Artifact> getArtList() {
 		ArrayList<Artifact> list = new ArrayList<>();
 
-		Iterator<Entry<Integer, Artifact>> it = artifacts.entrySet().iterator();
+		Iterator<Entry<Integer, Artifact>> it = map.entrySet().iterator();
 		while(it.hasNext()) {			
 			list.add(it.next().getValue());
 		}
@@ -41,17 +42,17 @@ class ArtGallery {
 
 	void add(Artifact artifact) {
 		int id = artifact.getId();
-		artifacts.put(id, artifact);
+		map.put(id, artifact);
 	}
 
 	void add(int id, String name, String creator, String placeofCreation, Date creationDate, GENRE genre) {
 		Artifact artifact = new Artifact(id, placeofCreation, placeofCreation, placeofCreation, creationDate, genre);
-		artifacts.put(id, artifact);
+		map.put(id, artifact);
 	}
 
 	Artifact getArtifact(int id) {
-		if(artifacts.containsKey(id)) { 
-			return artifacts.get(id);
+		if(map.containsKey(id)) { 
+			return map.get(id);
 		}
 		return null;
 	}
@@ -63,14 +64,27 @@ class ArtGallery {
 		return instance;
 	}
 
-	ArrayList<Integer> getArtifactList(GENRE genre) {
+	ArrayList<Integer> getArtifactIdList(GENRE genre) {
 		ArrayList<Integer> list = new ArrayList<>();
 
-		Iterator<Entry<Integer, Artifact>> it = artifacts.entrySet().iterator();
+		Iterator<Entry<Integer, Artifact>> it = map.entrySet().iterator();
 		while(it.hasNext()) {		
 			Artifact artifact = it.next().getValue();
 			if(genre instanceof Artifact.GENRE) {
 				list.add(artifact.getId());
+			}
+		}
+		return list;
+	}
+
+	ArrayList<String> getArtifactNameList(GENRE genre) {
+		ArrayList<String> list = new ArrayList<>();
+
+		Iterator<Entry<Integer, Artifact>> it = map.entrySet().iterator();
+		while(it.hasNext()) {		
+			String name = it.next().getValue().getName();
+			if(genre instanceof Artifact.GENRE) {
+				list.add(name);
 			}
 		}
 		return list;

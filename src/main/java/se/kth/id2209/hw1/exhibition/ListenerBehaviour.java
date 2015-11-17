@@ -1,10 +1,14 @@
 package se.kth.id2209.hw1.exhibition;
 
+import java.io.IOException;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.UnreadableException;
+import util.Ontologies;
 
 @SuppressWarnings("serial")
 public class ListenerBehaviour  extends CyclicBehaviour {
@@ -21,8 +25,11 @@ public class ListenerBehaviour  extends CyclicBehaviour {
 		if(msg != null) {			
 			if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION)) {					
 				AID senderID = msg.getSender();				
-				if(senderID == AGENTS.PROFILER){ // TODO hämta id från DF	
+				//	if(senderID == AGENTS.PROFILER){ // TODO hämta id från DF	
+				try {
 					reply(msg, senderID);
+				} catch(Exception e) {
+					e.printStackTrace();
 				}
 			} else if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION)) {
 				// TODO
@@ -30,13 +37,14 @@ public class ListenerBehaviour  extends CyclicBehaviour {
 		}
 	}
 
-	private void reply(ACLMessage msg, AID senderID) {		
+	private void reply(ACLMessage msg, AID senderID) throws UnreadableException, IOException {	
+		AID dummy = new AID();
 		ACLMessage reply = msg.createReply();		
-		if(senderID == AGENTS.PROFILER) { // TODO hämta id från DF			
-			int artifactID = (int) msg.getContentObject();
+		if(senderID == dummy) { // TODO hämta id från DF			
+			int artifactID = (int) msg.getContentObject();		
 			reply.setContentObject(curator.getArtifact(artifactID));
 		}
-		else if(senderID == AGENTS.GUIDE) {
+		else if(senderID == dummy) {
 			// TODO
 		}
 	}

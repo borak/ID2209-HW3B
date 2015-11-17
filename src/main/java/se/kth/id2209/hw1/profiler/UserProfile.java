@@ -5,6 +5,7 @@
  */
 package se.kth.id2209.hw1.profiler;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ import java.util.List;
  * 
  * @author Kim
  */
-public class UserProfile {
+public class UserProfile implements Serializable {
     private int age;
     private String occupation;
     private GENDER gender;

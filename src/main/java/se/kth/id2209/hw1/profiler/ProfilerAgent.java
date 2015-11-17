@@ -7,21 +7,22 @@ package se.kth.id2209.hw1.profiler;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.TickerBehaviour;
+import jade.core.behaviours.DataStore;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.proto.states.MsgReceiver;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import se.kth.id2209.hw1.exhibition.Artifact;
 import se.kth.id2209.hw1.exhibition.CuratorAgent;
 import se.kth.id2209.hw1.smartmuseum.TourGuideAgent;
 import util.DFUtilities;
+import util.Ontologies;
 
 /**
  * Profiler Agent travels around the network and looks for interesting
@@ -29,18 +30,25 @@ import util.DFUtilities;
  * internet.
  *
  *  The Profiler Agent interacts directly with Tour Guide Agent to get a
- * personalized virtual tour.  The Profile Agent interacts with Curator Agent
- * to obtain detailed information about each of the items stated in the virtual
- * tour.
+ * personalized virtual tour. 
+ *  The Profile Agent interacts with Curator Agent to obtain detailed 
+ * information about each of the items stated in the virtual tour.
  *
  * TODO: Implement behaviours. Behaviors should correspond to each category
- * below:  Simple Behavior (at least 5 different behaviors): – CyclicBehaviour,
- * MsgReceiver, OneShotBehaviour, SimpleAchieveREInitiator,
- * SimpleAchieveREResponder, TickerBehaviour, WakerBehaviour  Composite
- * Behaviors (at least 2 different behaviors): – ParallelBehaviour,
- * FSMBehaviour, SequentialBehaviour
+ * below: 
+ *  Simple Behavior (at least 5 different behaviors): 
+ *      – CyclicBehaviour, MsgReceiver, OneShotBehaviour, 
+ *        SimpleAchieveREInitiator, SimpleAchieveREResponder, TickerBehaviour, 
+ *        WakerBehaviour 
+ *  Composite Behaviors (at least 2 different behaviors): 
+ *      – ParallelBehaviour, FSMBehaviour, SequentialBehaviour
  *
- *
+ * TickerBehvaiour - curator checks DB
+ * OneShotBehaviour - ask for information from curatorAgent
+ * MsgReceiver - receiver in profiler agent, receiver in curatoragent
+ * ?? - touragent
+ * ?? - touragent
+ * 
  * @author Kim
  */
 public class ProfilerAgent extends Agent {
@@ -49,6 +57,7 @@ public class ProfilerAgent extends Agent {
     private CuratorAgent cAgent; // temporary - register at DF instead
     private TourGuideAgent tgAgent; // temporary - register at DF instead
     private List<Artifact> artifacts;
+    private final static String ONTOLOGY = "profileragent ontology" ;
 
     @Override
     protected void setup() {
@@ -68,7 +77,8 @@ public class ProfilerAgent extends Agent {
             fe.printStackTrace();
         }
 
-        addBehaviour(new ArtifactRequestBehaviour(this, 5000));
+        //addBehaviour(new CyclicBehaviour());
+        //addBehaviour(new ArtifactRequestBehaviour(this, 5000));
     }
 
     @Override
@@ -89,21 +99,42 @@ public class ProfilerAgent extends Agent {
             this.artifacts.addAll(artifacts);
         }
     }
+    
+    
+    private class ReceiverBehaviour extends MsgReceiver {
+        
+        public ReceiverBehaviour(Agent a, MessageTemplate mt, long deadline, 
+                DataStore s, java.lang.Object msgKey) {
+            super(a, mt, deadline, s, msgKey);
+        }
+        
+        @Override
+        public void handleMessage(ACLMessage msg) {
+            if (msg == null) {
+                //Log
+                return;
+            }
+            
+            if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION)) {
+              
+            } else if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION)) {
+                
+            }
+        }
+    }
 
-    // Example of a behaviour skeleton. Remove and recreate as its own class 
-    // outside of this class.
-    private class ArtifactRequestBehaviour extends TickerBehaviour {
+    private class ArtifactRequestBehaviour extends OneShotBehaviour {
 
         private AID cAgent;
+        private Integer artifactId;
 
-        public ArtifactRequestBehaviour(Agent a, long period) {
-            super(a, period);
+        public ArtifactRequestBehaviour(Agent a, Integer artifactId) {
+            super(a);
+            this.artifactId = artifactId;
             DFAgentDescription dfd = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
             sd.setType("service");
             dfd.addServices(sd);
-            SearchConstraints ALL = new SearchConstraints();
-            ALL.setMaxResults(new Long(-1));
             AID[] aids = DFUtilities.searchDF(a, dfd);
             if (aids.length < 1) {
                 throw new RuntimeException("Cannot find agent");
@@ -111,24 +142,29 @@ public class ProfilerAgent extends Agent {
             cAgent = aids[0];
         }
 
-        private void sendRequest(AID name) {
+        private void sendRequest(Integer artifactId) {
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.addReceiver(name);
+            msg.addReceiver(cAgent);
             msg.setLanguage("Java Serialized");
-            msg.setOntology("sup dawg");
+            msg.setOntology(ONTOLOGY);
             try {
-                msg.setContentObject(null);
+                msg.setContentObject(artifactId);
                 send(msg);
             } catch (IOException ex) {
-                
+                ex.printStackTrace();
             }
         }
 
-        @Override
-        protected void onTick() {
-            ProfilerAgent agent = (ProfilerAgent) getAgent();
+        //@Override
+        //protected void onTick() {
+            //ProfilerAgent agent = (ProfilerAgent) getAgent();
             //List<Artifact> artifacts = cAgent.addBehaviour(new RequestPerformer());
             //agent.notifyProducts(artifacts);
+        //}
+
+        @Override
+        public void action() {
+            sendRequest(artifactId);
         }
 
     }

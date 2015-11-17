@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -55,7 +56,22 @@ public class CuratorAgent extends Agent {
 
 		behaviour = new ListenerBehaviour(this);
 		addBehaviour(behaviour);
+                //waker b to check db
+                
 	}
+        
+        private class DatabaseChecker extends WakerBehaviour {
+
+            public DatabaseChecker(Agent a, long timeout) {
+                super(a, timeout);
+            }
+        
+            @Override
+            public void onWake() {
+                
+            }
+        }
+        
 
 	public void action() {
 		behaviour.action();		

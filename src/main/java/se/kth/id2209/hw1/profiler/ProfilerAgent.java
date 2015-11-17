@@ -47,10 +47,10 @@ import se.kth.id2209.hw1.util.Ontologies;
  * Composite Behaviors (at least 2 different behaviors): 
  *      – ParallelBehaviour, FSMBehaviour, SequentialBehaviour
  *
- * TickerBehvaiour - curator checks DB
+ * CyclicBehaviour - curator checks DB
  * OneShotBehaviour - ask for information from curatorAgent
  * MsgReceiver - receiver in profiler agent, receiver in curatoragent
- * ?? - touragent
+ * TickerBehvaiour - touragent
  * ?? - touragent
  * 
  * @author Kim
@@ -111,7 +111,7 @@ public class ProfilerAgent extends Agent {
             if (msg == null) {
                 System.err.println("Agent " + getAID().getName() 
                     + " received message: null.");
-                return;
+                block();
             }
             System.out.println("Agent " + getAID().getName() 
                     + " received message: " + msg.getOntology());
@@ -141,6 +141,7 @@ public class ProfilerAgent extends Agent {
                 System.out.println("Received artifact info: " + content);
             } catch (UnreadableException ex) {
                 Logger.getLogger(ProfilerAgent.class.getName()).log(Level.SEVERE, null, ex);
+                block();
             }
         }
     }
@@ -156,7 +157,7 @@ public class ProfilerAgent extends Agent {
 
         @Override
         public void action() {
-            Integer content;
+            Integer content = null;
             try {
                 content = (Integer) msg.getContentObject();
                 recommendedArtifacts.add(content);
@@ -164,7 +165,7 @@ public class ProfilerAgent extends Agent {
                         + ": was recommended artifact with ID=" + content);
             } catch (UnreadableException ex) {
                 Logger.getLogger(ProfilerAgent.class.getName()).log(Level.SEVERE, null, ex);
-                return;
+                block();
             }
             
             // If interested (always atm) ask for information

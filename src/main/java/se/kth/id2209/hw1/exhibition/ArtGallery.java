@@ -6,6 +6,8 @@
 package se.kth.id2209.hw1.exhibition;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *  A gallery/museum contains detailed information of artifacts such as:
@@ -14,21 +16,11 @@ import java.util.Date;
  * @author Kim
  */
 class ArtGallery {
-    int id;
-    String name, creator, placeofCreation;
-    Date creationDate;
-    Genre genre;
-    enum Genre {
+    
+    Map<Integer, Artifact> artifacts = new HashMap<Integer, Artifact>();
+    
+    ArtGallery() {
         
-    }
-
-    public ArtGallery(int id, String name, String creator, String placeofCreation, Date creationDate, Genre genre) {
-        this.id = id;
-        this.name = name;
-        this.creator = creator;
-        this.placeofCreation = placeofCreation;
-        this.creationDate = creationDate;
-        this.genre = genre;
     }
     
 }

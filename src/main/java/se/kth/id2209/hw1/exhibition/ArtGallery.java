@@ -5,10 +5,13 @@
  */
 
 package se.kth.id2209.hw1.exhibition;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -44,7 +47,7 @@ class ArtGallery {
 		artifacts.put(id, artifact);
 	}
 
-	void add(int id, String name, String creator, String placeofCreation, Date creationDate, GENRE genre) {
+	void add(int id, String name, String creator, String placeofCreation, String creationDate, GENRE genre) {
 		Artifact artifact = new Artifact(id, placeofCreation, placeofCreation, placeofCreation, creationDate, genre);
 		artifacts.put(id, artifact);
 	}

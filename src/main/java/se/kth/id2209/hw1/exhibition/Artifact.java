@@ -17,7 +17,7 @@ public class Artifact {
     Date creationDate;
     GENRE genre;
     enum GENRE {
-        
+        LITERATURE, MUSIC, PAINTING, SCULPTURE, FASHION, JEWELRY;
     }
 
     public Artifact(int id, String name, String creator, String placeofCreation, Date creationDate, GENRE genre) {

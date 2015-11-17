@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import se.kth.id2209.hw1.exhibition.Artifact;
 import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
 
 /**

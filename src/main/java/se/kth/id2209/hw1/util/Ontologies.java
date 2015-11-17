@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package util;
+package se.kth.id2209.hw1.util;
 
 /**
  *

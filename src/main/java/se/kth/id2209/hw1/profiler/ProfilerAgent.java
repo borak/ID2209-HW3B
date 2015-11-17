@@ -25,26 +25,26 @@ import java.util.logging.Logger;
 import se.kth.id2209.hw1.exhibition.Artifact;
 import se.kth.id2209.hw1.exhibition.CuratorAgent;
 import se.kth.id2209.hw1.smartmuseum.TourGuideAgent;
-import util.DFUtilities;
-import util.Ontologies;
+import se.kth.id2209.hw1.util.DFUtilities;
+import se.kth.id2209.hw1.util.Ontologies;
 
 /**
  * Profiler Agent travels around the network and looks for interesting
  * information about art and culture from online museums or art galleries on the
  * internet.
  *
- *  The Profiler Agent interacts directly with Tour Guide Agent to get a
+ * The Profiler Agent interacts directly with Tour Guide Agent to get a
  * personalized virtual tour. 
- *  The Profile Agent interacts with Curator Agent to obtain detailed 
+ * The Profile Agent interacts with Curator Agent to obtain detailed 
  * information about each of the items stated in the virtual tour.
  *
  * TODO: Implement behaviours. Behaviors should correspond to each category
  * below: 
- *  Simple Behavior (at least 5 different behaviors): 
+ * Simple Behavior (at least 5 different behaviors): 
  *      – CyclicBehaviour, MsgReceiver, OneShotBehaviour, 
  *        SimpleAchieveREInitiator, SimpleAchieveREResponder, TickerBehaviour, 
  *        WakerBehaviour 
- *  Composite Behaviors (at least 2 different behaviors): 
+ * Composite Behaviors (at least 2 different behaviors): 
  *      – ParallelBehaviour, FSMBehaviour, SequentialBehaviour
  *
  * TickerBehvaiour - curator checks DB
@@ -62,7 +62,7 @@ public class ProfilerAgent extends Agent {
     private TourGuideAgent tgAgent; // temporary - register at DF instead
     private List<Integer> recommendedArtifacts;
     private List<Artifact> lookedUpArtifacts;
-    private final static String ONTOLOGY = "profileragent ontology" ;
+    private static final String ACL_LANGUAGE = "Java Serialized";
 
     @Override
     protected void setup() {
@@ -84,8 +84,8 @@ public class ProfilerAgent extends Agent {
             fe.printStackTrace();
         }
 
-        //addBehaviour(new MsgReceiverBehaviour(this, new MessageTemplate, -1, ));
-        //addBehaviour(new ArtifactRequestBehaviour(this, 5000));
+        addBehaviour(new MsgReceiverBehaviour(this, null, MsgReceiver.INFINITE, 
+                new DataStore(), null));
     }
 
     @Override
@@ -98,15 +98,6 @@ public class ProfilerAgent extends Agent {
         //myGui.dispose();
         System.out.println("Agent " + getAID().getName() + " is terminating.");
     }
-/*
-    public void addArtifacts(List<Artifact> artifacts) {
-        if (this.artifacts == null || this.artifacts.isEmpty()) {
-            this.artifacts = artifacts;
-        } else {
-            this.artifacts.addAll(artifacts);
-        }
-    }*/
-    
     
     private class MsgReceiverBehaviour extends MsgReceiver {
         
@@ -114,7 +105,6 @@ public class ProfilerAgent extends Agent {
                 DataStore s, java.lang.Object msgKey) {
             super(a, mt, deadline, s, msgKey);
         }
-        
         
         @Override
         public void handleMessage(ACLMessage msg) {
@@ -204,8 +194,8 @@ public class ProfilerAgent extends Agent {
         private void sendRequest(Integer artifactId) {
             ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
             msg.addReceiver(cAgent);
-            msg.setLanguage("Java Serialized");
-            msg.setOntology(ONTOLOGY);
+            msg.setLanguage(ACL_LANGUAGE);
+            msg.setOntology(Ontologies.ARTIFACT_REQUEST_INFO);
             try {
                 msg.setContentObject(artifactId); 
                 send(msg);

@@ -6,7 +6,7 @@ import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-import util.Ontologies;
+import se.kth.id2209.hw1.util.Ontologies;
 
 @SuppressWarnings("serial")
 public class ListenerBehaviour  extends CyclicBehaviour {

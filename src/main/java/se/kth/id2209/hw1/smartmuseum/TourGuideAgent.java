@@ -86,6 +86,8 @@ public class TourGuideAgent extends Agent {
     }
 	
 	class PresentBehaviour extends TickerBehaviour {
+		ACLMessage msg;
+		int itemId = 0;
 		public PresentBehaviour(Agent a, long period) {
 			super(a, period);
 		}
@@ -94,16 +96,20 @@ public class TourGuideAgent extends Agent {
 		protected void onTick() {
 			ArrayList<ProfilerAgent> profilers = tour.getProfilers();
 			Iterator<ProfilerAgent> it = profilers.iterator();
-//			while(it.hasNext()) {
-//				
-//			}
+		
+			while(it.hasNext()) {
+				ProfilerAgent profiler = it.next();
+				//msg.setContentObject(tour.getArtifacts().get(itemId));
+				//profiler.send(arg0);
+			}
 			
 			System.out.println(myAgent.getLocalName() + " checking for items");
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);			
 			msg.addReceiver(cAgent.getAID());
 			msg.setOntology(Ontologies.ARTIFACT_RECOMMENDATION);
 			
-			send(msg);			
+			send(msg);		
+			itemId++;
 		}
 		
 	}

@@ -17,7 +17,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import se.kth.id2209.hw1.exhibition.CuratorAgent;
 import se.kth.id2209.hw1.profiler.ProfilerAgent;
-import util.Ontologies;
+import se.kth.id2209.hw1.util.Ontologies;
 
 /**
  * Tour Guide Agent retrieves the information about artifacts in the

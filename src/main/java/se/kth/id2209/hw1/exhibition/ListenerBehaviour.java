@@ -3,6 +3,7 @@ package se.kth.id2209.hw1.exhibition;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
+import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
 import se.kth.id2209.hw1.util.Ontologies;
 
 @SuppressWarnings("serial")

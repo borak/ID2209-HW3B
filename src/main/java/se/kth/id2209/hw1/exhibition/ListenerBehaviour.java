@@ -3,10 +3,8 @@ package se.kth.id2209.hw1.exhibition;
 import java.io.IOException;
 
 import jade.core.AID;
-import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 import util.Ontologies;
 

@@ -7,6 +7,7 @@ package se.kth.id2209.hw1.exhibition;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.StringTokenizer;
 
 import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
 
@@ -17,14 +18,30 @@ import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
 public class Artifact implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private int id;
-    private String name, creator, placeofCreation;
-    private Date creationDate;
+    private String name, creator, placeofCreation, creationDate;
     GENRE genre;
     public enum GENRE {
     	LITERATURE, MUSIC, PAINTING, SCULPTURE, FASHION, JEWELRY;
     }
 
-    public Artifact(int id, String name, String creator, String placeofCreation, Date creationDate, GENRE genre) {
+    public Artifact(String dbline) {
+        StringTokenizer tokenizer = new StringTokenizer(dbline, "/");
+        
+        this.id = Integer.parseInt(tokenizer.nextToken());
+        this.name = tokenizer.nextToken();
+        this.creator = tokenizer.nextToken();
+        this.placeofCreation = tokenizer.nextToken();
+        this.creationDate = tokenizer.nextToken();
+        this.genre = GENRE.valueOf(tokenizer.nextToken());
+    }
+    
+    @Override
+    public String toString() {
+        return id + "/" + name + "/" + creator + "/" + placeofCreation + "/" 
+                + creationDate + "/" + genre;
+    }
+    
+    public Artifact(int id, String name, String creator, String placeofCreation, String creationDate, GENRE genre) {
         this.id = id;
         this.name = name;
         this.creator = creator;
@@ -64,11 +81,11 @@ public class Artifact implements Serializable {
 		this.placeofCreation = placeofCreation;
 	}
 
-	public Date getCreationDate() {
+	public String getCreationDate() {
 		return creationDate;
 	}
 
-	public void setCreationDate(Date creationDate) {
+	public void setCreationDate(String creationDate) {
 		this.creationDate = creationDate;
 	}
 

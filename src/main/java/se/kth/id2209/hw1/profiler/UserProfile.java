@@ -72,8 +72,8 @@ public class UserProfile implements Serializable {
         return visitedItems;
     }
 
-    public void setVisitedItems(List visitedItems) {
-        this.visitedItems = visitedItems;
+    public void addVisitedItem(Integer visitedItem) {
+        this.visitedItems.add(visitedItem);
     }
     
     

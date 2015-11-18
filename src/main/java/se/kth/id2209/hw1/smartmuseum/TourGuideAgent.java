@@ -16,20 +16,16 @@ import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
-import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.UnreadableException;
 import jade.proto.states.MsgReceiver;
-import se.kth.id2209.hw1.exhibition.Artifact;
 import se.kth.id2209.hw1.exhibition.CuratorAgent;
 import se.kth.id2209.hw1.profiler.ProfilerAgent;
-import se.kth.id2209.hw1.profiler.UserProfile;
-import util.Ontologies;
+import se.kth.id2209.hw1.util.Ontologies;
 
 /**
  * Tour Guide Agent retrieves the information about artifacts in the

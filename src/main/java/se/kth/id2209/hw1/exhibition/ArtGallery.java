@@ -5,15 +5,12 @@
  */
 
 package se.kth.id2209.hw1.exhibition;
-import java.io.Serializable;
+//github.com/borak/ID2209-HW1
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 
-import se.kth.id2209.hw1.exhibition.Artifact;
 import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
 
 /**
@@ -45,7 +42,7 @@ class ArtGallery {
 		map.put(id, artifact);
 	}
 
-	void add(int id, String name, String creator, String placeofCreation, Date creationDate, GENRE genre) {
+	void add(int id, String name, String creator, String placeofCreation, String creationDate, GENRE genre) {
 		Artifact artifact = new Artifact(id, placeofCreation, placeofCreation, placeofCreation, creationDate, genre);
 		map.put(id, artifact);
 	}

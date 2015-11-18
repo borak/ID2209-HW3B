@@ -75,12 +75,14 @@ public class TourGuideAgent extends Agent {
 		par.addSubBehaviour(new MsgReceiver() {
 			// TODO: MAKE !
 		});
+		//par.addSubBehaviour(seq);
+		addBehaviour(par);
 	}
 
 	// TODO: se till att denna kallas då en profiler vill starta en tour
 	@SuppressWarnings("serial")
 	void startTour() {
-
+		
 		SequentialBehaviour seq = new SequentialBehaviour();
 		seq.addSubBehaviour(new OneShotBehaviour() {
 

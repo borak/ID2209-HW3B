@@ -9,11 +9,16 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import se.kth.id2209.hw1.exhibition.Artifact;
 
-@SuppressWarnings("serial")
+/**
+ * In order for the given ProfilerAgent to keep track of its responses for 
+ * looked up artifacts, this behavior will save it to the ProfilerAgent's user
+ * profile.
+ *
+ * @author Kim
+ */
 class HandleArtifactInfoResponse extends OneShotBehaviour {
-
     private ACLMessage msg;
-	private ProfilerAgent profilerAgent;
+    private ProfilerAgent profilerAgent;
 
     HandleArtifactInfoResponse(Agent a, ACLMessage msg) {
         super(a);
@@ -21,7 +26,7 @@ class HandleArtifactInfoResponse extends OneShotBehaviour {
         this.msg = msg;
     }
 
-	@Override
+    @Override
     public void action() {
         try {
             Artifact content = (Artifact) msg.getContentObject();

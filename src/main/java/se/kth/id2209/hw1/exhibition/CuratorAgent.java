@@ -18,94 +18,96 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
 
 /**
- * ïƒ˜ Curator Agent monitors the gallery/museum.
- * ïƒ˜ A gallery/museum contains detailed information of artifacts such as:
- *      ï‚§ id, name, creator, date of creation, place of creation, genre etc.
- * 
- * TODO: Implement behaviours. 
- *       Behaviors should correspond to each category below:
- *          ï�± Simple Behavior (at least 5 different behaviors):
- *              â€“ CyclicBehaviour, MsgReceiver, OneShotBehaviour,
- *                SimpleAchieveREInitiator, SimpleAchieveREResponder,
- *                TickerBehaviour, WakerBehaviour
- *          ï�± Composite Behaviors (at least 2 different behaviors):
- *              â€“ ParallelBehaviour, FSMBehaviour, SequentialBehaviour
- * 
+ * An Curator Agent monitors the art gallery of the museum. It will provide
+ * responses with the information about the various artifacts after appropriate
+ * requests made by other agents.
+ *
+ *
  * @author Kim
  */
-
 @SuppressWarnings("serial")
 public class CuratorAgent extends Agent {
-	private ArtGallery artGallery;
-	private final static int DB_CHECKER_DELAY = 60000;
 
-	protected void setup() {
-		artGallery = ArtGallery.getInstance();
+    private ArtGallery artGallery;
+    private final static int DB_CHECKER_DELAY = 60000;
 
-		DFAgentDescription dfd = new DFAgentDescription();
-		dfd.setName(getAID());
+    /**
+     * Initializes its state and the ArtGallery by checking and parsing a 
+     * database of the artifacts and by adding a message listener for the
+     * agents incomming message requests.
+     */
+    protected void setup() {
+        artGallery = ArtGallery.getInstance();
 
-		ServiceDescription sd = new ServiceDescription();
-		sd.setType("Curator-agent");
-		sd.setName(getLocalName());
-		dfd.addServices(sd);
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(getAID());
 
-		try {
-			DFService.register(this, dfd);
-		} catch (FIPAException fe) {
-			fe.printStackTrace();
-		}
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType("Curator-agent");
+        sd.setName(getLocalName());
+        dfd.addServices(sd);
 
-		ParallelBehaviour pbr = new ParallelBehaviour(this,
-				ParallelBehaviour.WHEN_ALL);
-		pbr.addSubBehaviour(new ListenerBehaviour(this));
-		pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
-		addBehaviour(pbr);
-	}
+        try {
+            DFService.register(this, dfd);
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
 
-	private class DatabaseChecker extends WakerBehaviour {
+        ParallelBehaviour pbr = new ParallelBehaviour(this,
+                ParallelBehaviour.WHEN_ALL);
+        pbr.addSubBehaviour(new ListenerBehaviour(this));
+        pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
+        addBehaviour(pbr);
+    }
 
-		private static final String DB_PATH = "src/main/resources/db.txt";
+    /**
+     * This behavior is performing the parsing of the database's content as 
+     * Artifact objects to the ArtGallery.
+     */
+    private class DatabaseChecker extends WakerBehaviour {
+        private static final String DB_PATH = "src/main/resources/db.txt";
 
-		public DatabaseChecker(Agent a, long timeout) {
-			super(a, timeout);
-		}
+        public DatabaseChecker(Agent a, long timeout) {
+            super(a, timeout);
+        }
 
-		@Override
-		public void onWake() {
-			try {
-				File file = new File(DB_PATH);
-				List<String> lines = Files.readAllLines(file.toPath());
-				for(String s : lines) {
-					System.out.println(new Artifact(s));
-				}
-			} catch (IOException ex) {
-				Logger.getLogger(CuratorAgent.class.getName()).log(Level.SEVERE, null, ex);
-			}
-		}
-	}
+        @Override
+        public void onWake() {
+            try {
+                File file = new File(DB_PATH);
+                List<String> lines = Files.readAllLines(file.toPath());
+                for (String s : lines) {
+                    System.out.println(new Artifact(s));
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(CuratorAgent.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 
-	public Artifact getArtifact(int id) {
-		return artGallery.getArtifact(id);
-	}
+    public Artifact getArtifact(int id) {
+        return artGallery.getArtifact(id);
+    }
 
-	@Override
-	protected void takeDown() {
-		try {
-			DFService.deregister(this);
-		} catch (FIPAException fe) {
-			fe.printStackTrace();
-		}
-		System.out.println("Agent " + getAID().getName() + " is terminating.");
-	}
+    /**
+     * Deregisters its services from the DFService.
+     */
+    @Override
+    protected void takeDown() {
+        try {
+            DFService.deregister(this);
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
+        System.out.println("Agent " + getAID().getName() + " is terminating.");
+    }
 
-	public ArrayList<Integer> getArtifactIdList(GENRE genre) {		
-		return artGallery.getArtifactIdList(genre);
-	}
-	
-	
-	public ArrayList<String> getArtifactNameList(GENRE genre) {		
-		return artGallery.getArtifactNameList(genre);
-	}
+    public ArrayList<Integer> getArtifactIdList(GENRE genre) {
+        return artGallery.getArtifactIdList(genre);
+    }
+
+    public ArrayList<String> getArtifactNameList(GENRE genre) {
+        return artGallery.getArtifactNameList(genre);
+    }
 
 }

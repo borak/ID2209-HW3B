@@ -11,9 +11,14 @@ import jade.lang.acl.ACLMessage;
 import se.kth.id2209.hw1.util.DFUtilities;
 import se.kth.id2209.hw1.util.Ontologies;
 
-@SuppressWarnings("serial")
-public class ArtifactRequestBehaviour extends OneShotBehaviour {
-
+/**
+ * This is a behavior that sends a request for an artifact to a Curator agent.
+ * 
+ * TODO: Rename the curator agent type to something more unique.
+ * 
+ * @author Kim
+ */
+class ArtifactRequestBehaviour extends OneShotBehaviour {
     private AID cAgent;
     private Integer artifactId;
 

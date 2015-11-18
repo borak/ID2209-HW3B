@@ -54,7 +54,7 @@ class ArtGallery {
 		return null;
 	}
 
-	ArtGallery getInstance() {
+	static ArtGallery getInstance() {
 		if(instance == null) {
 			instance = new ArtGallery();
 		}

@@ -41,13 +41,11 @@ import se.kth.id2209.hw1.smartmuseum.TourGuideAgent;
 
 @SuppressWarnings("serial")
 public class CuratorAgent extends Agent {
-	private ProfilerAgent pAgent; // temporary - register at DF instead
-	private TourGuideAgent tgAgent; // temporary - register at DF instead
 	private ArtGallery artGallery;
 	private final static int DB_CHECKER_DELAY = 60000;
 
 	protected void setup() {
-		artGallery = artGallery.getInstance();
+		artGallery = ArtGallery.getInstance();
 
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());

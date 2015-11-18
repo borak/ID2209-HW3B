@@ -1,26 +1,21 @@
 package se.kth.id2209.hw1.exhibition;
 
-import java.io.Serializable;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
-import se.kth.id2209.hw1.profiler.ProfilerAgent;
-import se.kth.id2209.hw1.profiler.UserProfile.GENDER;
-import se.kth.id2209.hw1.smartmuseum.TourGuideAgent;
 
 /**
  * ïƒ˜ Curator Agent monitors the gallery/museum.

@@ -49,6 +49,7 @@ import se.kth.id2209.hw1.util.Ontologies;
  *
  * @author Kim
  */
+@SuppressWarnings("serial")
 public class ProfilerAgent extends Agent {
 
 	private UserProfile profile;
@@ -56,7 +57,6 @@ public class ProfilerAgent extends Agent {
 	private List<Artifact> lookedUpArtifacts;
 	static final String ACL_LANGUAGE = "Java Serialized";
 
-	@SuppressWarnings("serial")
 	@Override
 	protected void setup() {
 		super.setup();
@@ -92,6 +92,7 @@ public class ProfilerAgent extends Agent {
 				isDone = sendTourGuideRequest();
 			}
 
+			@SuppressWarnings("unused")
 			public boolean isDone() {
 				return isDone;
 			}

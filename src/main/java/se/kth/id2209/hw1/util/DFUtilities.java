@@ -5,15 +5,15 @@
  */
 package se.kth.id2209.hw1.util;
 
+import static jade.tools.sniffer.Agent.i;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.domain.DFService;
+import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
-import static jade.tools.sniffer.Agent.i;
-import static jdk.nashorn.internal.objects.NativeString.search;
 
 /**
  *

@@ -6,10 +6,7 @@
 package se.kth.id2209.hw1.exhibition;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.StringTokenizer;
-
-import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
 
 /**
  *  id, name, creator, date of creation, place of creation, genre etc.

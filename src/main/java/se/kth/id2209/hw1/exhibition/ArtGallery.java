@@ -22,7 +22,7 @@ import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
 class ArtGallery {
 
 	HashMap<Integer, Artifact> map = new HashMap<Integer, Artifact>();
-	private static ArtGallery instance;
+	private static ArtGallery instance = new ArtGallery();
 	
 	private ArtGallery(){
 	}

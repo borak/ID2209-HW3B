@@ -97,7 +97,7 @@ public class TourGuideAgent extends Agent {
 					try {
 						msg.addReceiver(cAgent.getAID()); // TODO ANVÄND DF	
 						msg.setOntology(Ontologies.ARTIFACT_RECOMMENDATION_NAME);			
-						msg.setContentObject((Serializable) profiler.getGenre());
+						msg.setContentObject((Serializable) profiler.getUserProfile());
 						send(msg);
 
 						ACLMessage recMsg = blockingReceive(); // should block until response

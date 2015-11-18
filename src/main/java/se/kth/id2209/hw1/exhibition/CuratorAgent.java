@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
 import se.kth.id2209.hw1.profiler.ProfilerAgent;
+import se.kth.id2209.hw1.profiler.UserProfile.GENDER;
 import se.kth.id2209.hw1.smartmuseum.TourGuideAgent;
 
 /**
@@ -43,7 +44,7 @@ public class CuratorAgent extends Agent {
 	private ProfilerAgent pAgent; // temporary - register at DF instead
 	private TourGuideAgent tgAgent; // temporary - register at DF instead
 	private ArtGallery artGallery;
-        private final static int DB_CHECKER_DELAY = 60000;
+	private final static int DB_CHECKER_DELAY = 60000;
 
 	protected void setup() {
 		artGallery = artGallery.getInstance();
@@ -62,34 +63,34 @@ public class CuratorAgent extends Agent {
 			fe.printStackTrace();
 		}
 
-                ParallelBehaviour pbr = new ParallelBehaviour(this,
-                    ParallelBehaviour.WHEN_ALL);
-                pbr.addSubBehaviour(new ListenerBehaviour(this));
-                pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
+		ParallelBehaviour pbr = new ParallelBehaviour(this,
+				ParallelBehaviour.WHEN_ALL);
+		pbr.addSubBehaviour(new ListenerBehaviour(this));
+		pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
 		addBehaviour(pbr);
 	}
-        
-        private class DatabaseChecker extends WakerBehaviour {
 
-            private static final String DB_PATH = "src/main/resources/db.txt";
-            
-            public DatabaseChecker(Agent a, long timeout) {
-                super(a, timeout);
-            }
-        
-            @Override
-            public void onWake() {
-                try {
-                    File file = new File(DB_PATH);
-                    List<String> lines = Files.readAllLines(file.toPath());
-                    for(String s : lines) {
-                        System.out.println(new Artifact(s));
-                    }
-                } catch (IOException ex) {
-                    Logger.getLogger(CuratorAgent.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
+	private class DatabaseChecker extends WakerBehaviour {
+
+		private static final String DB_PATH = "src/main/resources/db.txt";
+
+		public DatabaseChecker(Agent a, long timeout) {
+			super(a, timeout);
+		}
+
+		@Override
+		public void onWake() {
+			try {
+				File file = new File(DB_PATH);
+				List<String> lines = Files.readAllLines(file.toPath());
+				for(String s : lines) {
+					System.out.println(new Artifact(s));
+				}
+			} catch (IOException ex) {
+				Logger.getLogger(CuratorAgent.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+	}
 
 	public Artifact getArtifact(int id) {
 		return artGallery.getArtifact(id);
@@ -108,9 +109,10 @@ public class CuratorAgent extends Agent {
 	public ArrayList<Integer> getArtifactIdList(GENRE genre) {		
 		return artGallery.getArtifactIdList(genre);
 	}
-
+	
+	
 	public ArrayList<String> getArtifactNameList(GENRE genre) {		
 		return artGallery.getArtifactNameList(genre);
 	}
-	
+
 }

@@ -60,15 +60,15 @@ public class UserProfile implements Serializable {
         this.gender = gender;
     }
 
-    public List getInterests() {
+    public List<String> getInterests() {
         return interests;
     }
 
-    public void setInterests(List interests) {
+    public void setInterests(List<String> interests) {
         this.interests = interests;
     }
 
-    public List getVisitedItems() {
+    public List<Integer> getVisitedItems() {
         return visitedItems;
     }
 

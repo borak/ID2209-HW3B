@@ -5,28 +5,21 @@
  */
 package se.kth.id2209.hw1.profiler;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.DataStore;
-import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
+import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
-import jade.lang.acl.UnreadableException;
 import jade.proto.states.MsgReceiver;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import se.kth.id2209.hw1.exhibition.Artifact;
-import se.kth.id2209.hw1.exhibition.CuratorAgent;
-import se.kth.id2209.hw1.smartmuseum.TourGuideAgent;
 import se.kth.id2209.hw1.util.DFUtilities;
 import se.kth.id2209.hw1.util.Ontologies;
 
@@ -58,207 +51,110 @@ import se.kth.id2209.hw1.util.Ontologies;
  */
 public class ProfilerAgent extends Agent {
 
-    private UserProfile profile;
-    private CuratorAgent cAgent; // temporary - register at DF instead
-    private TourGuideAgent tgAgent; // temporary - register at DF instead
-    private List<Integer> recommendedArtifacts;
-    private List<Artifact> lookedUpArtifacts;
-    private static final String ACL_LANGUAGE = "Java Serialized";
+	private UserProfile profile;
+	private List<Integer> recommendedArtifacts;
+	private List<Artifact> lookedUpArtifacts;
+	static final String ACL_LANGUAGE = "Java Serialized";
 
-    @Override
-    protected void setup() {
-        super.setup();
-        recommendedArtifacts = new ArrayList();
-        lookedUpArtifacts = new ArrayList();
-        List<String> interests = new ArrayList();
-        interests.add(Artifact.GENRE.PAINTING.toString());
-        List<Integer> visitedItems = new ArrayList();
-        profile = new UserProfile(22, "Programmer", UserProfile.GENDER.male, 
-            interests, visitedItems);
-        DFAgentDescription dfd = new DFAgentDescription();
-        dfd.setName(getAID());
+	@SuppressWarnings("serial")
+	@Override
+	protected void setup() {
+		super.setup();
+		setRecommendedArtifacts(new ArrayList<Integer>());
+		setLookedUpArtifacts(new ArrayList<Artifact>());
+		
+		List<String> interests = new ArrayList<String>();
+		List<Integer> visitedItems = new ArrayList<Integer>();
 
-        ServiceDescription sd = new ServiceDescription();
-        sd.setType("Profiler-agent");
-        sd.setName(getLocalName());
-        dfd.addServices(sd);
+		interests.add(Artifact.GENRE.PAINTING.toString());
 
-        try {
-            DFService.register(this, dfd);
-        } catch (FIPAException fe) {
-            fe.printStackTrace();
-        }
+		profile = new UserProfile(22, "Programmer", UserProfile.GENDER.male, 
+				interests, visitedItems);
+		DFAgentDescription dfd = new DFAgentDescription();
+		dfd.setName(getAID());
 
-        addBehaviour(new CyclicBehaviour() {
-            boolean isDone = false;
-            
-            @Override
-            public void action() {
-                isDone = sendTourGuideRequest();
-            }
-            
-            public boolean isDone() {
-                return isDone;
-            }
-            
-        });
+		ServiceDescription sd = new ServiceDescription();
+		sd.setType("Profiler-agent");
+		sd.setName(getLocalName());
+		dfd.addServices(sd);
 
-        addBehaviour(new MsgReceiverBehaviour(this, null, MsgReceiver.INFINITE,
-                new DataStore(), null));
-    }
+		try {
+			DFService.register(this, dfd);
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
 
-    private boolean sendTourGuideRequest() {
-        DFAgentDescription dfdTGA = new DFAgentDescription();
-        ServiceDescription sdTGA = new ServiceDescription();
-        sdTGA.setType("Tour-Guide-agent");
-        dfdTGA.addServices(sdTGA);
-        AID[] aids = DFUtilities.searchDF(this, dfdTGA);
-        if (aids.length < 1) {
-            return false;
-        }
-        
-        AID tgAgent = (AID) aids[0];
-        ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-        msg.addReceiver(tgAgent);
-        msg.setLanguage(ACL_LANGUAGE);
-        msg.setOntology(Ontologies.PROFILER_REQUEST_TOUR_AGENT);
-        try {
-            msg.setContentObject(getAID());
-            send(msg);
-            return true;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        return false;
-    }
+		addBehaviour(new CyclicBehaviour() {
+			boolean isDone = false;
 
-    @Override
-    protected void takeDown() {
-        try {
-            DFService.deregister(this);
-        } catch (FIPAException fe) {
-            fe.printStackTrace();
-        }
-        //myGui.dispose();
-        System.out.println("Agent " + getAID().getName() + " is terminating.");
-    }
+			@Override
+			public void action() {
+				isDone = sendTourGuideRequest();
+			}
 
-    private class MsgReceiverBehaviour extends MsgReceiver {
+			public boolean isDone() {
+				return isDone;
+			}
 
-        public MsgReceiverBehaviour(Agent a, MessageTemplate mt, long deadline,
-                DataStore s, java.lang.Object msgKey) {
-            super(a, mt, deadline, s, msgKey);
-        }
+		});
 
-        @Override
-        public void handleMessage(ACLMessage msg) {
-            if (msg == null) {
-                System.err.println("Agent " + getAID().getName()
-                        + " received message: null.");
-                block();
-            }
-            System.out.println("Agent " + getAID().getName()
-                    + " received message: " + msg.getOntology());
+		addBehaviour(new MsgReceiverBehaviour(this, null, MsgReceiver.INFINITE,
+				new DataStore(), null));
+	}
 
-            if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_REQUEST_INFO)) {
-                addBehaviour(new HandleArtifactInfoResponse(getAgent(), msg));
-            } else if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION_ID)) {
-                addBehaviour(new HandleArtifactRecommendation(getAgent(), msg));
-            }
-        }
-    }
+	private boolean sendTourGuideRequest() {
+		DFAgentDescription dfdTGA = new DFAgentDescription();
+		ServiceDescription sdTGA = new ServiceDescription();
+		sdTGA.setType("Tour-Guide-agent");
+		dfdTGA.addServices(sdTGA);
+		AID[] aids = DFUtilities.searchDF(this, dfdTGA);
+		if (aids.length < 1) {
+			return false;
+		}
 
-    private class HandleArtifactInfoResponse extends OneShotBehaviour {
+		AID tgAgent = (AID) aids[0];
+		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+		msg.addReceiver(tgAgent);
+		msg.setLanguage(ACL_LANGUAGE);
+		msg.setOntology(Ontologies.PROFILER_REQUEST_TOUR_AGENT);
+		try {
+			msg.setContentObject(getAID());
+			send(msg);
+			return true;
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		return false;
+	}
 
-        private ACLMessage msg;
+	@Override
+	protected void takeDown() {
+		try {
+			DFService.deregister(this);
+		} catch (FIPAException fe) {
+			fe.printStackTrace();
+		}
+		//myGui.dispose();
+		System.out.println("Agent " + getAID().getName() + " is terminating.");
+	}
 
-        HandleArtifactInfoResponse(Agent a, ACLMessage msg) {
-            super(a);
-            this.msg = msg;
-        }
+	public UserProfile getUserProfile() {
+		return profile;
+	}
 
-        @Override
-        public void action() {
-            try {
-                Artifact content = (Artifact) msg.getContentObject();
-                lookedUpArtifacts.add(content);
-                profile.addVisitedItem(content.getId());
-                System.out.println("Received artifact info: " + content);
-            } catch (UnreadableException ex) {
-                Logger.getLogger(ProfilerAgent.class.getName()).log(Level.SEVERE, null, ex);
-                block();
-            }
-        }
-    }
+	public List<Artifact> getLookedUpArtifacts() {
+		return lookedUpArtifacts;
+	}
 
-    private class HandleArtifactRecommendation extends OneShotBehaviour {
+	public void setLookedUpArtifacts(List<Artifact> lookedUpArtifacts) {
+		this.lookedUpArtifacts = lookedUpArtifacts;
+	}
 
-        private ACLMessage msg;
+	public List<Integer> getRecommendedArtifacts() {
+		return recommendedArtifacts;
+	}
 
-        HandleArtifactRecommendation(Agent a, ACLMessage msg) {
-            super(a);
-            this.msg = msg;
-        }
-
-        @Override
-        public void action() {
-            Integer content = null;
-            try {
-                content = (Integer) msg.getContentObject();
-                recommendedArtifacts.add(content);
-                System.out.println("Agent " + getAID().getName()
-                        + ": was recommended artifact with ID=" + content);
-            } catch (UnreadableException ex) {
-                Logger.getLogger(ProfilerAgent.class.getName()).log(Level.SEVERE, null, ex);
-                block();
-            }
-
-            // If interested (always atm) ask for information
-            addBehaviour(new ArtifactRequestBehaviour(getAgent(), content));
-        }
-    }
-
-    private class ArtifactRequestBehaviour extends OneShotBehaviour {
-
-        private AID cAgent;
-        private Integer artifactId;
-
-        public ArtifactRequestBehaviour(Agent a, Integer artifactId) {
-            super(a);
-            this.artifactId = artifactId;
-            DFAgentDescription dfd = new DFAgentDescription();
-            ServiceDescription sd = new ServiceDescription();
-            sd.setType("service");
-            dfd.addServices(sd);
-            AID[] aids = DFUtilities.searchDF(a, dfd);
-            if (aids.length < 1) {
-                throw new RuntimeException("Cannot find agent");
-            }
-            cAgent = aids[0];
-        }
-
-        private void sendRequest(Integer artifactId) {
-            ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-            msg.addReceiver(cAgent);
-            msg.setLanguage(ACL_LANGUAGE);
-            msg.setOntology(Ontologies.ARTIFACT_REQUEST_INFO);
-            try {
-                msg.setContentObject(artifactId);
-                send(msg);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        @Override
-        public void action() {
-            sendRequest(artifactId);
-        }
-
-    }
-
-	public Serializable getGenre() {
-		// TODO Auto-generated method stub
-		return null;
+	public void setRecommendedArtifacts(List<Integer> recommendedArtifacts) {
+		this.recommendedArtifacts = recommendedArtifacts;
 	}
 }

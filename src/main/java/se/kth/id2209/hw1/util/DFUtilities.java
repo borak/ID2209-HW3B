@@ -36,6 +36,28 @@ public class DFUtilities {
 
         return null;
     }
+    
+    public static AID searchDF(Agent agent, String type) {
+		DFAgentDescription dfdTGA = new DFAgentDescription();
+    	ServiceDescription sdTGA = new ServiceDescription();
+        sdTGA.setType(type);
+		dfdTGA.addServices(sdTGA);
+        try {
+            DFAgentDescription[] result = DFService.search(agent, dfdTGA);
+            AID[] agents = new AID[result.length];
+            for (i = 0; i < result.length; i++) {
+                agents[i] = result[i].getName();
+            }
+
+            return agents[0];
+        } catch (Exception fe) {
+            fe.printStackTrace();
+        }
+
+        return null;
+    }
+    
+    
 
     public static AID[] searchAllDF(Agent agent, String service) {
         DFAgentDescription dfd = new DFAgentDescription();

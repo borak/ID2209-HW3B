@@ -12,6 +12,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 import jade.proto.states.MsgReceiver;
+import java.util.ArrayList;
 import se.kth.id2209.hw1.profiler.UserProfile;
 import se.kth.id2209.hw1.util.Ontologies;
 
@@ -63,7 +64,9 @@ class TGAMsgReceiverBehaviour extends MsgReceiver {
 				Map<String, AID> requests = tourGuide.getRequests();
 				final AID user = requests.get(msg.getConversationId());
 				List<ACLMessage> msglist = tourGuide.getResponses().get(user);
-				
+				if(msglist == null) {
+                                    msglist = new ArrayList<>();
+                                }
 				System.out.println("added msg " + msg + " to msgList: " + msglist);
 				msglist.add(msg);
 				requests.remove(msg.getConversationId());

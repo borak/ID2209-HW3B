@@ -28,8 +28,6 @@ import se.kth.id2209.hw1.util.Ontologies;
  * personalized virtual tour and a Curator Agent to obtain detailed information
  * about each of the items stated in the virtual tour.
  *
- * TODO: CyclicBehaviour should be interrupted when a tour guide has been found.
- *
  * @author Kim
  */
 @SuppressWarnings("serial")

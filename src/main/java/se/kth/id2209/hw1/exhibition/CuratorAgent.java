@@ -37,6 +37,7 @@ public class CuratorAgent extends Agent {
      * database of the artifacts and by adding a message listener for the
      * agents incomming message requests.
      */
+    @Override
     protected void setup() {
         artGallery = ArtGallery.getInstance();
 

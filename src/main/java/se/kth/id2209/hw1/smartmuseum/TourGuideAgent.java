@@ -63,15 +63,8 @@ public class TourGuideAgent extends Agent {
 		}
 
 		final ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
-		par.addSubBehaviour(new CyclicBehaviour() {
-
-                    @Override
-                    public void action() {
-                        par.addSubBehaviour(new TGAMsgReceiverBehaviour(TourGuideAgent.this,
+		par.addSubBehaviour(new TGAMsgReceiverBehaviour(TourGuideAgent.this,
 				null, MsgReceiver.INFINITE, new DataStore(), null));
-                    }
-                    
-                });
 		par.addSubBehaviour(new PresentingRecommendationsBehaviour(this, 10000));
 		addBehaviour(par);
 	}

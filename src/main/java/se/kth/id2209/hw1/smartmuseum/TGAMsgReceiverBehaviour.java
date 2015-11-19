@@ -73,5 +73,8 @@ class TGAMsgReceiverBehaviour extends MsgReceiver {
 					+ " RECIEVED message: null.");
 			block();
 		}
+                
+                myAgent.addBehaviour(new TGAMsgReceiverBehaviour(myAgent, null, 
+                        deadline, getDataStore(), null));
 	}
 }

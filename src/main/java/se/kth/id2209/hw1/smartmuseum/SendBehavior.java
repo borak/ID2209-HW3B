@@ -13,6 +13,7 @@ import jade.lang.acl.UnreadableException;
 import jade.util.Logger;
 import java.util.ArrayList;
 import se.kth.id2209.hw1.util.Ontologies;
+import se.kth.id2209.hw1.util.SList;
 
 /**
  * This behavior sends recommendations that the tour agent has put togheter to
@@ -56,11 +57,4 @@ class SendBehavior extends OneShotBehaviour {
 		System.out.println(myAgent.getName() + " SENDING msg: " + msg.getOntology() + " to " + receiver);
 		tourGuide.send(msg);
 	}
-    
-    private class SList extends ArrayList implements Serializable {
-        SList(List list) {
-            super(list);
-        }
-        
-    }
 }

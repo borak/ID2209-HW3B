@@ -39,6 +39,7 @@ public class ProfilerAgent extends Agent {
     private List<Integer> recommendedArtifacts;
     private List<Artifact> lookedUpArtifacts;
     static final String ACL_LANGUAGE = "Java Serialized";
+    public static final String DF_NAME = "Profiler-agent";
 
     /**
      * Creates a user profile and registers itself to the DFService. Starts
@@ -61,7 +62,7 @@ public class ProfilerAgent extends Agent {
         dfd.setName(getAID());
 
         ServiceDescription sd = new ServiceDescription();
-        sd.setType("Profiler-agent");
+        sd.setType(DF_NAME);
         sd.setName(getLocalName());
         dfd.addServices(sd);
 

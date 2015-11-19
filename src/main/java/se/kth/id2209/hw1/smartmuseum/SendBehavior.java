@@ -11,6 +11,7 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.util.Logger;
+import java.util.ArrayList;
 import se.kth.id2209.hw1.util.Ontologies;
 
 /**
@@ -47,7 +48,7 @@ class SendBehavior extends OneShotBehaviour {
         msg.setConversationId(msg.getConversationId());
 
         try {
-            msg.setContentObject((Serializable) list);
+            msg.setContentObject(new SList(list));
         } catch (IOException ex) {
             Logger.getLogger(TourGuideAgent.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -55,4 +56,11 @@ class SendBehavior extends OneShotBehaviour {
 		System.out.println(myAgent.getName() + " SENDING msg: " + msg.getOntology() + " to " + receiver);
 		tourGuide.send(msg);
 	}
+    
+    private class SList extends ArrayList implements Serializable {
+        SList(List list) {
+            super(list);
+        }
+        
+    }
 }

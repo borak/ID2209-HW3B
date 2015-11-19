@@ -1,3 +1,8 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package se.kth.id2209.hw1.smartmuseum;
 
 import java.io.Serializable;
@@ -32,30 +37,19 @@ import se.kth.id2209.hw1.util.Ontologies;
  * gallery/museum and builds a virtual tour (upon the request) for profiler
  * agent.
  *
- * –The virtual tour contains list of related items (based on user’s interest,
- * age, etc..)
- *
- *  Tour Guide agent interacts with Curator Agent in order to build the virtual
- * tour.
- *
- * TODO: Implement behaviours. Behaviors should correspond to each category
- * below:  Simple Behavior (at least 5 different behaviors): – CyclicBehaviour,
- * MsgReceiver, OneShotBehaviour, SimpleAchieveREInitiator,
- * SimpleAchieveREResponder, TickerBehaviour, WakerBehaviour  Composite
- * Behaviors (at least 2 different behaviors): – ParallelBehaviour,
- * FSMBehaviour, SequentialBehaviour
- *
  * @author Kim
  */
 public class TourGuideAgent extends Agent {
-
-	private static final long serialVersionUID = 5883088851872677769L;
 	private HashMap<AID, UserProfile> users = new HashMap<>();
 	private TGAMsgReceiverBehaviour msgReceiver;
 	private Map<String, AID> requests = new HashMap<String, AID>();
 	private Map<AID, List<ACLMessage>> responses = new HashMap<AID, List<ACLMessage>>();
 	//static Lock usersLock = new ReentrantLock();
 
+        /**
+         * Registers itself to the DFService and starts listening for incomming
+         * tour requests and artifact query responses.
+         */
 	@Override
 	protected void setup() {
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -76,7 +70,7 @@ public class TourGuideAgent extends Agent {
 		msgReceiver = new TGAMsgReceiverBehaviour(this,
 				null, MsgReceiver.INFINITE, new DataStore(), null);
 		par.addSubBehaviour(msgReceiver);
-		par.addSubBehaviour(new PresentBehaviour(this, 10000));
+		par.addSubBehaviour(new PresentingRecommendationsBehaviour(this, 10000));
 		addBehaviour(par);
 	}
 
@@ -127,6 +121,9 @@ public class TourGuideAgent extends Agent {
 		addBehaviour(seq);
 	}
 
+        /**
+         * Deregisters itself from DFService.
+         */
 	@Override
 	protected void takeDown() {
 		try {
@@ -137,27 +134,27 @@ public class TourGuideAgent extends Agent {
 		System.out.println(getAID().getName() + " is terminating.");
 	}
 
-	public Map<String, AID> getRequests() {
+	Map<String, AID> getRequests() {
 		return requests;
 	}
 
-	public void setRequests(Map<String, AID> requests) {
+	void setRequests(Map<String, AID> requests) {
 		this.requests = requests;
 	}
 
-	public Map<AID, List<ACLMessage>> getResponses() {
+	Map<AID, List<ACLMessage>> getResponses() {
 		return responses;
 	}
 
-	public void setResponses(Map<AID, List<ACLMessage>> responses) {
+	void setResponses(Map<AID, List<ACLMessage>> responses) {
 		this.responses = responses;
 	}
 
-	public HashMap<AID, UserProfile> getUsers() {
+	HashMap<AID, UserProfile> getUsers() {
 		return users;
 	}
 
-	public void setUsers(HashMap<AID, UserProfile> users) {
+	void setUsers(HashMap<AID, UserProfile> users) {
 		this.users = users;
 	}
 }

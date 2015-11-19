@@ -14,8 +14,6 @@ import se.kth.id2209.hw1.util.Ontologies;
  * This agent behavior is listening for artifact recommendation requests and 
  * performs appropriate responses.
  * 
- * TODO: REMOVE dependancy of a direct association with a ProfilerAgent. 
- * 
  * @author Kim
  */
 class ListenerBehaviour extends CyclicBehaviour {
@@ -30,8 +28,6 @@ class ListenerBehaviour extends CyclicBehaviour {
      */
     ListenerBehaviour(CuratorAgent curator) {
         this.curator = curator;
-//        profiler = DFUtilities.searchDF(myAgent, "Profiler-agent");
-//        travelGuide = DFUtilities.searchDF(myAgent, "Tour-Guide-agent");
     }
 
     @Override

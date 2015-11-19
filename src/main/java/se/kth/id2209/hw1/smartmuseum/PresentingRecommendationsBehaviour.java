@@ -45,8 +45,8 @@ class PresentingRecommendationsBehaviour extends TickerBehaviour {
 				Entry<AID, UserProfile> entry = it.next();
 				AID aid = entry.getKey();
 				List<ACLMessage> messages = responses.get(aid);
-				System.out.println("messages = "+ messages);
-				if(messages != null) { // TODO: messages is null
+				if(messages != null) { 
+                                        System.out.println("messages = "+ messages);
 					for (ACLMessage message : messages) {
 						par.addSubBehaviour(new SendBehavior(tourGuide, aid, message));
 					}

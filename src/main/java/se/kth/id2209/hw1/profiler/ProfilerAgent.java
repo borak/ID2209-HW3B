@@ -73,15 +73,8 @@ public class ProfilerAgent extends Agent {
 
         SequentialBehaviour seq = new SequentialBehaviour();
         seq.addSubBehaviour(new SendTourGuideRequestBehaviour(this, profile));
-        seq.addSubBehaviour(new CyclicBehaviour() {
-
-            @Override
-            public void action() {
-                addBehaviour(new MsgReceiverBehaviour(ProfilerAgent.this, null, MsgReceiver.INFINITE,
+        seq.addSubBehaviour(new MsgReceiverBehaviour(ProfilerAgent.this, null, MsgReceiver.INFINITE,
                         new DataStore(), null));
-            }
-
-        });
         addBehaviour(seq);
     }
 

@@ -6,6 +6,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.states.MsgReceiver;
 import se.kth.id2209.hw1.util.Ontologies;
+import sun.print.ServiceDialog;
 
 /**
  * This behavior is listening for an agent's messages, specifically, requests for
@@ -15,10 +16,12 @@ import se.kth.id2209.hw1.util.Ontologies;
  * @author Kim
  */
 class MsgReceiverBehaviour extends MsgReceiver {
-
+        private Object msgKey;
+    
 	public MsgReceiverBehaviour(Agent a, MessageTemplate mt, long deadline,
 			DataStore s, java.lang.Object msgKey) {
 		super(a, mt, deadline, s, msgKey);
+                this.msgKey = msgKey;
 	}
 
 	@Override
@@ -38,5 +41,7 @@ class MsgReceiverBehaviour extends MsgReceiver {
 					+ " RECIEVED message: null.");
 			block();
 		}
+                myAgent.addBehaviour(new MsgReceiverBehaviour(myAgent, null, 
+                        deadline, getDataStore(), msgKey));
 	}
 }

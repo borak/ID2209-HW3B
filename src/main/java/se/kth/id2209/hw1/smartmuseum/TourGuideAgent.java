@@ -77,8 +77,7 @@ public class TourGuideAgent extends Agent {
 	@SuppressWarnings("serial")
 	void startTour() {
 		System.out.println("TOUR STARTED!");
-		SequentialBehaviour seq = new SequentialBehaviour();
-		seq.addSubBehaviour(new OneShotBehaviour() {
+		addBehaviour(new OneShotBehaviour() {
 			@Override
 			public void action() {
 				// usersLock.lock();
@@ -118,7 +117,6 @@ public class TourGuideAgent extends Agent {
 				}
 			}
 		});
-		addBehaviour(seq);
 	}
 
 	/**

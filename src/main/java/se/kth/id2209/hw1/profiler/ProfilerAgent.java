@@ -6,8 +6,11 @@ import java.util.List;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.DataStore;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -31,13 +34,14 @@ import se.kth.id2209.hw1.util.Ontologies;
  */
 @SuppressWarnings("serial")
 public class ProfilerAgent extends Agent {
+
     private UserProfile profile;
     private List<Integer> recommendedArtifacts;
     private List<Artifact> lookedUpArtifacts;
     static final String ACL_LANGUAGE = "Java Serialized";
 
     /**
-     * Creates a user profile and registers itself to the DFService. Starts 
+     * Creates a user profile and registers itself to the DFService. Starts
      * sending requests for a tour.
      */
     @Override
@@ -67,48 +71,18 @@ public class ProfilerAgent extends Agent {
             fe.printStackTrace();
         }
 
-        addBehaviour(new CyclicBehaviour() {
-            boolean isDone = false;
+        SequentialBehaviour seq = new SequentialBehaviour();
+        seq.addSubBehaviour(new SendTourGuideRequestBehaviour(this, profile));
+        seq.addSubBehaviour(new CyclicBehaviour() {
 
             @Override
             public void action() {
-                isDone = sendTourGuideRequest();
-            }
-
-            @SuppressWarnings("unused")
-            public boolean isDone() {
-                return isDone;
+                addBehaviour(new MsgReceiverBehaviour(ProfilerAgent.this, null, MsgReceiver.INFINITE,
+                        new DataStore(), null));
             }
 
         });
-
-        addBehaviour(new MsgReceiverBehaviour(this, null, MsgReceiver.INFINITE,
-                new DataStore(), null));
-    }
-
-    private boolean sendTourGuideRequest() {
-        DFAgentDescription dfdTGA = new DFAgentDescription();
-        ServiceDescription sdTGA = new ServiceDescription();
-        sdTGA.setType("Tour-Guide-agent");
-        dfdTGA.addServices(sdTGA);
-        AID[] aids = DFUtilities.searchDF(this, dfdTGA);
-        if (aids.length < 1) {
-            return false;
-        }
-
-        AID tgAgent = (AID) aids[0];
-        ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-        msg.addReceiver(tgAgent);
-        msg.setLanguage(ACL_LANGUAGE);
-        msg.setOntology(Ontologies.PROFILER_REQUEST_TOUR_AGENT);
-        try {
-            msg.setContentObject(profile);
-            send(msg);
-            return true;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        return false;
+        addBehaviour(seq);
     }
 
     /**

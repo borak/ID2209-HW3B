@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.DataStore;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
@@ -59,10 +60,16 @@ public class TourGuideAgent extends Agent {
 			fe.printStackTrace();
 		}
 
-		ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
-		msgReceiver = new TGAMsgReceiverBehaviour(this,
-				null, MsgReceiver.INFINITE, new DataStore(), null);
-		par.addSubBehaviour(msgReceiver);
+		final ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
+		par.addSubBehaviour(new CyclicBehaviour() {
+
+                    @Override
+                    public void action() {
+                        par.addSubBehaviour(new TGAMsgReceiverBehaviour(TourGuideAgent.this,
+				null, MsgReceiver.INFINITE, new DataStore(), null));
+                    }
+                    
+                });
 		par.addSubBehaviour(new PresentingRecommendationsBehaviour(this, 10000));
 		addBehaviour(par);
 	}

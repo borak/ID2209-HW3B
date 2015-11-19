@@ -8,6 +8,7 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import se.kth.id2209.hw1.exhibition.CuratorAgent;
 import se.kth.id2209.hw1.util.DFUtilities;
 import se.kth.id2209.hw1.util.Ontologies;
 
@@ -27,7 +28,7 @@ class ArtifactRequestBehaviour extends OneShotBehaviour {
         this.artifactId = artifactId;
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
-        sd.setType("service");
+        sd.setType(CuratorAgent.DF_NAME);
         dfd.addServices(sd);
         AID[] aids = DFUtilities.searchDF(a, dfd);
         if (aids.length < 1) {

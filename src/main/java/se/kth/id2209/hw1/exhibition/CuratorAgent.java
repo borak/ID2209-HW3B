@@ -31,6 +31,7 @@ public class CuratorAgent extends Agent {
 
     private ArtGallery artGallery;
     private final static int DB_CHECKER_DELAY = 60000;
+    public static final String DF_NAME = "Curator-agent";
 
     /**
      * Initializes its state and the ArtGallery by checking and parsing a 
@@ -45,7 +46,7 @@ public class CuratorAgent extends Agent {
         dfd.setName(getAID());
 
         ServiceDescription sd = new ServiceDescription();
-        sd.setType("Curator-agent");
+        sd.setType(DF_NAME);
         sd.setName(getLocalName());
         dfd.addServices(sd);
 

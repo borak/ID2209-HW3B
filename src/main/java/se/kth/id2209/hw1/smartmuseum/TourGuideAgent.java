@@ -41,6 +41,8 @@ public class TourGuideAgent extends Agent {
 	private Map<String, AID> requests = new HashMap<String, AID>();
 	private Map<AID, List<ACLMessage>> responses = new HashMap<AID, List<ACLMessage>>();
 	Lock usersLock = new ReentrantLock();
+        public static final String DF_NAME = "Tour-Guide-agent";
+        public static final String CA_DF_NAME = "Curator-agent";
 
 	/**
 	 * Registers itself to the DFService and starts listening for incomming
@@ -52,7 +54,7 @@ public class TourGuideAgent extends Agent {
 		dfd.setName(getAID());
 
 		ServiceDescription sd = new ServiceDescription();
-		sd.setType("Tour-Guide-agent");
+		sd.setType(DF_NAME);
 		sd.setName(getLocalName());
 		dfd.addServices(sd);
 
@@ -90,7 +92,7 @@ public class TourGuideAgent extends Agent {
 						for (String s : interests) {
 							genres.add(Artifact.GENRE.valueOf(s));
 						}                        
-						AID caid = DFUtilities.searchDF(TourGuideAgent.this, "Curator-agent");
+						AID caid = DFUtilities.searchDF(TourGuideAgent.this, CA_DF_NAME);
 						if (caid != null) {                                           
 							try {
 								msg.addReceiver(caid);

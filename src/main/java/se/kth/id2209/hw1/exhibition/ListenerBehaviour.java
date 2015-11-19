@@ -1,5 +1,8 @@
 package se.kth.id2209.hw1.exhibition;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -27,8 +30,8 @@ class ListenerBehaviour extends CyclicBehaviour {
      */
     ListenerBehaviour(CuratorAgent curator) {
         this.curator = curator;
-        profiler = DFUtilities.searchDF(myAgent, "Profiler-Agent");
-        travelGuide = DFUtilities.searchDF(myAgent, "Travel-Guide-Agent");
+//        profiler = DFUtilities.searchDF(myAgent, "Profiler-agent");
+//        travelGuide = DFUtilities.searchDF(myAgent, "Tour-Guide-agent");
     }
 
     @Override
@@ -36,6 +39,7 @@ class ListenerBehaviour extends CyclicBehaviour {
         ACLMessage msg = curator.receive();
 
         if (msg != null) {
+        	System.out.println(curator.getName() + " RECIEVED message: " + msg.getOntology());
             ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
             String ontology = msg.getOntology();
             if (ontology.equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION_ID)) {
@@ -54,16 +58,17 @@ class ListenerBehaviour extends CyclicBehaviour {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (ontology.equalsIgnoreCase(Ontologies.ARTIFACT_REQUEST_INFO)) {
+            } else if (ontology.equalsIgnoreCase(Ontologies.QUERY_ARTIFACTS)) {
                 try {
-                    int artifactID = (int) msg.getContentObject();
-                    reply.setOntology(Ontologies.ARTIFACT_RESPONSE_INFO);
-                    reply.setContentObject(curator.getArtifact(artifactID));
+                    ArrayList<GENRE> genres = (ArrayList<GENRE>) msg.getContentObject();
+                    reply.setOntology(Ontologies.QUERY_ARTIFACTS);
+                    reply.setContentObject((Serializable) curator.getArtifactIdList(genres.get(0))); // TODO skicka hela listan
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
             reply.addReceiver(msg.getSender());
+            System.out.println(curator.getName() + " SENDING msg: " + msg + " to " + msg.getSender().getName());
             curator.send(reply);
         } else {
             block();

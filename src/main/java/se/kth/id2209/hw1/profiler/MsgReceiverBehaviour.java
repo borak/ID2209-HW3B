@@ -16,25 +16,27 @@ import se.kth.id2209.hw1.util.Ontologies;
  */
 class MsgReceiverBehaviour extends MsgReceiver {
 
-    public MsgReceiverBehaviour(Agent a, MessageTemplate mt, long deadline,
-            DataStore s, java.lang.Object msgKey) {
-        super(a, mt, deadline, s, msgKey);
-    }
+	public MsgReceiverBehaviour(Agent a, MessageTemplate mt, long deadline,
+			DataStore s, java.lang.Object msgKey) {
+		super(a, mt, deadline, s, msgKey);
+	}
 
-    @Override
-    public void handleMessage(ACLMessage msg) {
-        if (msg == null) {
-            System.err.println("Agent " + myAgent.getAID().getName()
-                    + " received message: null.");
-            block();
-        }
-        System.out.println("Agent " + myAgent.getAID().getName()
-                + " received message: " + msg.getOntology());
+	@Override
+	public void handleMessage(ACLMessage msg) {
+		if (msg != null) {
+			System.out.println(myAgent.getAID().getName()
+					+ " RECIEVED message: " + msg.getOntology());
 
-        if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_REQUEST_INFO)) {
-            myAgent.addBehaviour(new HandleArtifactInfoResponse(getAgent(), msg));
-        } else if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION_ID)) {
-            myAgent.addBehaviour(new HandleArtifactRecommendation(getAgent(), msg));
-        }
-    }
+			if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_REQUEST_INFO)) {
+				myAgent.addBehaviour(new HandleArtifactInfoResponse(getAgent(), msg));
+			} else if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION_ID)) {
+				myAgent.addBehaviour(new HandleArtifactRecommendation(getAgent(), msg));
+			}
+		}
+		else {
+			System.err.println(myAgent.getAID().getName()
+					+ " RECIEVED message: null.");
+			block();
+		}
+	}
 }

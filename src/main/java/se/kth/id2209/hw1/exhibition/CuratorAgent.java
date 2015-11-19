@@ -77,7 +77,7 @@ public class CuratorAgent extends Agent {
                 File file = new File(DB_PATH);
                 List<String> lines = Files.readAllLines(file.toPath());
                 for (String s : lines) {
-                    System.out.println(new Artifact(s));
+                    System.out.println("New artifact: " + new Artifact(s));
                 }
             } catch (IOException ex) {
                 Logger.getLogger(CuratorAgent.class.getName()).log(Level.SEVERE, null, ex);

@@ -31,7 +31,7 @@ class HandleArtifactRecommendation extends OneShotBehaviour {
         try {
             content = (Integer) msg.getContentObject();
             profilerAgent.getRecommendedArtifacts().add(content);
-            System.out.println("Agent " + myAgent.getAID().getName()
+            System.out.println(myAgent.getAID().getName()
                     + ": was recommended artifact with ID=" + content);
         } catch (UnreadableException ex) {
             Logger.getLogger(ProfilerAgent.class.getName()).log(Level.SEVERE, null, ex);

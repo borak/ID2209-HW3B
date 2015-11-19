@@ -25,7 +25,7 @@ class PresentBehaviour extends TickerBehaviour {
 
 	@Override
 	protected void onTick() {
-		TourGuideAgent.usersLock.lock();
+		//TourGuideAgent.usersLock.lock();
 		HashMap<AID, UserProfile> users = tourGuide.getUsers();
 		Map<AID, List<ACLMessage>> responses = tourGuide.getResponses();
 
@@ -41,14 +41,16 @@ class PresentBehaviour extends TickerBehaviour {
 				Entry<AID, UserProfile> entry = it.next();
 				AID aid = entry.getKey();
 				List<ACLMessage> messages = responses.get(aid);
-
-				for(ACLMessage message : messages) {
-					par.addSubBehaviour(new SendBehavior(tourGuide, aid, message));
+				System.out.println("messages: " + messages);
+				if(messages != null) { // TODO: IS NULL
+					for(ACLMessage message : messages) {
+						par.addSubBehaviour(new SendBehavior(tourGuide, aid, message));
+					}
 				}
 			}
 			responses.clear();
 		} finally {
-			TourGuideAgent.usersLock.unlock();
+			//TourGuideAgent.usersLock.unlock();
 		}
 		tourGuide.addBehaviour(par);
 	}

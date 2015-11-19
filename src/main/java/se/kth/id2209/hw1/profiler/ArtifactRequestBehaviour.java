@@ -43,6 +43,7 @@ class ArtifactRequestBehaviour extends OneShotBehaviour {
         msg.setOntology(Ontologies.ARTIFACT_REQUEST_INFO);
         try {
             msg.setContentObject(artifactId);
+            System.out.println(myAgent.getName() + " SENDING msg: " + msg.getOntology() + " to " + cAgent.getName());
             myAgent.send(msg);
         } catch (IOException ex) {
             ex.printStackTrace();

@@ -47,6 +47,7 @@ class SendBehavior extends OneShotBehaviour {
 			Logger.getLogger(TourGuideAgent.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
+		System.out.println(myAgent.getName() + " SENDING msg: " + msg.getOntology() + " to " + receiver);
 		tourGuide.send(msg);
 	}
 }

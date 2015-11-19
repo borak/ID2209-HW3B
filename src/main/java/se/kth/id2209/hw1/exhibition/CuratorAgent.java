@@ -30,7 +30,7 @@ import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
 public class CuratorAgent extends Agent {
 
     private ArtGallery artGallery;
-    private final static int DB_CHECKER_DELAY = 60000;
+    private final static int DB_CHECKER_DELAY = 100;
     public static final String DF_NAME = "Curator-agent";
 
     /**

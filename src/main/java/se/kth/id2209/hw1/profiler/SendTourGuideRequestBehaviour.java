@@ -12,7 +12,8 @@ import se.kth.id2209.hw1.util.DFUtilities;
 import se.kth.id2209.hw1.util.Ontologies;
 
 /**
- *
+ * Performs requests for any tour guide via the DFService until it finds one.
+ * 
  * @author Kim
  */
 class SendTourGuideRequestBehaviour extends Behaviour {

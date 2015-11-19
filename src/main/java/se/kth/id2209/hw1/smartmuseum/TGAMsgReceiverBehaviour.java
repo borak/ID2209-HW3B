@@ -15,12 +15,18 @@ import jade.proto.states.MsgReceiver;
 import se.kth.id2209.hw1.profiler.UserProfile;
 import se.kth.id2209.hw1.util.Ontologies;
 
+/**
+ * This message receiver behavior listens for new profiler agents that wants
+ * recommendations and responses for sent queries to the curator agent.
+ * 
+ * @author Kim
+ */
 @SuppressWarnings("serial")
 class TGAMsgReceiverBehaviour extends MsgReceiver {
 
     private TourGuideAgent tourGuide;
 
-	public TGAMsgReceiverBehaviour(Agent a, MessageTemplate mt, long deadline,
+    public TGAMsgReceiverBehaviour(Agent a, MessageTemplate mt, long deadline,
             DataStore s, java.lang.Object msgKey) {
         super(a, mt, deadline, s, msgKey);
         this.tourGuide = (TourGuideAgent) a;
@@ -47,17 +53,19 @@ class TGAMsgReceiverBehaviour extends MsgReceiver {
             block();
         }
 
-        // New user
         if (msg.getOntology().equalsIgnoreCase(Ontologies.PROFILER_REQUEST_TOUR_AGENT)) {
             UserProfile up = (UserProfile) o;
-            
+
             TourGuideAgent.usersLock.lock();
-            tourGuide.getUsers().put(msg.getSender(), up);
-            TourGuideAgent.usersLock.unlock();
-            
+            try {
+                tourGuide.getUsers().put(msg.getSender(), up);
+            } finally {
+                TourGuideAgent.usersLock.unlock();
+            }
+
             tourGuide.startTour();
         } else if (msg.getOntology().equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION_ID)) {
-        	Map<String, AID> requests = tourGuide.getRequests();
+            Map<String, AID> requests = tourGuide.getRequests();
             final AID user = requests.get(msg.getConversationId());
             List<ACLMessage> msglist = tourGuide.getResponses().get(user);
             msglist.add(msg);

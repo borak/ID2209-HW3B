@@ -1,16 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.id2209.hw1.profiler;
 
 import java.io.Serializable;
 import java.util.List;
 
 /**
- * The profile contains basic user information (age, occupation, gender,
- * interest, etc) and visited items (in our case museum artifacts).
+ * The User Profile contains basic user information (age, occupation, gender,
+ * interest, etc) and visited items (artifacts from the museum).
+ * 
+ * This class is protected to only be manipulated from an entity in the package
+ * but has public access to read its content.
  * 
  * TODO: Change getters & setters of list to be adding & removing elements.
  * 
@@ -27,7 +25,7 @@ public class UserProfile implements Serializable {
         male, female;
     }
 
-    public UserProfile(int age, String occupation, GENDER gender, 
+    UserProfile(int age, String occupation, GENDER gender, 
             List<String> interests, List<Integer> visitedItems) {
         this.age = age;
         this.occupation = occupation;
@@ -40,7 +38,7 @@ public class UserProfile implements Serializable {
         return age;
     }
 
-    public void setAge(int age) {
+    void setAge(int age) {
         this.age = age;
     }
 
@@ -48,7 +46,7 @@ public class UserProfile implements Serializable {
         return occupation;
     }
 
-    public void setOccupation(String occupation) {
+    void setOccupation(String occupation) {
         this.occupation = occupation;
     }
 
@@ -56,7 +54,7 @@ public class UserProfile implements Serializable {
         return gender;
     }
 
-    public void setGender(GENDER gender) {
+    void setGender(GENDER gender) {
         this.gender = gender;
     }
 
@@ -64,7 +62,7 @@ public class UserProfile implements Serializable {
         return interests;
     }
 
-    public void setInterests(List<String> interests) {
+    void setInterests(List<String> interests) {
         this.interests = interests;
     }
 

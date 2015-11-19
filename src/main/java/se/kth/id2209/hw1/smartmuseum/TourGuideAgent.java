@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.id2209.hw1.smartmuseum;
 
 import java.io.Serializable;
@@ -81,7 +76,7 @@ public class TourGuideAgent extends Agent {
         msgReceiver = new TGAMsgReceiverBehaviour(this,
                 null, MsgReceiver.INFINITE, new DataStore(), null);
         par.addSubBehaviour(msgReceiver);
-        par.addSubBehaviour(new PresentBehaviour(this, 10000));
+        par.addSubBehaviour(new PresentingRecommendationsBehaviour(this, 10000));
     }
 
     // TODO: se till att denna kallas då en profiler vill starta en tour

@@ -8,13 +8,6 @@ import jade.proto.states.MsgReceiver;
 import se.kth.id2209.hw1.util.Ontologies;
 
 /**
- * In order to process a received recommendation of an artifact, this class
- * will modify the Profiler agent's state by storing that recommendation and
- * forward the request to a Curator agent.
- *
- * @author Kim
- */
-/**
  * This behavior is listening for an agent's messages, specifically, requests for
  * artifacts and artifacts recommendations and start appropriate behaviors to
  * handle the message.

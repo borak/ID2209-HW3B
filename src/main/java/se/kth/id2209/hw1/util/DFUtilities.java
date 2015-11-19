@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.id2209.hw1.util;
 
 import static jade.tools.sniffer.Agent.i;
@@ -16,11 +11,20 @@ import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 /**
- *
+ * This class provides some utilities for communicating via the DFService. More
+ * specifically, searching for agents.
+ * 
  * @author Kim
  */
 public class DFUtilities {
 
+    /**
+     * Searches for all agents with the provided description in the DFService.
+     * 
+     * @param agent The agent that wishes to perform the search.
+     * @param dfd A description of the agent(s).
+     * @return The agents which the DFService matched to the description.
+     */
     public static AID[] searchDF(Agent agent, DFAgentDescription dfd) {
         try {
             DFAgentDescription[] result = DFService.search(agent, dfd);
@@ -36,12 +40,19 @@ public class DFUtilities {
 
         return null;
     }
-    
+
+    /**
+     * Searches for any agent with the provided type in the DFService.
+     * 
+     * @param agent The agent that wishes to perform the search.
+     * @param type The name of the agent type to look for.
+     * @return The agent which the DFService matched to the description.
+     */
     public static AID searchDF(Agent agent, String type) {
-		DFAgentDescription dfdTGA = new DFAgentDescription();
-    	ServiceDescription sdTGA = new ServiceDescription();
+        DFAgentDescription dfdTGA = new DFAgentDescription();
+        ServiceDescription sdTGA = new ServiceDescription();
         sdTGA.setType(type);
-		dfdTGA.addServices(sdTGA);
+        dfdTGA.addServices(sdTGA);
         try {
             DFAgentDescription[] result = DFService.search(agent, dfdTGA);
             AID[] agents = new AID[result.length];
@@ -56,13 +67,18 @@ public class DFUtilities {
 
         return null;
     }
-    
-    
 
-    public static AID[] searchAllDF(Agent agent, String service) {
+    /**
+     * Searches for all agents with the provided service in the DFService.
+     * 
+     * @param agent The agent that wishes to perform the search.
+     * @param type The name of the agent type to look for.
+     * @return The agents which the DFService matched to the description.
+     */
+    public static AID[] searchAllDF(Agent agent, String type) {
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(service);
+        sd.setType(type);
         dfd.addServices(sd);
         SearchConstraints ALL = new SearchConstraints();
         ALL.setMaxResults(new Long(-1));
@@ -81,19 +97,4 @@ public class DFUtilities {
         return null;
     }
 
-    AID getService(Agent a, String service) {
-        DFAgentDescription dfd = new DFAgentDescription();
-        ServiceDescription sd = new ServiceDescription();
-        sd.setType(service);
-        dfd.addServices(sd);
-        try {
-            DFAgentDescription[] result = DFService.search(a, dfd);
-            if (result.length > 0) {
-                return result[0].getName();
-            }
-        } catch (FIPAException fe) {
-            fe.printStackTrace();
-        }
-        return null;
-    }
 }

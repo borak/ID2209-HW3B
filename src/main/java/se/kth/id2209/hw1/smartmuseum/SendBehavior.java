@@ -13,40 +13,45 @@ import jade.lang.acl.UnreadableException;
 import jade.util.Logger;
 import se.kth.id2209.hw1.util.Ontologies;
 
-@SuppressWarnings("serial")
+/**
+ * This behavior sends recommendations that the tour agent has put togheter to
+ * the corresponding user that had had requested recommendations.
+ * 
+ * @author Kim
+ */
 class SendBehavior extends OneShotBehaviour {
 
-	private final AID receiver;
-	private final ACLMessage queryResponse;
-	private TourGuideAgent tourGuide;
+    private final AID receiver;
+    private final ACLMessage queryResponse;
+    private TourGuideAgent tourGuide;
 
-	SendBehavior(Agent a, AID receiver, ACLMessage queryResponse) {
-		this.tourGuide = (TourGuideAgent) a;
-		this.receiver = receiver;
-		this.queryResponse = queryResponse;
-	}
+    SendBehavior(Agent a, AID receiver, ACLMessage queryResponse) {
+        this.tourGuide = (TourGuideAgent) a;
+        this.receiver = receiver;
+        this.queryResponse = queryResponse;
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public void action() {
-		List<Integer> list = null;
-		try {
-			list = (List<Integer>) queryResponse.getContentObject();
-		} catch (UnreadableException ex) {
-			Logger.getLogger(TourGuideAgent.class.getName()).log(Level.SEVERE, null, ex);
-			block();
-		}
-		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-		msg.addReceiver(receiver);
-		msg.setOntology(Ontologies.ARTIFACT_RESPONSE_RECOMMENDATION_ID);
-		msg.setConversationId(msg.getConversationId());
+    @SuppressWarnings("unchecked")
+    @Override
+    public void action() {
+        List<Integer> list = null;
+        try {
+            list = (List<Integer>) queryResponse.getContentObject();
+        } catch (UnreadableException ex) {
+            Logger.getLogger(TourGuideAgent.class.getName()).log(Level.SEVERE, null, ex);
+            block();
+        }
+        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+        msg.addReceiver(receiver);
+        msg.setOntology(Ontologies.ARTIFACT_RESPONSE_RECOMMENDATION_ID);
+        msg.setConversationId(msg.getConversationId());
 
-		try {
-			msg.setContentObject((Serializable) list);
-		} catch (IOException ex) {
-			Logger.getLogger(TourGuideAgent.class.getName()).log(Level.SEVERE, null, ex);
-		}
+        try {
+            msg.setContentObject((Serializable) list);
+        } catch (IOException ex) {
+            Logger.getLogger(TourGuideAgent.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-		tourGuide.send(msg);
-	}
+        tourGuide.send(msg);
+    }
 }

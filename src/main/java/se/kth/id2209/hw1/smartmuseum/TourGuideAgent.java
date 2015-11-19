@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -76,7 +74,7 @@ public class TourGuideAgent extends Agent {
 		msgReceiver = new TGAMsgReceiverBehaviour(this,
 				null, MsgReceiver.INFINITE, new DataStore(), null);
 		par.addSubBehaviour(msgReceiver);
-		par.addSubBehaviour(new PresentBehaviour(this, 10000));
+		par.addSubBehaviour(new PresentingRecommendationsBehaviour(this, 10000));
 		addBehaviour(par);
 	}
 

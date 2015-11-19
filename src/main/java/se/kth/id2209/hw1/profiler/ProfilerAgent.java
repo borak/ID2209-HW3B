@@ -102,7 +102,7 @@ public class ProfilerAgent extends Agent {
         msg.setLanguage(ACL_LANGUAGE);
         msg.setOntology(Ontologies.PROFILER_REQUEST_TOUR_AGENT);
         try {
-            msg.setContentObject(getAID());
+            msg.setContentObject(profile);
             send(msg);
             return true;
         } catch (IOException ex) {

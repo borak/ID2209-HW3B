@@ -22,40 +22,42 @@ import se.kth.id2209.hw1.profiler.UserProfile;
  */
 @SuppressWarnings("serial")
 class PresentingRecommendationsBehaviour extends TickerBehaviour {
-    private TourGuideAgent tourGuide;
+	private TourGuideAgent tourGuide;
 
-    public PresentingRecommendationsBehaviour(Agent a, long period) {
-        super(a, period);
-        this.tourGuide = (TourGuideAgent) a;
-    }
+	public PresentingRecommendationsBehaviour(Agent a, long period) {
+		super(a, period);
+		this.tourGuide = (TourGuideAgent) a;
+	}
 
-    @Override
-    protected void onTick() {
-        TourGuideAgent.usersLock.lock();
-        HashMap<AID, UserProfile> users = tourGuide.getUsers();
-        Map<AID, List<ACLMessage>> responses = tourGuide.getResponses();
+	@Override
+	protected void onTick() {
+		//TourGuideAgent.usersLock.lock();
+		HashMap<AID, UserProfile> users = tourGuide.getUsers();
+		Map<AID, List<ACLMessage>> responses = tourGuide.getResponses();
 
-        if (users.isEmpty()) {
-            block();
-        }
+		if (users.isEmpty()) {
+			block();
+		}
 
-        ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
+		ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
 
-        try {
-            Iterator<Entry<AID, UserProfile>> it = users.entrySet().iterator();
-            while (it.hasNext()) {
-                Entry<AID, UserProfile> entry = it.next();
-                AID aid = entry.getKey();
-                List<ACLMessage> messages = responses.get(aid);
-
-                for (ACLMessage message : messages) {
-                    par.addSubBehaviour(new SendBehavior(tourGuide, aid, message));
-                }
-            }
-            responses.clear();
-        } finally {
-            TourGuideAgent.usersLock.unlock();
-        }
-        tourGuide.addBehaviour(par);
-    }
+		try {
+			Iterator<Entry<AID, UserProfile>> it = users.entrySet().iterator();
+			while (it.hasNext()) {
+				Entry<AID, UserProfile> entry = it.next();
+				AID aid = entry.getKey();
+				List<ACLMessage> messages = responses.get(aid);
+				System.out.println("messages = "+ messages);
+				if(messages != null) { // TODO: messages is null
+					for (ACLMessage message : messages) {
+						par.addSubBehaviour(new SendBehavior(tourGuide, aid, message));
+					}
+				}
+			}
+			responses.clear();
+		} finally {
+			//     TourGuideAgent.usersLock.unlock();
+		}
+		tourGuide.addBehaviour(par);
+	}
 }

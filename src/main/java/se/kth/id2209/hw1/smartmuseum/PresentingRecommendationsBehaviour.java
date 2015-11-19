@@ -34,13 +34,11 @@ class PresentingRecommendationsBehaviour extends TickerBehaviour {
 		//TourGuideAgent.usersLock.lock();
 		HashMap<AID, UserProfile> users = tourGuide.getUsers();
 		Map<AID, List<ACLMessage>> responses = tourGuide.getResponses();
-
 		if (users.isEmpty()) {
 			block();
 		}
 
 		ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
-
 		try {
 			Iterator<Entry<AID, UserProfile>> it = users.entrySet().iterator();
 			while (it.hasNext()) {

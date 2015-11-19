@@ -64,11 +64,8 @@ class TGAMsgReceiverBehaviour extends MsgReceiver {
 				Map<String, AID> requests = tourGuide.getRequests();
 				final AID user = requests.get(msg.getConversationId());
 				List<ACLMessage> msglist = tourGuide.getResponses().get(user);
-				if(msglist == null) {
-                                    msglist = new ArrayList<>();
-                                }
-				System.out.println("added msg " + msg + " to msgList: " + msglist);
 				msglist.add(msg);
+                                System.out.println("added msg " + msg + " to msgList: " + tourGuide.getResponses().get(user));
 				requests.remove(msg.getConversationId());
 			}
 		}else {

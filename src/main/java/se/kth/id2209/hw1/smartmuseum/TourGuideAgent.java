@@ -36,120 +36,126 @@ import se.kth.id2209.hw1.util.Ontologies;
  * @author Kim
  */
 public class TourGuideAgent extends Agent {
-	private HashMap<AID, UserProfile> users = new HashMap<>();
-	private TGAMsgReceiverBehaviour msgReceiver;
-	private Map<String, AID> requests = new HashMap<String, AID>();
-	private Map<AID, List<ACLMessage>> responses = new HashMap<AID, List<ACLMessage>>();
-	Lock usersLock = new ReentrantLock();
-        public static final String DF_NAME = "Tour-Guide-agent";
-        public static final String CA_DF_NAME = "Curator-agent";
 
-	/**
-	 * Registers itself to the DFService and starts listening for incomming
-	 * tour requests and artifact query responses.
-	 */
-	@Override
-	protected void setup() {
-		DFAgentDescription dfd = new DFAgentDescription();
-		dfd.setName(getAID());
+    private HashMap<AID, UserProfile> users = new HashMap<>();
+    private TGAMsgReceiverBehaviour msgReceiver;
+    private Map<String, AID> requests = new HashMap<String, AID>();
+    private Map<AID, List<ACLMessage>> responses = new HashMap<AID, List<ACLMessage>>();
+    Lock usersLock = new ReentrantLock();
+    public static final String DF_NAME = "Tour-Guide-agent";
+    public static final String CA_DF_NAME = "Curator-agent";
 
-		ServiceDescription sd = new ServiceDescription();
-		sd.setType(DF_NAME);
-		sd.setName(getLocalName());
-		dfd.addServices(sd);
+    /**
+     * Registers itself to the DFService and starts listening for incomming tour
+     * requests and artifact query responses.
+     */
+    @Override
+    protected void setup() {
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(getAID());
 
-		try {
-			DFService.register(this, dfd);
-		} catch (FIPAException fe) {
-			fe.printStackTrace();
-		}
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType(DF_NAME);
+        sd.setName(getLocalName());
+        dfd.addServices(sd);
 
-		final ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
-		par.addSubBehaviour(new TGAMsgReceiverBehaviour(TourGuideAgent.this,
-				null, MsgReceiver.INFINITE, new DataStore(), null));
-		par.addSubBehaviour(new PresentingRecommendationsBehaviour(this, 10000));
-		addBehaviour(par);
-	}
+        try {
+            DFService.register(this, dfd);
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
 
-	@SuppressWarnings("serial")
-	void startTour() {
-		System.out.println("TOUR STARTED!");
-		addBehaviour(new OneShotBehaviour() {
-			@Override
-			public void action() {
-				usersLock.lock();
-				try {
-					Iterator<Entry<AID, UserProfile>> it = getUsers().entrySet().iterator();
-					ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+        final ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
+        par.addSubBehaviour(new TGAMsgReceiverBehaviour(TourGuideAgent.this,
+                null, MsgReceiver.INFINITE, new DataStore(), null));
+        par.addSubBehaviour(new PresentingRecommendationsBehaviour(this, 10000));
+        addBehaviour(par);
+    }
 
-					while (it.hasNext()) {
-						Entry<AID, UserProfile> entry = it.next();
-						AID aid = entry.getKey();
-						UserProfile profile = entry.getValue();
-						List<String> interests = profile.getInterests();
-						System.out.println("interests: " + interests);
-						ArrayList<Artifact.GENRE> genres = new ArrayList<>();
-						for (String s : interests) {
-							genres.add(Artifact.GENRE.valueOf(s));
-						}                        
-						AID caid = DFUtilities.searchDF(TourGuideAgent.this, CA_DF_NAME);
-						if (caid != null) {                                           
-							try {
-								msg.addReceiver(caid);
-								msg.setOntology(Ontologies.QUERY_ARTIFACTS);
-								msg.setContentObject((Serializable) genres);
+    @SuppressWarnings("serial")
+    void startTour() {
+        System.out.println("TOUR STARTED!");
+        addBehaviour(new OneShotBehaviour() {
+            @Override
+            public void action() {
+                usersLock.lock();
+                try {
+                    Iterator<Entry<AID, UserProfile>> it = getUsers().entrySet().iterator();
+                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 
-								requests.put(msg.getConversationId(), aid);
-								System.out.println(myAgent.getName() + " SENDING msg: " + msg.getOntology() + " to " + caid.getName());
-								send(msg);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						} else {
-							block();
-						}
-					}
-				} finally {
-					usersLock.unlock();
-				}
-			}
-		});
-	}
+                    while (it.hasNext()) {
+                        Entry<AID, UserProfile> entry = it.next();
+                        AID aid = entry.getKey();
+                        UserProfile profile = entry.getValue();
+                        List<String> interests = profile.getInterests();
+                        System.out.println("interests: " + interests);
+                        ArrayList<Artifact.GENRE> genres = new ArrayList<>();
+                        for (String s : interests) {
+                            genres.add(Artifact.GENRE.valueOf(s));
+                        }
+                        AID caid = DFUtilities.searchDF(TourGuideAgent.this, CA_DF_NAME);
+                        if (caid != null) {
+                            try {
+                                msg.addReceiver(caid);
+                                msg.setOntology(Ontologies.QUERY_ARTIFACTS);
+                                msg.setContentObject((Serializable) genres);
 
-	/**
-	 * Deregisters itself from DFService.
-	 */
-	@Override
-	protected void takeDown() {
-		try {
-			DFService.deregister(this);
-		} catch (FIPAException fe) {
-			fe.printStackTrace();
-		}
-		System.out.println(getAID().getName() + " is terminating.");
-	}
+                                requests.put(msg.getConversationId(), aid);
+                                if (responses.get(aid) == null) {
+                                    responses.put(aid, new ArrayList());
+                                }
 
-	Map<String, AID> getRequests() {
-		return requests;
-	}
+                                System.out.println(myAgent.getName() + " SENDING msg: " + msg.getOntology() + " to " + caid.getName());
+                                send(msg);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            block();
+                        }
+                    }
+                } finally {
+                    usersLock.unlock();
+                }
+            }
+        }
+        );
+    }
 
-	void setRequests(Map<String, AID> requests) {
-		this.requests = requests;
-	}
+    /**
+     * Deregisters itself from DFService.
+     */
+    @Override
+    protected void takeDown() {
+        try {
+            DFService.deregister(this);
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
+        System.out.println(getAID().getName() + " is terminating.");
+    }
 
-	Map<AID, List<ACLMessage>> getResponses() {
-		return responses;
-	}
+    Map<String, AID> getRequests() {
+        return requests;
+    }
 
-	void setResponses(Map<AID, List<ACLMessage>> responses) {
-		this.responses = responses;
-	}
+    void setRequests(Map<String, AID> requests) {
+        this.requests = requests;
+    }
 
-	HashMap<AID, UserProfile> getUsers() {
-		return users;
-	}
+    Map<AID, List<ACLMessage>> getResponses() {
+        return responses;
+    }
 
-	void setUsers(HashMap<AID, UserProfile> users) {
-		this.users = users;
-	}
+    void setResponses(Map<AID, List<ACLMessage>> responses) {
+        this.responses = responses;
+    }
+
+    HashMap<AID, UserProfile> getUsers() {
+        return users;
+    }
+
+    void setUsers(HashMap<AID, UserProfile> users) {
+        this.users = users;
+    }
 }

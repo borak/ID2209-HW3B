@@ -16,12 +16,10 @@ import sun.print.ServiceDialog;
  * @author Kim
  */
 class MsgReceiverBehaviour extends MsgReceiver {
-        private Object msgKey;
     
 	public MsgReceiverBehaviour(Agent a, MessageTemplate mt, long deadline,
 			DataStore s, java.lang.Object msgKey) {
 		super(a, mt, deadline, s, msgKey);
-                this.msgKey = msgKey;
 	}
 
 	@Override
@@ -42,6 +40,6 @@ class MsgReceiverBehaviour extends MsgReceiver {
 			block();
 		}
                 myAgent.addBehaviour(new MsgReceiverBehaviour(myAgent, null, 
-                        deadline, getDataStore(), msgKey));
+                        deadline, getDataStore(), null));
 	}
 }

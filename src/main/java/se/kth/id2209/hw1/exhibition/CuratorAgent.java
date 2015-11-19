@@ -2,6 +2,7 @@ package se.kth.id2209.hw1.exhibition;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,5 +110,13 @@ public class CuratorAgent extends Agent {
     public ArrayList<String> getArtifactNameList(GENRE genre) {
         return artGallery.getArtifactNameList(genre);
     }
+
+	public ArrayList<Integer> getArtifactIdList(ArrayList<GENRE> genres) {
+		ArrayList<Integer> artIds = new ArrayList<Integer>();
+		for (GENRE genre : genres) {
+			artIds.addAll(artGallery.getArtifactIdList(genre));
+		}
+		return artIds;		
+	}
 
 }

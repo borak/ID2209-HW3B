@@ -35,10 +35,9 @@ class TGAMsgReceiverBehaviour extends MsgReceiver {
 	// TODO: is never called
 	@Override
 	public void handleMessage(ACLMessage msg) {
+		System.out.println(myAgent.getAID().getName()
+				+ " RECIEVED message: " + msg.getOntology());
 		if (msg != null) {
-			System.out.println(myAgent.getAID().getName()
-					+ " RECIEVED message: " + msg.getOntology());
-
 			Object o = null;
 			try {
 				o = msg.getContentObject();

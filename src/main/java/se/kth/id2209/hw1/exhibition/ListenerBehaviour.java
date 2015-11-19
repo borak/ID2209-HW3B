@@ -62,7 +62,7 @@ class ListenerBehaviour extends CyclicBehaviour {
                 try {
                     ArrayList<GENRE> genres = (ArrayList<GENRE>) msg.getContentObject();
                     reply.setOntology(Ontologies.QUERY_ARTIFACTS);
-                    reply.setContentObject((Serializable) curator.getArtifactIdList(genres.get(0))); // TODO skicka hela listan
+                    reply.setContentObject((Serializable) curator.getArtifactIdList(genres)); 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

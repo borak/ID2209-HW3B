@@ -58,7 +58,7 @@ class ArtGallery {
         }
         return instance;
     }
-
+        
     ArrayList<Integer> getArtifactIdList(GENRE genre) {
         ArrayList<Integer> list = new ArrayList<>();
 

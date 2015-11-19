@@ -21,6 +21,8 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.proto.states.MsgReceiver;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import se.kth.id2209.hw1.exhibition.Artifact;
 import se.kth.id2209.hw1.profiler.UserProfile;
 import se.kth.id2209.hw1.util.DFUtilities;
@@ -38,7 +40,7 @@ public class TourGuideAgent extends Agent {
 	private TGAMsgReceiverBehaviour msgReceiver;
 	private Map<String, AID> requests = new HashMap<String, AID>();
 	private Map<AID, List<ACLMessage>> responses = new HashMap<AID, List<ACLMessage>>();
-	//static Lock usersLock = new ReentrantLock();
+	Lock usersLock = new ReentrantLock();
 
 	/**
 	 * Registers itself to the DFService and starts listening for incomming
@@ -80,7 +82,7 @@ public class TourGuideAgent extends Agent {
 		addBehaviour(new OneShotBehaviour() {
 			@Override
 			public void action() {
-				// usersLock.lock();
+				usersLock.lock();
 				try {
 					Iterator<Entry<AID, UserProfile>> it = getUsers().entrySet().iterator();
 					ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
@@ -113,7 +115,7 @@ public class TourGuideAgent extends Agent {
 						}
 					}
 				} finally {
-					//  usersLock.unlock();
+					usersLock.unlock();
 				}
 			}
 		});

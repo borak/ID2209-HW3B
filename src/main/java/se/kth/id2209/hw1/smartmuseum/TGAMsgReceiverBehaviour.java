@@ -32,7 +32,6 @@ class TGAMsgReceiverBehaviour extends MsgReceiver {
         this.tourGuide = (TourGuideAgent) a;
     }
 
-	// TODO: is never called
 	@Override
 	public void handleMessage(ACLMessage msg) {
 		System.out.println(myAgent.getAID().getName()
@@ -49,13 +48,15 @@ class TGAMsgReceiverBehaviour extends MsgReceiver {
 				block();
 			}
 
-			// New user
 			if (msg.getOntology().equalsIgnoreCase(Ontologies.PROFILER_REQUEST_TOUR_AGENT)) {
 				UserProfile up = (UserProfile) o;
 
-				//TourGuideAgent.usersLock.lock();
-				tourGuide.getUsers().put(msg.getSender(), up);
-				//TourGuideAgent.usersLock.unlock();
+				tourGuide.usersLock.lock();
+                            try {
+                                tourGuide.getUsers().put(msg.getSender(), up);
+                            } finally {
+                                tourGuide.usersLock.unlock();
+                            }
 
 				tourGuide.startTour();
 			} else if (msg.getOntology().equalsIgnoreCase(Ontologies.QUERY_ARTIFACTS)) {

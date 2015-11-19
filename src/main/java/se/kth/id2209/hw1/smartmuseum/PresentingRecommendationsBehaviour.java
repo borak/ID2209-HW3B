@@ -31,7 +31,7 @@ class PresentingRecommendationsBehaviour extends TickerBehaviour {
 
 	@Override
 	protected void onTick() {
-		//TourGuideAgent.usersLock.lock();
+		tourGuide.usersLock.lock();
 		HashMap<AID, UserProfile> users = tourGuide.getUsers();
 		Map<AID, List<ACLMessage>> responses = tourGuide.getResponses();
 		if (users.isEmpty()) {
@@ -54,7 +54,7 @@ class PresentingRecommendationsBehaviour extends TickerBehaviour {
 			}
 			responses.clear();
 		} finally {
-			//     TourGuideAgent.usersLock.unlock();
+			tourGuide.usersLock.unlock();
 		}
 		tourGuide.addBehaviour(par);
 	}

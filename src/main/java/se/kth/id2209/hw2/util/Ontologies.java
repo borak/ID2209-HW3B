@@ -6,7 +6,6 @@ package se.kth.id2209.hw2.util;
  * @author Kim
  */
 public class Ontologies {
-
     public final static String ARTIFACT_REQUEST_INFO = "artifact request";
     public final static String ARTIFACT_RESPONSE_INFO = "artifact response";
     public final static String ARTIFACT_RECOMMENDATION = "artifact recommendation";
@@ -17,4 +16,5 @@ public class Ontologies {
     public static final String ARTIFACT_RECOMMENDATION_ID = "rec id";
     public static final String ARTIFACT_RESPONSE_RECOMMENDATION_NAMES = "rec name resp";
     public static final String QUERY_ARTIFACTS = "requestquery for artifacts";
+    public static final String AUCTION_BID = "auction bid";
 }

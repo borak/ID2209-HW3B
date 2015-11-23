@@ -1,4 +1,4 @@
-package se.kth.id2209.hw1.profiler;
+package se.kth.id2209.hw2.profiler;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -7,7 +7,7 @@ import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-import se.kth.id2209.hw1.exhibition.Artifact;
+import se.kth.id2209.hw2.exhibition.Artifact;
 
 /**
  * In order for the given ProfilerAgent to keep track of its responses for 

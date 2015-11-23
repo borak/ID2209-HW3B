@@ -1,4 +1,4 @@
-package se.kth.id2209.hw1.smartmuseum;
+package se.kth.id2209.hw2.smartmuseum;
 
 import java.util.List;
 import java.util.Map;
@@ -13,8 +13,8 @@ import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 import jade.proto.states.MsgReceiver;
 import java.util.ArrayList;
-import se.kth.id2209.hw1.profiler.UserProfile;
-import se.kth.id2209.hw1.util.Ontologies;
+import se.kth.id2209.hw2.profiler.UserProfile;
+import se.kth.id2209.hw2.util.Ontologies;
 
 /**
  * This message receiver behavior listens for new profiler agents that wants

@@ -1,4 +1,4 @@
-package se.kth.id2209.hw1.util;
+package se.kth.id2209.hw2.util;
 
 /**
  * In this class the ontologies used in the application are kept. 

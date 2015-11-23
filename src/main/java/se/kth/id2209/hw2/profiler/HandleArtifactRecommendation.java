@@ -1,4 +1,4 @@
-package se.kth.id2209.hw1.profiler;
+package se.kth.id2209.hw2.profiler;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

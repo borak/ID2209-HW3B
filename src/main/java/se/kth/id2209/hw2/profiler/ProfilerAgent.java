@@ -1,4 +1,4 @@
-package se.kth.id2209.hw1.profiler;
+package se.kth.id2209.hw2.profiler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,9 +17,9 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.proto.states.MsgReceiver;
-import se.kth.id2209.hw1.exhibition.Artifact;
-import se.kth.id2209.hw1.util.DFUtilities;
-import se.kth.id2209.hw1.util.Ontologies;
+import se.kth.id2209.hw2.exhibition.Artifact;
+import se.kth.id2209.hw2.util.DFUtilities;
+import se.kth.id2209.hw2.util.Ontologies;
 
 /**
  * A Profiler Agent travels around the network and looks for interesting

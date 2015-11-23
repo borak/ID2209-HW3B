@@ -1,4 +1,4 @@
-package se.kth.id2209.hw1.smartmuseum;
+package se.kth.id2209.hw2.smartmuseum;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -12,8 +12,8 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.util.Logger;
 import java.util.ArrayList;
-import se.kth.id2209.hw1.util.Ontologies;
-import se.kth.id2209.hw1.util.SList;
+import se.kth.id2209.hw2.util.Ontologies;
+import se.kth.id2209.hw2.util.SList;
 
 /**
  * This behavior sends recommendations that the tour agent has put togheter to

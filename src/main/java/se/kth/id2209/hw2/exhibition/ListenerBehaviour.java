@@ -1,4 +1,4 @@
-package se.kth.id2209.hw1.exhibition;
+package se.kth.id2209.hw2.exhibition;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
-import se.kth.id2209.hw1.exhibition.Artifact.GENRE;
-import se.kth.id2209.hw1.util.DFUtilities;
-import se.kth.id2209.hw1.util.Ontologies;
+import se.kth.id2209.hw2.exhibition.Artifact.GENRE;
+import se.kth.id2209.hw2.util.DFUtilities;
+import se.kth.id2209.hw2.util.Ontologies;
 
 /**
  * This agent behavior is listening for artifact recommendation requests and 

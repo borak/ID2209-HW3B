@@ -1,4 +1,4 @@
-package se.kth.id2209.hw1.profiler;
+package se.kth.id2209.hw2.profiler;
 
 import java.io.IOException;
 
@@ -8,9 +8,9 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import se.kth.id2209.hw1.exhibition.CuratorAgent;
-import se.kth.id2209.hw1.util.DFUtilities;
-import se.kth.id2209.hw1.util.Ontologies;
+import se.kth.id2209.hw2.exhibition.CuratorAgent;
+import se.kth.id2209.hw2.util.DFUtilities;
+import se.kth.id2209.hw2.util.Ontologies;
 
 /**
  * This is a behavior that sends a request for an artifact to a Curator agent.

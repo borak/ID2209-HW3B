@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package se.kth.id2209.hw1.util;
+package se.kth.id2209.hw2.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;

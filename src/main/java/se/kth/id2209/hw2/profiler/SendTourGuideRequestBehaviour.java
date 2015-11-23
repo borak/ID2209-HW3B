@@ -1,4 +1,4 @@
-package se.kth.id2209.hw1.profiler;
+package se.kth.id2209.hw2.profiler;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -7,9 +7,9 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import java.io.IOException;
-import static se.kth.id2209.hw1.profiler.ProfilerAgent.ACL_LANGUAGE;
-import se.kth.id2209.hw1.util.DFUtilities;
-import se.kth.id2209.hw1.util.Ontologies;
+import static se.kth.id2209.hw2.profiler.ProfilerAgent.ACL_LANGUAGE;
+import se.kth.id2209.hw2.util.DFUtilities;
+import se.kth.id2209.hw2.util.Ontologies;
 
 /**
  * Performs requests for any tour guide via the DFService until it finds one.

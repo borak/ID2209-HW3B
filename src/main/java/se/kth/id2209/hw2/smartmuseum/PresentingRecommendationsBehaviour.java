@@ -1,4 +1,4 @@
-package se.kth.id2209.hw1.smartmuseum;
+package se.kth.id2209.hw2.smartmuseum;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,7 +11,7 @@ import jade.core.Agent;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.lang.acl.ACLMessage;
-import se.kth.id2209.hw1.profiler.UserProfile;
+import se.kth.id2209.hw2.profiler.UserProfile;
 
 /**
  * On each tick this behavior will go through the list of recommended items 

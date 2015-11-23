@@ -1,11 +1,11 @@
-package se.kth.id2209.hw1.profiler;
+package se.kth.id2209.hw2.profiler;
 
 import jade.core.Agent;
 import jade.core.behaviours.DataStore;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.states.MsgReceiver;
-import se.kth.id2209.hw1.util.Ontologies;
+import se.kth.id2209.hw2.util.Ontologies;
 import sun.print.ServiceDialog;
 
 /**

@@ -2,18 +2,18 @@ package se.kth.id2209.hw2.auctionstrategies;
 
 import jade.core.behaviours.OneShotBehaviour;
 import se.kth.id2209.hw2.auction.Auction;
-import se.kth.id2209.hw2.exhibition.BidSettings;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 
 /**
  * Created by Rickard on 2015-11-24.
  */
-public class Strategy extends OneShotBehaviour
+public abstract class Strategy extends OneShotBehaviour
 {
     private Auction auction;
     private CuratorAgent curatorAgent;
     private BidSettings bidSettings;
     private boolean shouldBuy = false;
+    private int suggestPrice;
 
     Strategy(Auction auction, CuratorAgent curatorAgent, BidSettings bidSettings)
     {
@@ -26,22 +26,16 @@ public class Strategy extends OneShotBehaviour
 
 
     @Override
-    public void action() {
+    public abstract void action();
 
-        if( auction.getCurrentPrice() <= bidSettings.getMaxPrice())
-        {
-            shouldBuy = true;
-        }
-
-
-
-
-        //TODO Add new behaivour to Agent, (send bid to artistmanagementagent)
-
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    //TODO Add new behaivour to Agent, (send bid to artistmanagementagent)
+    protected void proceed()
+    {
+//        myAgent.addBehaviour();
     }
 
-    public boolean isShouldBuy()
+
+    public boolean shouldBuy()
     {
         return shouldBuy;
     }
@@ -59,6 +53,16 @@ public class Strategy extends OneShotBehaviour
     public void setAuction(Auction auction)
     {
         this.auction = auction;
+    }
+
+    public int getSuggestPrice()
+    {
+        return suggestPrice;
+    }
+
+    public void setSuggestPrice(int suggestPrice)
+    {
+        this.suggestPrice = suggestPrice;
     }
 
     public CuratorAgent getCuratorAgent()

@@ -1,4 +1,4 @@
-package se.kth.id2209.hw2.exhibition;
+package se.kth.id2209.hw2.auctionstrategies;
 
 /**
  * Created by Rickard on 2015-11-24.

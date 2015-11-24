@@ -1,9 +1,6 @@
 package se.kth.id2209.hw2.auctionstrategies;
 
-import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.OneShotBehaviour;
 import se.kth.id2209.hw2.auction.Auction;
-import se.kth.id2209.hw2.exhibition.BidSettings;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 
 /**
@@ -21,13 +18,20 @@ public class StrategyOne extends Strategy {
 
     @Override
     public void action() {
-
+        //Accept once we reach the maximum price of the bidder
         if( getAuction().getCurrentPrice() <= getBidSettings().getMaxPrice())
         {
             setShouldBuy(true);
+            setSuggestPrice(getAuction().getCurrentPrice());
+        }
+        else
+        {
+            setShouldBuy(false);
+            setSuggestPrice(getBidSettings().getPreferredPrice());
         }
 
-        //TODO Add new behaivour to Agent, (send bid to artistmanagementagent)
+
+        proceed();
 
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

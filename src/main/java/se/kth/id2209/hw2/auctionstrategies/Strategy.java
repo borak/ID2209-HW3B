@@ -28,7 +28,7 @@ public class Strategy extends OneShotBehaviour
     @Override
     public void action() {
 
-        if( auction.getPrice() <= bidSettings.getMaxPrice())
+        if( auction.getCurrentPrice() <= bidSettings.getMaxPrice())
         {
             shouldBuy = true;
         }

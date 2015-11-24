@@ -22,7 +22,7 @@ public class StrategyOne extends Strategy {
     @Override
     public void action() {
 
-        if( getAuction().getPrice() <= getBidSettings().getMaxPrice())
+        if( getAuction().getCurrentPrice() <= getBidSettings().getMaxPrice())
         {
             setShouldBuy(true);
         }

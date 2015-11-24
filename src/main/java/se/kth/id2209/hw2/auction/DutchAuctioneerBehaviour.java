@@ -98,7 +98,7 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
 
         if (auction != null || auction.isDone()
                 || price <= auction.getCurrentPrice()) {
-            reply.setPerformative(ACLMessage.FAILURE);
+            reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
             agent.send(reply);
             System.out.println("Agent AID=" + msg.getSender()
                     + " proposed bid on auction=" + auction

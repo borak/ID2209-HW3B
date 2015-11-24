@@ -58,7 +58,8 @@ public class CuratorAgent extends Agent {
 
         ParallelBehaviour pbr = new ParallelBehaviour(this,
                 ParallelBehaviour.WHEN_ALL);
-        pbr.addSubBehaviour(new ListenerBehaviour(this));
+        pbr.addSubBehaviour(new ArtifactListenerBehaviour(this));
+        pbr.addSubBehaviour(new AuctionListenerBehaviour(this));
         pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
         addBehaviour(pbr);
     }

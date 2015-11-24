@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.MessageTemplate.MatchExpression;
 import se.kth.id2209.hw2.exhibition.Artifact.GENRE;
 import se.kth.id2209.hw2.util.DFUtilities;
 import se.kth.id2209.hw2.util.Ontologies;
@@ -16,9 +18,18 @@ import se.kth.id2209.hw2.util.Ontologies;
  * 
  * @author Kim
  */
-class ListenerBehaviour extends CyclicBehaviour {
+class ArtifactListenerBehaviour extends CyclicBehaviour {
     AID travelGuide, profiler;
     CuratorAgent curator;
+    MessageTemplate mt = new MessageTemplate(new MatchExpression() {
+            @Override
+            public boolean match(ACLMessage msg) {
+                String ontology = msg.getOntology();
+                return ontology.equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION_ID)
+                        || ontology.equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION_NAME)
+                        || ontology.equalsIgnoreCase(Ontologies.QUERY_ARTIFACTS);
+            }
+        });
 
     /**
      * Fetches the agents from the DFService it needs in order to perform its
@@ -26,13 +37,13 @@ class ListenerBehaviour extends CyclicBehaviour {
      * 
      * @param curator 
      */
-    ListenerBehaviour(CuratorAgent curator) {
+    ArtifactListenerBehaviour(CuratorAgent curator) {
         this.curator = curator;
     }
 
     @Override
     public void action() {
-        ACLMessage msg = curator.receive();
+        ACLMessage msg = curator.receive(mt);
 
         if (msg != null) {
         	System.out.println(curator.getName() + " RECIEVED message: " + msg.getOntology());

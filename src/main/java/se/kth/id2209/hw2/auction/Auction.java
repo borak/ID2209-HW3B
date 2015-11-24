@@ -14,25 +14,25 @@ import java.util.Map;
 public class Auction implements Serializable {
     private List<AID> participants;
     private ArrayList<AID> notUnderstoodParticipants = new ArrayList();
-    private int price;
+    private int currentPrice, lowestPrice;
     private Object item;
     private boolean isDone;
     private final Map<AID, Integer> bids = new HashMap();
 
-    Auction(List<AID> participants, int price, Object item, boolean isDone) {
+    Auction(List<AID> participants, int currentPrice, int lowestPrice, Object item, boolean isDone) {
         this.participants = participants;
-        this.price = price;
+        this.currentPrice = currentPrice;
         this.item = item;
         this.isDone = isDone;
     }
     
-    Auction(List<AID> participants, int price, Object item) {
-        this(participants, price, item, false);
+    Auction(List<AID> participants, int currentPrice, int lowestPrice, Object item) {
+        this(participants, currentPrice, lowestPrice, item, false);
     }
     
     @Override
     public String toString() {
-        return "Auction[item="+item+", price="+price+", isDone="+isDone
+        return "Auction[item="+item+", price="+currentPrice+", isDone="+isDone
                 +", numberOfParticipants="+participants.size()+"]";
     }
 
@@ -50,12 +50,20 @@ public class Auction implements Serializable {
         }
     }
 
-    public int getPrice() {
-        return price;
+    public int getCurrentPrice() {
+        return currentPrice;
     }
 
-    void setPrice(int price) {
-        this.price = price;
+    void setCurrentPrice(int price) {
+        this.currentPrice = price;
+    }
+    
+    public int getLowestPrice() {
+        return lowestPrice;
+    }
+
+    void setLowestPrice(int price) {
+        this.lowestPrice = price;
     }
 
     public Object getItem() {
@@ -96,7 +104,6 @@ public class Auction implements Serializable {
     
     List<AID> getNotUnderstood() {
         return notUnderstoodParticipants;
-        //return (List<AID>) notUnderstoodParticipants.clone();
     }
 
     public List<AID> getBidders() {

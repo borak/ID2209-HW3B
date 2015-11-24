@@ -12,12 +12,12 @@ import se.kth.id2209.hw2.util.Ontologies;
  *
  * @author Kim
  */
-class BidListenerBehaviour extends CyclicBehaviour {
+class DutchAuctioneerBehaviour extends CyclicBehaviour {
 
     private final Agent agent;
     private final Map<Integer, Auction> auctions;
 
-    BidListenerBehaviour(Agent agent,
+    DutchAuctioneerBehaviour(Agent agent,
             Map<Integer, Auction> auctions) {
         super(agent);
         this.agent = agent;
@@ -97,7 +97,7 @@ class BidListenerBehaviour extends CyclicBehaviour {
         Auction auction = auctions.get(item);
 
         if (auction != null || auction.isDone()
-                || price <= auction.getPrice()) {
+                || price <= auction.getCurrentPrice()) {
             reply.setPerformative(ACLMessage.FAILURE);
             agent.send(reply);
             System.out.println("Agent AID=" + msg.getSender()
@@ -108,7 +108,7 @@ class BidListenerBehaviour extends CyclicBehaviour {
             return;
         }
 
-        if (price > auction.getPrice()) {
+        if (price > auction.getCurrentPrice()) {
             auction.addBid(msg.getSender(), price);
             reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
             agent.send(reply);

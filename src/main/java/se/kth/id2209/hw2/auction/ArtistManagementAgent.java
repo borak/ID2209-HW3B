@@ -1,5 +1,6 @@
 package se.kth.id2209.hw2.auction;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.WakerBehaviour;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import se.kth.id2209.hw2.exhibition.CuratorAgent;
+import se.kth.id2209.hw2.util.DFUtilities;
 
 /**
  *
@@ -22,24 +25,19 @@ public class ArtistManagementAgent extends Agent {
 
     public static final String DF_NAME = "Artist-management-agent";
     private final Map<Integer, Auction> auctions = new HashMap();
-    Lock auctionsLock = new ReentrantLock();
+    final Lock auctionsLock = new ReentrantLock();
     private static final int auctionsStartDelay = 3000;
+    private final List<AID> bidders = new ArrayList();
 
     @Override
     protected void setup() {
         registerService();
-
-        auctionsLock.lock();
-        try {
-            auctions.put(134, new Auction(new ArrayList(), 1000, 134));
-            auctions.put(352, new Auction(new ArrayList(), 5321, 352));
-        } finally {
-            auctionsLock.unlock();
-        }
+        initAuctions();
+        fetchBidders();
         
         ParallelBehaviour pbr = new ParallelBehaviour(this,
                 ParallelBehaviour.WHEN_ALL);
-        pbr.addSubBehaviour(new BidListenerBehaviour(this, auctions));
+        pbr.addSubBehaviour(new DutchAuctioneerBehaviour(this, auctions));
         pbr.addSubBehaviour(new WakerBehaviour(this, auctionsStartDelay) {
             @Override
             public void onWake() {
@@ -48,7 +46,7 @@ public class ArtistManagementAgent extends Agent {
                     for(Auction auc : auctions.values()) {
                         ArtistManagementAgent.this.addBehaviour(
                                 new InformStartOfAuctionBehaviour(auc,
-                                        ArtistManagementAgent.this, null)); // Receivers are null
+                                        ArtistManagementAgent.this, bidders)); 
                     }
                 } finally {
                     auctionsLock.unlock();
@@ -85,5 +83,25 @@ public class ArtistManagementAgent extends Agent {
             fe.printStackTrace();
         }
         System.out.println("Agent " + getAID().getName() + " is terminating.");
+    }
+
+    private void initAuctions() {
+        auctionsLock.lock();
+        try {
+            auctions.put(432, new Auction(new ArrayList(), 1000, 400, 432)); 
+            auctions.put(743, new Auction(new ArrayList(), 5321, 3200, 743));
+            auctions.put(344, new Auction(new ArrayList(), 100, 34, 344));
+            auctions.put(888, new Auction(new ArrayList(), 433, 213, 888));
+            auctions.put(777, new Auction(new ArrayList(), 60, 20, 777));
+            auctions.put(999, new Auction(new ArrayList(), 40200, 24000, 999));
+        } finally {
+            auctionsLock.unlock();
+        }
+    }
+
+    private void fetchBidders() {
+        for(AID aid : DFUtilities.searchAllDF(this, CuratorAgent.DF_NAME)) {
+            bidders.add(aid);
+        }
     }
 }

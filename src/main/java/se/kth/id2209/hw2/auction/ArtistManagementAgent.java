@@ -31,7 +31,7 @@ public class ArtistManagementAgent extends Agent {
 
         auctionsLock.lock();
         try {
-            auctions.put(134, new Auction(new ArrayList(), 1000, 134));
+            auctions.put(134, new Auction(new ArrayList(), 1000, 134)); // ändra
             auctions.put(352, new Auction(new ArrayList(), 5321, 352));
         } finally {
             auctionsLock.unlock();

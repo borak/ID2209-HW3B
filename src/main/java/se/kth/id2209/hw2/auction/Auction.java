@@ -77,7 +77,11 @@ public class Auction implements Serializable {
     void addBid(AID sender, int price) {
         bids.put(sender, price);
     }
-
+    
+    Map<AID, Integer> getBids() {
+        return bids;
+    }
+    
     void removeParticipant(AID sender) {
         participants.remove(sender);
     }
@@ -93,6 +97,10 @@ public class Auction implements Serializable {
     List<AID> getNotUnderstood() {
         return notUnderstoodParticipants;
         //return (List<AID>) notUnderstoodParticipants.clone();
+    }
+
+    public List<AID> getBidders() {
+        return new ArrayList(bids.keySet());
     }
     
 }

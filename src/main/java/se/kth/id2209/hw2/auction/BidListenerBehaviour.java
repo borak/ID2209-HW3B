@@ -1,5 +1,6 @@
 package se.kth.id2209.hw2.auction;
 
+import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import java.util.Map;
@@ -25,7 +26,7 @@ class BidListenerBehaviour extends CyclicBehaviour {
 
         if (msg != null) {
             String ontology = msg.getOntology();
-
+            
             if (ontology.equalsIgnoreCase(Ontologies.AUCTION_BID)) {
                 ACLMessage reply = msg.createReply();
                 reply.addReceiver(msg.getSender());
@@ -71,14 +72,26 @@ class BidListenerBehaviour extends CyclicBehaviour {
                                 + "content.");
                         block();
                     }
-                } else if (msg.getPerformative() == ACLMessage.REFUSE) {
-                    reply.setPerformative(ACLMessage.CONFIRM);
-                    agent.send(reply);
+                } else if (msg.getPerformative() == ACLMessage.NOT_UNDERSTOOD) { 
+                    auction.addNotUnderstood(msg.getSender());
+                    if(auction.getNotUnderstood().size() == auction.getParticipants().size()) {
+                        ACLMessage noBidsMsg = new ACLMessage(ACLMessage.INFORM);
+                        noBidsMsg.setOntology(Ontologies.AUCTION_NO_BID);
+                        noBidsMsg.setContent(item + "");
+                        for(AID aid : auction.getParticipants()) {
+                            noBidsMsg.addReceiver(aid);
+                        }
+                        agent.send(noBidsMsg);
+                    }
+                    //just wait until the rest responds?
+                    
+                    //reply.setPerformative(ACLMessage.CONFIRM);
+                    //agent.send(reply);
 
                     // remove from participants?
-                    auction.removeParticipant(msg.getSender());
-                    reply.setPerformative(ACLMessage.CONFIRM);
-                    agent.send(reply);
+                    //auction.removeParticipant(msg.getSender());
+                    //reply.setPerformative(ACLMessage.CONFIRM);
+                    //agent.send(reply);
                 } else {
                     block();
                 }

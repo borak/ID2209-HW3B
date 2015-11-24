@@ -2,6 +2,7 @@ package se.kth.id2209.hw2.auction;
 
 import jade.core.AID;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.Map;
  */
 public class Auction implements Serializable {
     private List<AID> participants;
+    private ArrayList<AID> notUnderstoodParticipants = new ArrayList();
     private int price;
     private Object item;
     private boolean isDone;
@@ -78,6 +80,19 @@ public class Auction implements Serializable {
 
     void removeParticipant(AID sender) {
         participants.remove(sender);
+    }
+
+    void addNotUnderstood(AID agent) {
+        notUnderstoodParticipants.add(agent);
+    }
+    
+    void removeNotUnderstood(AID agent) {
+        notUnderstoodParticipants.remove(agent);
+    }
+    
+    List<AID> getNotUnderstood() {
+        return notUnderstoodParticipants;
+        //return (List<AID>) notUnderstoodParticipants.clone();
     }
     
 }

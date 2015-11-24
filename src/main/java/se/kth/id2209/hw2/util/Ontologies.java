@@ -17,4 +17,6 @@ public class Ontologies {
     public static final String ARTIFACT_RESPONSE_RECOMMENDATION_NAMES = "rec name resp";
     public static final String QUERY_ARTIFACTS = "requestquery for artifacts";
     public static final String AUCTION_BID = "auction bid";
+    public static final String AUCTION_NO_BID = "auction no bid";
+    public static final String AUCTION_START = "auction start";
 }

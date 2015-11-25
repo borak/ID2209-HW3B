@@ -1,1 +1,1 @@
-http://130.229.169.45:7778/acc
+http://Kim-LenovoZ50:7778/acc

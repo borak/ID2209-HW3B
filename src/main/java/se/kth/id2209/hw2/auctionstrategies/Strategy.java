@@ -2,8 +2,12 @@ package se.kth.id2209.hw2.auctionstrategies;
 
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.UnreadableException;
 import se.kth.id2209.hw2.auction.Auction;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
+import se.kth.id2209.hw2.util.Ontologies;
+
+import java.io.IOException;
 
 /**
  * Created by Rickard on 2015-11-24.
@@ -25,15 +29,50 @@ public abstract class Strategy extends OneShotBehaviour
         this.msg = msg;
         this.curatorAgent = curatorAgent;
         this.bidSettings = bidSettings;
+        try {
+            if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
+                this.auction = (Auction) msg.getContentObject();
+
+
+            } else {
+                block();
+            }
+        } catch (UnreadableException ex) {
+            block();
+        }
     }
 
     @Override
     public abstract void action();
 
-    //TODO Add new behaivour to Agent, (send bid to artistmanagementagent)
+    //Responds with a bid
     protected void proceed()
     {
-//        myAgent.addBehaviour();
+        if (msg != null)
+        {
+            String ontology = msg.getOntology();
+
+            if (ontology.equalsIgnoreCase(Ontologies.CALL_FOR_PROPOSALS))
+            {
+                ACLMessage reply = msg.createReply();
+                reply.addReceiver(msg.getSender());
+                try
+                {
+                    reply.setContentObject(suggestPrice);
+                    System.out.println("Agent AID=" + reply.getSender()
+                            + " proposed bid on auction=" + auction
+                            + " with price=" + suggestPrice
+                            + ".");
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+                reply.setContent(msg.getContent());
+
+
+                myAgent.send(reply);
+            }
+        }
     }
 
 

@@ -18,22 +18,41 @@ public class Auction implements Serializable {
     private Object item;
     private boolean isDone;
     private final Map<AID, Integer> bids = new HashMap();
+    private Quality quality;
+    public enum Quality {
+        HIGH_QUALITY, LOW_QUALITY, UNKNOWN_QUALITY
+    }
 
-    Auction(List<AID> participants, int currentPrice, int lowestPrice, Object item, boolean isDone) {
+    Auction(List<AID> participants, int currentPrice, int lowestPrice, 
+            Object item, Quality quality, boolean isDone) {
         this.participants = participants;
         this.currentPrice = currentPrice;
         this.item = item;
         this.isDone = isDone;
+        this.quality = quality;
     }
     
-    Auction(List<AID> participants, int currentPrice, int lowestPrice, Object item) {
-        this(participants, currentPrice, lowestPrice, item, false);
+    Auction(List<AID> participants, int currentPrice, int lowestPrice, 
+            Quality quality, Object item) {
+        this(participants, currentPrice, lowestPrice, item, quality, false);
     }
     
     @Override
     public String toString() {
         return "Auction[item="+item+", price="+currentPrice+", isDone="+isDone
                 +", numberOfParticipants="+participants.size()+"]";
+    }
+
+    public Quality getQuality() {
+        if(isDone) {
+            return quality;
+        } else {
+            return Quality.UNKNOWN_QUALITY;
+        }
+    }
+
+    void setQuality(Quality quality) {
+        this.quality = quality;
     }
 
     public List<AID> getParticipants() {

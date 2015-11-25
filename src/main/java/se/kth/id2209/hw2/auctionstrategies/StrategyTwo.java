@@ -8,7 +8,7 @@ import se.kth.id2209.hw2.exhibition.CuratorAgent;
  */
 public class StrategyTwo extends Strategy
 {
-    StrategyTwo(Auction auction, CuratorAgent curatorAgent, BidSettings bidSettings)
+    public StrategyTwo(Auction auction, CuratorAgent curatorAgent, BidSettings bidSettings)
     {
         super(auction, curatorAgent, bidSettings);
     }

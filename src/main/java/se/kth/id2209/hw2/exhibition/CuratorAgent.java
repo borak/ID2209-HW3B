@@ -32,6 +32,7 @@ public class CuratorAgent extends Agent {
     private ArtGallery artGallery;
     private final static int DB_CHECKER_DELAY = 100;
     public static final String DF_NAME = "Curator-agent";
+    private static int curatorId;
 
     /**
      * Initializes its state and the ArtGallery by checking and parsing a 
@@ -40,6 +41,7 @@ public class CuratorAgent extends Agent {
      */
     @Override
     protected void setup() {
+        curatorId = UniqueCuratorIdGiver.createUniqueId();
         artGallery = ArtGallery.getInstance();
 
         DFAgentDescription dfd = new DFAgentDescription();
@@ -47,7 +49,7 @@ public class CuratorAgent extends Agent {
 
         ServiceDescription sd = new ServiceDescription();
         sd.setType(DF_NAME);
-        sd.setName(getLocalName());
+        sd.setName(getLocalName()+curatorId);
         dfd.addServices(sd);
 
         try {
@@ -60,8 +62,14 @@ public class CuratorAgent extends Agent {
                 ParallelBehaviour.WHEN_ALL);
         pbr.addSubBehaviour(new ArtifactListenerBehaviour(this));
         pbr.addSubBehaviour(new AuctionListenerBehaviour(this));
-        pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
+        if(curatorId == UniqueCuratorIdGiver.FIRST_ID) {
+            pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
+        }
         addBehaviour(pbr);
+    }
+    
+    int getCuratorId() {
+        return curatorId;
     }
 
     /**

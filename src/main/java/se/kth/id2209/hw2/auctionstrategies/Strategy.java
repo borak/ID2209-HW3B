@@ -46,7 +46,7 @@ public abstract class Strategy extends OneShotBehaviour
     public abstract void action();
 
     //Responds with a bid
-    protected void proceed() throws IOException
+    protected void proceed()
     {
         if (msg != null)
         {
@@ -56,7 +56,13 @@ public abstract class Strategy extends OneShotBehaviour
             {
                 ACLMessage reply = msg.createReply();
                 reply.addReceiver(msg.getSender());
-                reply.setContentObject(suggestPrice);
+                try
+                {
+                    reply.setContentObject(suggestPrice);
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
                 reply.setContent(msg.getContent());
 
 

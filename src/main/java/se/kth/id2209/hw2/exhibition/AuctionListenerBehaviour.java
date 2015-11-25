@@ -27,9 +27,8 @@ import se.kth.id2209.hw2.util.Ontologies;
  */
 public class AuctionListenerBehaviour extends CyclicBehaviour {
 
-    private AID travelGuide, profiler;
-    private CuratorAgent curator;
-    MessageTemplate mt = new MessageTemplate(new MessageTemplate.MatchExpression() {
+    private final CuratorAgent curator;
+    static final MessageTemplate mt = new MessageTemplate(new MessageTemplate.MatchExpression() {
         @Override
         public boolean match(ACLMessage msg) {
             String ontology = msg.getOntology();
@@ -42,9 +41,8 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         }
     });
     final List<Auction> knownAuctions = new ArrayList();
-    final List<Auction> boughtAuctions = new ArrayList();
-    final Map<Auction, Integer> participatingAuctions = new HashMap();
-    //private Class<? extends Strategy> strategy;
+    final List<Artifact> boughtArtifacts = new ArrayList();
+    final Map<Auction, Integer> participatingAuctions = new HashMap(); 
 
     AuctionListenerBehaviour(CuratorAgent curator) {
         this.curator = curator;
@@ -65,11 +63,13 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                 handleCFP(msg);
             } else if (ontology.equalsIgnoreCase(Ontologies.AUCTION_NO_BIDS)) {
                 handleAuctionNoBids(msg);
+            } else if (ontology.equalsIgnoreCase(Ontologies.AUCTION_WON)) {
+                handleAuctionWon(msg);
             } else if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
                 handleAcceptProposal(msg);
             } else if (msg.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
                 handleAcceptReject(msg);
-            }
+            } 
         } else {
             block();
         }
@@ -149,13 +149,34 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         }
     }
 
+    private void handleAuctionWon(ACLMessage msg) {
+        try {
+            if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
+                final Artifact art = (Artifact) msg.getContentObject();
+                boughtArtifacts.add(art);
+                
+                for(Auction auction : participatingAuctions.keySet()) {
+                    if(((Artifact)auction.getItem()).getId() == art.getId()) {
+                        participatingAuctions.remove(auction);
+                        knownAuctions.remove(auction);
+                        break;
+                    }
+                }
+            } else {
+                block();
+            }
+        } catch (UnreadableException ex) {
+            block();
+        }
+    }
+    
     private void handleAcceptProposal(ACLMessage msg) {
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
-                boughtAuctions.add(auction);
-                participatingAuctions.remove(auction);
-                knownAuctions.remove(auction);
+                //boughtAuctions.add(auction);
+                //participatingAuctions.remove(auction);
+                //knownAuctions.remove(auction);
             } else {
                 block();
             }

@@ -40,11 +40,6 @@ class ArtGallery {
         map.put(id, artifact);
     }
 
-    void add(int id, String name, String creator, String placeofCreation, String creationDate, GENRE genre) {
-        Artifact artifact = new Artifact(id, placeofCreation, placeofCreation, placeofCreation, creationDate, genre);
-        map.put(id, artifact);
-    }
-
     Artifact getArtifact(int id) {
         if (map.containsKey(id)) {
             return map.get(id);

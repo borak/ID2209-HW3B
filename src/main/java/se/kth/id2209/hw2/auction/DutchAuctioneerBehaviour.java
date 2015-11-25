@@ -68,14 +68,22 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
                     } else {
                         auction.setIsDone(true);
                     }
-                } /*else if((auction.getBids().size() == 1) && 
+                } else if((auction.getBids().size() == 1) && 
                         (auction.getBids().size()
                         + auction.getNotUnderstood().size()
                         == auction.getParticipants().size())) {
-                    //modified the buisnesslogic. CFP is now started and the price lowered by 10% after receiving no bids.
-                    auction.setIsDone(true);
                     
-                }*/ else if (auction.getBids().size()
+                    auction.setIsDone(true);
+                    auction.setWinner(
+                            (AID) auction.getBids().keySet().toArray()[0]);
+                    myAgent.addBehaviour(new OneShotBehaviour() {
+                        @Override
+                        public void action() {
+                            myAgent.addBehaviour(new InformAuctionWonBehaviour(
+                                    auction, myAgent));
+                        }
+                    }); 
+                } else if (auction.getBids().size()
                         + auction.getNotUnderstood().size()
                         == auction.getParticipants().size()) {
                     myAgent.addBehaviour(new CFPBehaviour(auction, myAgent,

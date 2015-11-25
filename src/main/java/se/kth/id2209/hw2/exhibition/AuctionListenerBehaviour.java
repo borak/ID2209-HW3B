@@ -39,6 +39,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             return ontology.equalsIgnoreCase(Ontologies.AUCTION_START)
                     || ontology.equalsIgnoreCase(Ontologies.CALL_FOR_PROPOSALS)
                     || ontology.equalsIgnoreCase(Ontologies.AUCTION_NO_BIDS)
+                    || ontology.equalsIgnoreCase(Ontologies.AUCTION_WON)
                     || msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL
                     || msg.getPerformative() == ACLMessage.REJECT_PROPOSAL;
         }

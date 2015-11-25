@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import se.kth.id2209.hw2.exhibition.Artifact;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 import se.kth.id2209.hw2.util.DFUtilities;
 
@@ -86,20 +87,39 @@ public class ArtistManagementAgent extends Agent {
     }
 
     private void initAuctions() {
+        Artifact art1 = new Artifact(432, "artifact432", "unknown", "unknown", 
+                "unknown", Artifact.GENRE.PAINTING, 
+                Artifact.Quality.UNKNOWN_QUALITY);
+        Artifact art2 = new Artifact(743, "artifact743", "unknown", "unknown", 
+                "unknown", Artifact.GENRE.JEWELRY, 
+                Artifact.Quality.UNKNOWN_QUALITY);
+        Artifact art3 = new Artifact(344, "artifact344", "unknown", "unknown", 
+                "unknown", Artifact.GENRE.FASHION, 
+                Artifact.Quality.UNKNOWN_QUALITY);
+        Artifact art4 = new Artifact(888, "artifact888", "unknown", "unknown", 
+                "unknown", Artifact.GENRE.MUSIC, 
+                Artifact.Quality.UNKNOWN_QUALITY);
+        Artifact art5 = new Artifact(777, "artifact777", "unknown", "unknown", 
+                "unknown", Artifact.GENRE.PAINTING, 
+                Artifact.Quality.UNKNOWN_QUALITY);
+        Artifact art6 = new Artifact(999, "artifact999", "unknown", "unknown", 
+                "unknown", Artifact.GENRE.SCULPTURE, 
+                Artifact.Quality.UNKNOWN_QUALITY);
+        
         auctionsLock.lock();
         try {
-            auctions.put(432, new Auction(new ArrayList(), 1000, 550, 
-                    Auction.Quality.HIGH_QUALITY, 432)); 
-            auctions.put(743, new Auction(new ArrayList(), 5321, 3800, 
-                    Auction.Quality.LOW_QUALITY, 743));
-            auctions.put(344, new Auction(new ArrayList(), 100, 63, 
-                    Auction.Quality.LOW_QUALITY, 344));
-            auctions.put(888, new Auction(new ArrayList(), 433, 413, 
-                    Auction.Quality.LOW_QUALITY, 888));
-            auctions.put(777, new Auction(new ArrayList(), 60, 40, 
-                    Auction.Quality.HIGH_QUALITY, 777));
-            auctions.put(999, new Auction(new ArrayList(), 40200, 28000, 
-                    Auction.Quality.HIGH_QUALITY, 999));
+            auctions.put(art1.getId(), new Auction(new ArrayList(), 1000, 550, 
+                    art1, false, Artifact.Quality.HIGH_QUALITY)); 
+            auctions.put(art2.getId(), new Auction(new ArrayList(), 5321, 3800, 
+                    art2, false, Artifact.Quality.LOW_QUALITY));
+            auctions.put(art3.getId(), new Auction(new ArrayList(), 100, 63, 
+                    art3, false, Artifact.Quality.LOW_QUALITY));
+            auctions.put(art4.getId(), new Auction(new ArrayList(), 433, 413, 
+                    art4, false, Artifact.Quality.LOW_QUALITY));
+            auctions.put(art5.getId(), new Auction(new ArrayList(), 60, 40, 
+                    art5, false, Artifact.Quality.HIGH_QUALITY));
+            auctions.put(art6.getId(), new Auction(new ArrayList(), 40200, 
+                    28000, art6, false, Artifact.Quality.HIGH_QUALITY));
         } finally {
             auctionsLock.unlock();
         }

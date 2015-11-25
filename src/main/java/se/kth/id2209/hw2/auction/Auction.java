@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import se.kth.id2209.hw2.exhibition.Artifact;
 
 /**
  *
@@ -18,13 +19,11 @@ public class Auction implements Serializable {
     private Object item;
     private boolean isDone;
     private final Map<AID, Integer> bids = new HashMap();
-    private Quality quality;
-    public enum Quality {
-        HIGH_QUALITY, LOW_QUALITY, UNKNOWN_QUALITY
-    }
+    private Artifact.Quality quality;
+    private AID winner = null;
 
     Auction(List<AID> participants, int currentPrice, int lowestPrice, 
-            Object item, Quality quality, boolean isDone) {
+            Object item, boolean isDone, Artifact.Quality quality) {
         this.participants = participants;
         this.currentPrice = currentPrice;
         this.item = item;
@@ -32,26 +31,29 @@ public class Auction implements Serializable {
         this.quality = quality;
     }
     
-    Auction(List<AID> participants, int currentPrice, int lowestPrice, 
-            Quality quality, Object item) {
-        this(participants, currentPrice, lowestPrice, item, quality, false);
-    }
-    
     @Override
     public String toString() {
         return "Auction[item="+item+", price="+currentPrice+", isDone="+isDone
                 +", numberOfParticipants="+participants.size()+"]";
     }
-
-    public Quality getQuality() {
+    
+    public AID getWinner() {
+        return winner;
+    }
+    
+    void setWinner(AID winner) {
+        this.winner = winner;
+    }
+    
+    public Artifact.Quality getQuality() {
         if(isDone) {
             return quality;
         } else {
-            return Quality.UNKNOWN_QUALITY;
+            return Artifact.Quality.UNKNOWN_QUALITY;
         }
     }
 
-    void setQuality(Quality quality) {
+    void setQuality(Artifact.Quality quality) {
         this.quality = quality;
     }
 
@@ -77,7 +79,7 @@ public class Auction implements Serializable {
         this.currentPrice = price;
     }
     
-    public int getLowestPrice() {
+    int getLowestPrice() {
         return lowestPrice;
     }
 

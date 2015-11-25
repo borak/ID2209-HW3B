@@ -2,6 +2,7 @@ package se.kth.id2209.hw2.exhibition;
 
 import java.io.Serializable;
 import java.util.StringTokenizer;
+import se.kth.id2209.hw2.auction.Auction;
 
 /**
  * An Artifact contains detailed information about an artifact such as: id, 
@@ -17,11 +18,16 @@ public class Artifact implements Serializable {
     private int id;
     private String name, creator, placeofCreation, creationDate;
     private GENRE genre;
+    private Quality quality;
 
     public enum GENRE {
         LITERATURE, MUSIC, PAINTING, SCULPTURE, FASHION, JEWELRY;
     }
 
+    public enum Quality {
+        HIGH_QUALITY, LOW_QUALITY, UNKNOWN_QUALITY
+    }
+    
     Artifact() {
         
     }
@@ -35,6 +41,7 @@ public class Artifact implements Serializable {
         this.placeofCreation = tokenizer.nextToken();
         this.creationDate = tokenizer.nextToken();
         this.genre = GENRE.valueOf(tokenizer.nextToken());
+        this.quality = Quality.HIGH_QUALITY;
     }
 
     @Override
@@ -43,16 +50,25 @@ public class Artifact implements Serializable {
                 + creationDate + "/" + genre;
     }
 
-    Artifact(int id, String name, String creator, String placeofCreation, 
-            String creationDate, GENRE genre) {
+    public Artifact(int id, String name, String creator, String placeofCreation, 
+            String creationDate, GENRE genre, Quality quality) {
         this.id = id;
         this.name = name;
         this.creator = creator;
         this.placeofCreation = placeofCreation;
         this.creationDate = creationDate;
         this.genre = genre;
+        this.quality = quality;
     }
 
+    public Quality getQuality() {
+        return quality;
+    }
+
+    void setQuality(Quality quality) {
+        this.quality = quality;
+    }
+    
     public int getId() {
         return id;
     }

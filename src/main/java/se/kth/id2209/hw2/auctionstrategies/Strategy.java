@@ -59,6 +59,10 @@ public abstract class Strategy extends OneShotBehaviour
                 try
                 {
                     reply.setContentObject(suggestPrice);
+                    System.out.println("Agent AID=" + reply.getSender()
+                            + " proposed bid on auction=" + auction
+                            + " with price=" + suggestPrice
+                            + ".");
                 } catch (IOException e)
                 {
                     e.printStackTrace();

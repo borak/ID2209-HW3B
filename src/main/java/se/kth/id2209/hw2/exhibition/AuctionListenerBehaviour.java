@@ -18,10 +18,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import se.kth.id2209.hw2.auction.Auction;
-import se.kth.id2209.hw2.auctionstrategies.BidSettings;
-import se.kth.id2209.hw2.auctionstrategies.Strategy;
-import se.kth.id2209.hw2.auctionstrategies.StrategyOne;
-import se.kth.id2209.hw2.auctionstrategies.StrategyTwo;
+import se.kth.id2209.hw2.auctionstrategies.*;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
@@ -82,6 +79,9 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
                 knownAuctions.add(auction);
+                System.out.println("Agent AID=" + myAgent.getAID()
+                        + " joined " + auction
+                        + ".");
                 //Decide if the agent shuld join in on the auction
                 myAgent.addBehaviour(new OneShotBehaviour() {
                     @Override
@@ -105,9 +105,9 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             case 2:
                 return new StrategyTwo(msg, agent, bs);
             case 3:
-                return null;
+                return new StrategyThree(msg, agent, bs);
             case 4:
-                return null;
+                return new StrategyFour(msg, agent, bs);
             default:
                 return new StrategyOne(msg, agent, bs);
         }
@@ -120,6 +120,10 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
 
                 if (participatingAuctions.get(auction) != null) {
                     myAgent.addBehaviour(getStrategy(msg, curator, null)); // change to appropriate bid setting
+                    System.out.println("Agent AID=" + myAgent.getAID()
+                            + " got a CFP from " + msg.getSender()
+                            + " on auction " + auction
+                            + ".");
                 }
             } else {
                 block();

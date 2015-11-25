@@ -87,7 +87,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                     @Override
                     public void action() {
                         // Join them all
-                        participatingAuctions.put(auction, -1);
+                        participatingAuctions.put(auction, 0);
                     }
                 });
             } else {
@@ -133,9 +133,9 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
-                if (participatingAuctions.get(auction) != null) {
+                /*if (participatingAuctions.get(auction) != null) {
                     participatingAuctions.remove(auction);
-                }
+                }*/
             } else {
                 block();
             }

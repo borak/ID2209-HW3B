@@ -88,17 +88,17 @@ public class ArtistManagementAgent extends Agent {
     private void initAuctions() {
         auctionsLock.lock();
         try {
-            auctions.put(432, new Auction(new ArrayList(), 1000, 400, 
+            auctions.put(432, new Auction(new ArrayList(), 1000, 550, 
                     Auction.Quality.HIGH_QUALITY, 432)); 
-            auctions.put(743, new Auction(new ArrayList(), 5321, 3200, 
+            auctions.put(743, new Auction(new ArrayList(), 5321, 3800, 
                     Auction.Quality.LOW_QUALITY, 743));
-            auctions.put(344, new Auction(new ArrayList(), 100, 34, 
+            auctions.put(344, new Auction(new ArrayList(), 100, 63, 
                     Auction.Quality.LOW_QUALITY, 344));
-            auctions.put(888, new Auction(new ArrayList(), 433, 213, 
+            auctions.put(888, new Auction(new ArrayList(), 433, 413, 
                     Auction.Quality.LOW_QUALITY, 888));
-            auctions.put(777, new Auction(new ArrayList(), 60, 20, 
+            auctions.put(777, new Auction(new ArrayList(), 60, 40, 
                     Auction.Quality.HIGH_QUALITY, 777));
-            auctions.put(999, new Auction(new ArrayList(), 40200, 24000, 
+            auctions.put(999, new Auction(new ArrayList(), 40200, 28000, 
                     Auction.Quality.HIGH_QUALITY, 999));
         } finally {
             auctionsLock.unlock();

@@ -1,5 +1,6 @@
 package se.kth.id2209.hw2.auctionstrategies;
 
+import jade.lang.acl.ACLMessage;
 import se.kth.id2209.hw2.auction.Auction;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 
@@ -10,9 +11,9 @@ import se.kth.id2209.hw2.exhibition.CuratorAgent;
 public class StrategyOne extends Strategy {
 
 
-    public StrategyOne(Auction auction, CuratorAgent curatorAgent, BidSettings bidSettings)
+    public StrategyOne(ACLMessage msg, CuratorAgent curatorAgent, BidSettings bidSettings)
     {
-        super(auction, curatorAgent, bidSettings);
+        super(msg, curatorAgent, bidSettings);
     }
 
 

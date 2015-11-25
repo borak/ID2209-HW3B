@@ -98,18 +98,18 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         }
     }
     
-    private Strategy getStrategy(Auction auction, CuratorAgent agent, BidSettings bs) {
+    private Strategy getStrategy(ACLMessage msg, CuratorAgent agent, BidSettings bs) {
         switch(curator.getCuratorId()) {
             case 1:
-                return new StrategyOne(auction, agent, bs);
+                return new StrategyOne(msg, agent, bs);
             case 2:
-                return new StrategyTwo(auction, agent, bs);
+                return new StrategyTwo(msg, agent, bs);
             case 3:
                 return null;
             case 4:
                 return null;
             default:
-                return new StrategyOne(auction, agent, bs);
+                return new StrategyOne(msg, agent, bs);
         }
     }
 
@@ -119,7 +119,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                 final Auction auction = (Auction) msg.getContentObject();
 
                 if (participatingAuctions.get(auction) != null) {
-                    myAgent.addBehaviour(getStrategy(auction, curator, null)); // change to appropriate bid setting
+                    myAgent.addBehaviour(getStrategy(msg, curator, null)); // change to appropriate bid setting
                 }
             } else {
                 block();

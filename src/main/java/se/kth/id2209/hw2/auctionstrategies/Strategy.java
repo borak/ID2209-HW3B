@@ -1,6 +1,7 @@
 package se.kth.id2209.hw2.auctionstrategies;
 
 import jade.core.behaviours.OneShotBehaviour;
+import jade.lang.acl.ACLMessage;
 import se.kth.id2209.hw2.auction.Auction;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 
@@ -10,20 +11,21 @@ import se.kth.id2209.hw2.exhibition.CuratorAgent;
 public abstract class Strategy extends OneShotBehaviour
 {
     private Auction auction;
+
+
+    private ACLMessage msg;
     private CuratorAgent curatorAgent;
     private BidSettings bidSettings;
     private boolean shouldBuy = false;
     private int suggestPrice;
 
-    Strategy(Auction auction, CuratorAgent curatorAgent, BidSettings bidSettings)
+    Strategy(ACLMessage msg, CuratorAgent curatorAgent, BidSettings bidSettings)
     {
         super(curatorAgent);
-        this.auction = auction;
+        this.msg = msg;
         this.curatorAgent = curatorAgent;
         this.bidSettings = bidSettings;
     }
-
-
 
     @Override
     public abstract void action();
@@ -60,6 +62,15 @@ public abstract class Strategy extends OneShotBehaviour
         return suggestPrice;
     }
 
+    public ACLMessage getMsg()
+    {
+        return msg;
+    }
+
+    public void setMsg(ACLMessage msg)
+    {
+        this.msg = msg;
+    }
     public void setSuggestPrice(int suggestPrice)
     {
         this.suggestPrice = suggestPrice;

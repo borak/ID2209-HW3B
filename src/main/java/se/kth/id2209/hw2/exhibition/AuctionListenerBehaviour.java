@@ -11,10 +11,8 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import se.kth.id2209.hw2.auction.Auction;
@@ -99,8 +97,12 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         }
     }
     
-    private Strategy getStrategy(ACLMessage msg, CuratorAgent agent, BidSettings bs) {
-        switch(curator.getCuratorId()) {
+    private Strategy getStrategy(ACLMessage msg, CuratorAgent agent, BidSettings bs, int strategy) {
+        int i = curator.getCuratorId();
+        if(strategy!=0)
+            i = strategy;
+
+        switch(strategy) {
             case 1:
                 return new StrategyOne(msg, agent, bs);
             case 2:
@@ -120,10 +122,22 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                 final Auction auction = (Auction) msg.getContentObject();
 
                 if (participatingAuctions.get(auction) != null) {
-                    myAgent.addBehaviour(getStrategy(msg, curator, null)); // change to appropriate bid setting
+                    Random random = new Random();
+                    double maxFactor = (random.nextInt(8) + 6)/10 ;
+                    int maxPrice = (int)Math.floor(auction.getCurrentPrice() * maxFactor);
+                    BidSettings bs= new BidSettings(maxPrice, (int) Math.floor(0.7*maxPrice));
+
+                    //-------------------------------------------------------------
+
+                    int strategy = random.nextInt(4) + 1;
+//                    int strategy = 2;
+                    //-------------------------------------------------------------
+
+                    myAgent.addBehaviour(getStrategy(msg, curator, bs, strategy)); // change to appropriate bid setting
                     System.out.println("Agent AID=" + myAgent.getAID()
                             + " got a CFP from " + msg.getSender()
                             + " on auction " + auction
+                            + ". It said: " + msg.getContent() + " & " + msg.getContentObject().toString()
                             + ".");
                 }
             } else {

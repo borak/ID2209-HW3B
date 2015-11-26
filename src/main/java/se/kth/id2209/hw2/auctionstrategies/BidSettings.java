@@ -8,12 +8,14 @@ public class BidSettings
 
     private int maxPrice;
     private int preferredPrice;
+    private int strategy;
 
 
-    public BidSettings(int maxPrice, int preferredPrice)
+    public BidSettings(int maxPrice, int preferredPrice, int strategy)
     {
         this.maxPrice = maxPrice;
         this.preferredPrice = preferredPrice;
+        this.strategy = strategy;
     }
 
     public int getMaxPrice()
@@ -21,8 +23,26 @@ public class BidSettings
         return maxPrice;
     }
 
+    public int getStrategy()
+    {
+        return strategy;
+    }
+
+    public void setPreferredPrice(int preferredPrice)
+    {
+        this.preferredPrice = preferredPrice;
+    }
+
+    public void setStrategy(int strategy)
+    {
+        this.strategy = strategy;
+    }
+
     public int getPreferredPrice()
     {
         return preferredPrice;
     }
+
+
+
 }

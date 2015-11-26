@@ -40,7 +40,8 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
     });
     final List<Auction> knownAuctions = new ArrayList();
     final List<Artifact> boughtArtifacts = new ArrayList();
-    final Map<Auction, Integer> participatingAuctions = new HashMap(); 
+    final Map<Auction, Integer> participatingAuctions = new HashMap();
+    final Map<Auction, BidSettings> auctionSettings = new HashMap();
 
     AuctionListenerBehaviour(CuratorAgent curator) {
         this.curator = curator;
@@ -87,6 +88,20 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                     public void action() {
                         // Join them all
                         participatingAuctions.put(auction, 0);
+                        Random random = new Random();
+                        double maxFactor = (random.nextInt(8) + 6)/10 ;
+                        int maxPrice = (int)Math.floor(auction.getCurrentPrice() * maxFactor);
+
+
+                        //-------------------------------------------------------------
+                        //Change strategy, set to 0 to have one of each
+//                        int strategy = random.nextInt(4) + 1;
+                      int strategy = 0;
+                        //-------------------------------------------------------------
+
+
+                        BidSettings bs= new BidSettings(maxPrice, (int) Math.floor(0.7*maxPrice), strategy);
+                        auctionSettings.put(auction, bs);
                     }
                 });
             } else {
@@ -97,12 +112,12 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         }
     }
     
-    private Strategy getStrategy(ACLMessage msg, CuratorAgent agent, BidSettings bs, int strategy) {
+    private Strategy getStrategy(ACLMessage msg, CuratorAgent agent, BidSettings bs) {
         int i = curator.getCuratorId();
-        if(strategy!=0)
-            i = strategy;
+        if(bs.getStrategy()!=0)
+            i = bs.getStrategy();
 
-        switch(strategy) {
+        switch(i) {
             case 1:
                 return new StrategyOne(msg, agent, bs);
             case 2:
@@ -122,18 +137,9 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                 final Auction auction = (Auction) msg.getContentObject();
 
                 if (participatingAuctions.get(auction) != null) {
-                    Random random = new Random();
-                    double maxFactor = (random.nextInt(8) + 6)/10 ;
-                    int maxPrice = (int)Math.floor(auction.getCurrentPrice() * maxFactor);
-                    BidSettings bs= new BidSettings(maxPrice, (int) Math.floor(0.7*maxPrice));
 
-                    //-------------------------------------------------------------
 
-                    int strategy = random.nextInt(4) + 1;
-//                    int strategy = 2;
-                    //-------------------------------------------------------------
-
-                    myAgent.addBehaviour(getStrategy(msg, curator, bs, strategy)); // change to appropriate bid setting
+                    myAgent.addBehaviour(getStrategy(msg, curator, auctionSettings.get(auction))); // change to appropriate bid setting
                     System.out.println("Agent AID=" + myAgent.getAID()
                             + " got a CFP from " + msg.getSender()
                             + " on auction " + auction

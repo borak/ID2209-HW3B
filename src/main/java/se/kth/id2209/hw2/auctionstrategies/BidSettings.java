@@ -10,7 +10,7 @@ public class BidSettings
     private int preferredPrice;
 
 
-    BidSettings(int maxPrice, int preferredPrice)
+    public BidSettings(int maxPrice, int preferredPrice)
     {
         this.maxPrice = maxPrice;
         this.preferredPrice = preferredPrice;

@@ -10,18 +10,29 @@ import se.kth.id2209.hw2.util.Ontologies;
 import java.io.IOException;
 
 /**
- * Created by Rickard on 2015-11-24.
+ * Strategy is a OneShotBehaviour that will decide what bid to put, and send a message to the auctioneer with the bid
  */
 public abstract class Strategy extends OneShotBehaviour
 {
     private Auction auction;
-
-
     private ACLMessage msg;
     private CuratorAgent curatorAgent;
     private BidSettings bidSettings;
     private boolean shouldBuy = false;
     private int suggestPrice;
+
+    /**
+     *
+     * The constructor is called with the CFP message, the agent that received the message,
+     *  and settings concerning preferred price etc
+     *
+     * The received CFP message
+     * @param msg
+     * The agent that received the message
+     * @param curatorAgent
+     * An object containing preferred price, maximum price and selected strategy. Unique for each auction and bidder
+     * @param bidSettings
+     */
 
     Strategy(ACLMessage msg, CuratorAgent curatorAgent, BidSettings bidSettings)
     {
@@ -42,10 +53,17 @@ public abstract class Strategy extends OneShotBehaviour
         }
     }
 
+    /**
+     * Action is implemented by each of the strategies. Uses a strategy to decide what to bid,
+     *  and then calls the proceed method of the Strategy class.
+     */
     @Override
     public abstract void action();
 
-    //Responds with a bid
+
+    /**
+     * Called by the action method of implementing classes. Proceed sends a message with a bid to the auctioneer
+     */
     protected void proceed()
     {
         if (msg != null)

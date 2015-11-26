@@ -20,8 +20,8 @@ import se.kth.id2209.hw2.auctionstrategies.*;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
+ * AuctionListener handles the incoming communication from an auctioneer, and handles each type of response
  *
- * @author Kim
  */
 public class AuctionListenerBehaviour extends CyclicBehaviour {
 
@@ -47,6 +47,9 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         this.curator = curator;
     }
 
+    /**
+     * Looks at the message type and starts the appropriate handler
+     */
     @Override
     public void action() {
         ACLMessage msg = curator.receive(mt);

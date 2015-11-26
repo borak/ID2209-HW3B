@@ -25,6 +25,9 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
         this.auctions = auctions;
     }
 
+    /**
+     * Handles incoming messages from bidders
+     */
     @Override
     public void action() {
         ACLMessage msg = agent.receive();

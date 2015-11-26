@@ -3,15 +3,14 @@ package se.kth.id2209.hw2.auction;
 import jade.core.AID;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import se.kth.id2209.hw2.exhibition.Artifact;
 
 /**
- *
- * @author Kim
+ * An auction object contains information about a specific auction, and is sent back and forth between
+ *   the auctioneer and the bidders. Some information is hidden from bidders.
  */
+
 public class Auction implements Serializable {
     private List<AID> participants;
     private ArrayList<AID> participantsWhichRejected = new ArrayList();
@@ -56,7 +55,12 @@ public class Auction implements Serializable {
     void setWinner(AID winner) {
         this.winner = winner;
     }
-    
+
+
+    /**
+     * Returns the quality if the auction is done, otherwise an unknown quality
+     * @return
+     */
     public Artifact.Quality getQuality() {
         if(isDone) {
             return quality;

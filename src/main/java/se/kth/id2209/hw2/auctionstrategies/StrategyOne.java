@@ -4,10 +4,6 @@ import jade.lang.acl.ACLMessage;
 import se.kth.id2209.hw2.auction.Auction;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 
-/**
- *
- * @author Kim
- */
 public class StrategyOne extends Strategy {
 
 

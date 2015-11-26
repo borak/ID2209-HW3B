@@ -9,8 +9,8 @@ import java.util.Map;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
+ * Handles incoming and outgoing messages regarding a dutch auction
  *
- * @author Kim
  */
 class DutchAuctioneerBehaviour extends CyclicBehaviour {
 

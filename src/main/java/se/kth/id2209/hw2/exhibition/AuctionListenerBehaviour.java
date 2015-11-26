@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.id2209.hw2.exhibition;
 
 import jade.core.AID;
@@ -20,7 +15,7 @@ import se.kth.id2209.hw2.auctionstrategies.*;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
- * AuctionListener handles the incoming communication from an auctioneer, and handles each type of response
+ * AuctionListener handles the incoming communication from an auctioneer, and handles each type of response accordingly
  *
  */
 public class AuctionListenerBehaviour extends CyclicBehaviour {
@@ -82,14 +77,9 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
                 knownAuctions.add(auction);
-                //System.out.println("Agent AID=" + myAgent.getAID()
-                 //       + " joined " + auction
-                 //       + ".");
-                //Decide if the agent shuld join in on the auction
                 myAgent.addBehaviour(new OneShotBehaviour() {
                     @Override
                     public void action() {
-                        // Join them all
                         participatingAuctions.put(auction, 0);
                         Random random = new Random();
                         double maxFactor = (random.nextInt(8) + 6)/10 ;
@@ -140,14 +130,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                 final Auction auction = (Auction) msg.getContentObject();
 
                 if (participatingAuctions.get(auction) != null) {
-
-
-                    myAgent.addBehaviour(getStrategy(msg, curator, auctionSettings.get(auction))); // change to appropriate bid setting
-                    //System.out.println("Agent AID=" + myAgent.getAID()
-                    //        + " got a CFP from " + msg.getSender()
-                    //        + " on auction " + auction
-                    //        + ". It said: " + msg.getContent() + " & " + msg.getContentObject().toString()
-                    //        + ".");
+                    myAgent.addBehaviour(getStrategy(msg, curator, auctionSettings.get(auction)));
                 }
             } else {
                 block();

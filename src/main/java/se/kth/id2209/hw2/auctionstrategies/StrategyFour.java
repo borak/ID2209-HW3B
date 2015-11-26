@@ -3,9 +3,6 @@ package se.kth.id2209.hw2.auctionstrategies;
 import jade.lang.acl.ACLMessage;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 
-/**
- * Created by Rickard on 2015-11-25.
- */
 public class StrategyFour extends Strategy
 {
     public StrategyFour(ACLMessage msg, CuratorAgent curatorAgent, BidSettings bidSettings)

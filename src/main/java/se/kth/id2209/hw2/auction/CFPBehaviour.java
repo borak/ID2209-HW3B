@@ -9,8 +9,8 @@ import java.util.List;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
+ * Sends out a Call For Proposals to all the receivers
  *
- * @author Kim
  */
 public class CFPBehaviour extends OneShotBehaviour {
     private Auction auction;

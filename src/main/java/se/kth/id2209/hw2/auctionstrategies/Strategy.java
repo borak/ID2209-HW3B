@@ -51,7 +51,7 @@ public abstract class Strategy extends OneShotBehaviour
         if (msg != null)
         {
             String ontology = msg.getOntology();
-
+           
             if (ontology.equalsIgnoreCase(Ontologies.CALL_FOR_PROPOSALS))
             {
                 ACLMessage reply = msg.createReply();
@@ -59,18 +59,21 @@ public abstract class Strategy extends OneShotBehaviour
                 try
                 {
                     reply.setContentObject(suggestPrice);
-                    System.out.println("Agent AID=" + reply.getSender()
-                            + " proposed bid on auction=" + auction
-                            + " with price=" + suggestPrice
-                            + ".");
-                } catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-                reply.setContent(msg.getContent());
+                    reply.setContent(msg.getContent());
 
 
                 myAgent.send(reply);
+                    System.out.println(myAgent.getName() + " SENDING message: "
+                        + reply.getOntology());
+                } catch (IOException e)
+                {
+                     System.err.println(myAgent.getName() + " COULD NOT SEND: "
+                        + msg.getOntology());
+                     block();
+                }
+                
+            } else {
+                block();
             }
         }
     }

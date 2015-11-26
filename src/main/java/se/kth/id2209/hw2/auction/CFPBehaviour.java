@@ -34,6 +34,8 @@ public class CFPBehaviour extends OneShotBehaviour {
             }
             myAgent.send(msg);
             auction.CFPCounter++;
+            System.out.println(myAgent.getName() + " SENDING message: "
+                    + msg.getOntology());
         } catch (IOException ex) {
             System.err.println("Error occurred when "+myAgent.getName()
                     +" created auction start message.");

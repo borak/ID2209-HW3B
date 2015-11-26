@@ -30,6 +30,8 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
         ACLMessage msg = agent.receive();
 
         if (msg != null) {
+            System.out.println(myAgent.getName() + " RECIEVED message: "
+                    + msg.getOntology());
             String ontology = msg.getOntology();
 
             if (ontology.equalsIgnoreCase(Ontologies.AUCTION_BID)) {

@@ -32,6 +32,8 @@ public class InformStartOfAuctionBehaviour extends OneShotBehaviour {
                 msg.addReceiver(r);
             }
             myAgent.send(msg);
+            System.out.println(myAgent.getName() + " SENDING message: "
+                    + msg.getOntology());
         } catch (IOException ex) {
             System.err.println("Error occurred when "+myAgent.getName()
                     +" created auction start message.");

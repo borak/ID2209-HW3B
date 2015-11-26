@@ -79,9 +79,9 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
                 knownAuctions.add(auction);
-                System.out.println("Agent AID=" + myAgent.getAID()
-                        + " joined " + auction
-                        + ".");
+                //System.out.println("Agent AID=" + myAgent.getAID()
+                 //       + " joined " + auction
+                 //       + ".");
                 //Decide if the agent shuld join in on the auction
                 myAgent.addBehaviour(new OneShotBehaviour() {
                     @Override
@@ -140,11 +140,11 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
 
 
                     myAgent.addBehaviour(getStrategy(msg, curator, auctionSettings.get(auction))); // change to appropriate bid setting
-                    System.out.println("Agent AID=" + myAgent.getAID()
-                            + " got a CFP from " + msg.getSender()
-                            + " on auction " + auction
-                            + ". It said: " + msg.getContent() + " & " + msg.getContentObject().toString()
-                            + ".");
+                    //System.out.println("Agent AID=" + myAgent.getAID()
+                    //        + " got a CFP from " + msg.getSender()
+                    //        + " on auction " + auction
+                    //        + ". It said: " + msg.getContent() + " & " + msg.getContentObject().toString()
+                    //        + ".");
                 }
             } else {
                 block();
@@ -209,8 +209,8 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
-                participatingAuctions.remove(auction);
-                knownAuctions.remove(auction);
+                //participatingAuctions.remove(auction);
+                //knownAuctions.remove(auction);
             } else {
                 block();
             }

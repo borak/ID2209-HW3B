@@ -28,6 +28,7 @@ public class ArtistManagementAgent extends Agent {
     private final Map<Integer, Auction> auctions = new HashMap();
     final Lock auctionsLock = new ReentrantLock();
     private static final int auctionsStartDelay = 3000;
+    private static final int auctionsCFPDelay = 6000;
     private final List<AID> bidders = new ArrayList();
 
     @Override
@@ -48,6 +49,27 @@ public class ArtistManagementAgent extends Agent {
                         ArtistManagementAgent.this.addBehaviour(
                                 new InformStartOfAuctionBehaviour(auc,
                                         ArtistManagementAgent.this, bidders)); 
+                        if(auc != null) {
+                            break;
+                        } // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    }
+                } finally {
+                    auctionsLock.unlock();
+                }
+            }
+        });
+        pbr.addSubBehaviour(new WakerBehaviour(this, auctionsCFPDelay) {
+            @Override
+            public void onWake() {
+                auctionsLock.lock();
+                try {
+                    for(Auction auc : auctions.values()) {
+                        ArtistManagementAgent.this.addBehaviour(
+                                new CFPBehaviour(auc,
+                                        ArtistManagementAgent.this, bidders)); 
+                        if(auc != null) {
+                            break;
+                        } // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     }
                 } finally {
                     auctionsLock.unlock();

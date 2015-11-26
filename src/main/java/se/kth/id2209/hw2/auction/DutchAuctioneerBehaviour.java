@@ -16,6 +16,7 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
 
     private final Agent agent;
     private final Map<Integer, Auction> auctions;
+    private float priceDecrementConstant = 0.9f;
 
     DutchAuctioneerBehaviour(Agent agent,
             Map<Integer, Auction> auctions) {
@@ -42,52 +43,33 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
 
                 final Auction auction = getAuction(msg);
 
-                if (msg.getPerformative() == ACLMessage.PROPOSE) {
+                if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
                     try {
-                        handleProposal(msg);
+                        handleAcceptProposal(msg);
                     } catch (Exception ex) {
                         System.err.println("Could not read or accept auction "
                                 + "bid content.");
                         block();
                         return;
                     }
-                } else if (msg.getPerformative() == ACLMessage.NOT_UNDERSTOOD) {
-                    auction.addNotUnderstood(msg.getSender());
+                } else if (msg.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
+                    auction.addParticipantWhoRejected(msg.getSender());
                 } else {
                     block();
                     return;
                 }
 
-                if (auction.getNotUnderstood().size() == auction.getParticipants().size()) {
+                if (auction.getParticipantsWhichRejected().size() == auction.getParticipants().size()) {
                     sendNoBidsCall(auction);
-                    int newPrice = (int)((float) auction.getCurrentPrice() * 0.9);
-                    if(newPrice >= auction.getLowestPrice()) {
+                    int newPrice = (int) ((float) auction.getCurrentPrice() 
+                            * priceDecrementConstant);
+                    if (newPrice >= auction.getLowestPrice()) {
                         auction.setCurrentPrice(newPrice);
                         myAgent.addBehaviour(new CFPBehaviour(auction, myAgent,
-                                auction.getBidders()));
+                                auction.getParticipants()));
                     } else {
                         auction.setIsDone(true);
                     }
-                } else if((auction.getBids().size() == 1) && 
-                        (auction.getBids().size()
-                        + auction.getNotUnderstood().size()
-                        == auction.getParticipants().size())) {
-                    
-                    auction.setIsDone(true);
-                    auction.setWinner(
-                            (AID) auction.getBids().keySet().toArray()[0]);
-                    myAgent.addBehaviour(new OneShotBehaviour() {
-                        @Override
-                        public void action() {
-                            myAgent.addBehaviour(new InformAuctionWonBehaviour(
-                                    auction, myAgent));
-                        }
-                    }); 
-                } else if (auction.getBids().size()
-                        + auction.getNotUnderstood().size()
-                        == auction.getParticipants().size()) {
-                    myAgent.addBehaviour(new CFPBehaviour(auction, myAgent,
-                            auction.getBidders()));
                 }
             } else {
                 block();
@@ -111,41 +93,36 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
         return auction != null;
     }
 
-    private void handleProposal(ACLMessage msg) throws Exception {
+    private void handleAcceptProposal(ACLMessage msg) throws Exception {
         ACLMessage reply = msg.createReply();
         reply.addReceiver(msg.getSender());
         int item = Integer.parseInt(msg.getContent());
         int price = (int) msg.getContentObject();
-        Auction auction = auctions.get(item);
+        final Auction auction = auctions.get(item);
 
         if (auction != null || auction.isDone()
                 || price <= auction.getCurrentPrice()) {
-            reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+            reply.setPerformative(ACLMessage.FAILURE);
             agent.send(reply);
             System.out.println("Agent AID=" + msg.getSender()
                     + " proposed bid on auction=" + auction
                     + " with price=" + price
                     + ". Auction could not be found or is "
                     + "completed.");
+            block();
             return;
         }
 
-        if (price > auction.getCurrentPrice()) {
-            auction.addBid(msg.getSender(), price);
-            reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-            agent.send(reply);
-            System.out.println("Agent AID=" + msg.getSender()
-                    + " proposed bid on auction=" + auction
-                    + " with price=" + price + ". Proposal was "
-                    + "ACCEPTED. ");
-        } else {
-            reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
-            agent.send(reply);
-            System.out.println("Agent AID=" + msg.getSender()
-                    + " proposed bid on auction=" + auction
-                    + " with price=" + price + ". Proposal was "
-                    + "REJECTED.");
-        }
+        auction.setIsDone(true);
+        auction.setWinner(msg.getSender());
+        myAgent.addBehaviour(new OneShotBehaviour() {
+            @Override
+            public void action() {
+                myAgent.addBehaviour(new InformAuctionWonBehaviour(
+                        auction, myAgent));
+            }
+        });
+
     }
 
     private void sendNoBidsCall(Auction auction) {

@@ -33,6 +33,7 @@ public class CFPBehaviour extends OneShotBehaviour {
                 msg.addReceiver(r);
             }
             myAgent.send(msg);
+            auction.CFPCounter++;
         } catch (IOException ex) {
             System.err.println("Error occurred when "+myAgent.getName()
                     +" created auction start message.");

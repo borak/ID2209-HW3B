@@ -16,7 +16,6 @@ public class StrategyOne extends Strategy {
         super(msg, curatorAgent, bidSettings);
     }
 
-
     @Override
     public void action() {
         //Accept once we reach the maximum price of the bidder

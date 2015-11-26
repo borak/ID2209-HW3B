@@ -34,6 +34,7 @@ public class InformAuctionWonBehaviour extends OneShotBehaviour {
             msg.setContentObject((Artifact) auction.getItem());
             msg.addReceiver(auction.getWinner());
             myAgent.send(msg);
+            System.out.println("Auction completed. " + auction);
         } catch (IOException ex) {
             System.err.println("Error occurred when "+myAgent.getName()
                     +" created auction won message.");

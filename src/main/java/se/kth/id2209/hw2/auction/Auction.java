@@ -14,11 +14,10 @@ import se.kth.id2209.hw2.exhibition.Artifact;
  */
 public class Auction implements Serializable {
     private List<AID> participants;
-    private ArrayList<AID> notUnderstoodParticipants = new ArrayList();
+    private ArrayList<AID> participantsWhichRejected = new ArrayList();
     private int currentPrice, lowestPrice;
     private Object item;
     private boolean isDone;
-    private final Map<AID, Integer> bids = new HashMap();
     private Artifact.Quality quality;
     private AID winner = null;
 
@@ -103,32 +102,19 @@ public class Auction implements Serializable {
         this.isDone = isDone;
     }
 
-    void addBid(AID sender, int price) {
-        bids.put(sender, price);
-    }
-    
-    Map<AID, Integer> getBids() {
-        return bids;
-    }
-    
     void removeParticipant(AID sender) {
         participants.remove(sender);
     }
 
-    void addNotUnderstood(AID agent) {
-        notUnderstoodParticipants.add(agent);
+    void addParticipantWhoRejected(AID agent) {
+        participantsWhichRejected.add(agent);
     }
     
-    void removeNotUnderstood(AID agent) {
-        notUnderstoodParticipants.remove(agent);
+    void removeParticipantWhoRejected(AID agent) {
+        participantsWhichRejected.remove(agent);
     }
     
-    List<AID> getNotUnderstood() {
-        return notUnderstoodParticipants;
+    List<AID> getParticipantsWhichRejected() {
+        return participantsWhichRejected;
     }
-
-    public List<AID> getBidders() {
-        return new ArrayList(bids.keySet());
-    }
-    
 }

@@ -33,11 +33,17 @@ public class Auction implements Serializable {
     
     @Override
     public String toString() {
+        String winnerstr = "";
+        if(winner == null) {
+            winnerstr = "null";
+        } else {
+            winnerstr = winner.getName();
+        }
         return "Auction[item="+item
                 +", price="+currentPrice
                 +", isDone="+isDone
-                +", numberOfParticipants="+participants.size()+""
-                + ", winner="+winner.getName()
+                +", numberOfParticipants="+participants.size()
+                + ", winner="+winnerstr
                 + ", quality="+quality
                 + ", CFPcounter="+CFPCounter
                 +"]";

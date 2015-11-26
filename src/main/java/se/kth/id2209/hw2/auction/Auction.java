@@ -20,6 +20,7 @@ public class Auction implements Serializable {
     private boolean isDone;
     private Artifact.Quality quality;
     private AID winner = null;
+    int CFPCounter = 0;
 
     Auction(List<AID> participants, int currentPrice, int lowestPrice, 
             Object item, boolean isDone, Artifact.Quality quality) {
@@ -32,8 +33,14 @@ public class Auction implements Serializable {
     
     @Override
     public String toString() {
-        return "Auction[item="+item+", price="+currentPrice+", isDone="+isDone
-                +", numberOfParticipants="+participants.size()+"]";
+        return "Auction[item="+item
+                +", price="+currentPrice
+                +", isDone="+isDone
+                +", numberOfParticipants="+participants.size()+""
+                + ", winner="+winner.getName()
+                + ", quality="+quality
+                + ", CFPcounter="+CFPCounter
+                +"]";
     }
     
     public AID getWinner() {

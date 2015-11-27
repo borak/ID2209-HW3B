@@ -3,9 +3,7 @@ package se.kth.id2209.hw2.auction;
 import jade.core.AID;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import se.kth.id2209.hw2.exhibition.Artifact;
 
 /**
@@ -13,52 +11,64 @@ import se.kth.id2209.hw2.exhibition.Artifact;
  * @author Kim
  */
 public class Auction implements Serializable {
+
     private List<AID> participants;
     private ArrayList<AID> participantsWhichRejected = new ArrayList();
     private int currentPrice, lowestPrice;
-    private Object item;
+    private Artifact artifact;
     private boolean isDone;
     private Artifact.Quality quality;
     private AID winner = null;
     int CFPCounter = 0;
 
-    Auction(List<AID> participants, int currentPrice, int lowestPrice, 
-            Object item, boolean isDone, Artifact.Quality quality) {
+    Auction(List<AID> participants, int currentPrice, int lowestPrice,
+            Artifact item, boolean isDone, Artifact.Quality quality) {
         this.participants = participants;
         this.currentPrice = currentPrice;
-        this.item = item;
+        this.artifact = item;
         this.isDone = isDone;
         this.quality = quality;
     }
-    
+
     @Override
     public String toString() {
         String winnerstr = "";
-        if(winner == null) {
+        if (winner == null) {
             winnerstr = "null";
         } else {
             winnerstr = winner.getName();
         }
-        return "Auction[item="+item
-                +", price="+currentPrice
-                +", isDone="+isDone
-                +", numberOfParticipants="+participants.size()
-                + ", winner="+winnerstr
-                + ", quality="+quality
-                + ", CFPcounter="+CFPCounter
-                +"]";
+        return "Auction[item=" + artifact
+                + ", price=" + currentPrice
+                + ", isDone=" + isDone
+                + ", numberOfParticipants=" + participants.size()
+                + ", winner=" + winnerstr
+                + ", quality=" + getQuality()
+                + ", CFPcounter=" + CFPCounter
+                + "]";
     }
-    
+
+    @Override
+    public boolean equals(Object o) {
+        if(o instanceof Auction && 
+                ((Auction)o).getArtifact() instanceof Artifact &&
+                getArtifact() instanceof Artifact &&
+                ((Artifact)((Auction)o).getArtifact()).getId() == getArtifact().getId()) {
+            return true;            
+        }
+        return false;
+    }
+
     public AID getWinner() {
         return winner;
     }
-    
+
     void setWinner(AID winner) {
         this.winner = winner;
     }
-    
+
     public Artifact.Quality getQuality() {
-        if(isDone) {
+        if (isDone) {
             return quality;
         } else {
             return Artifact.Quality.UNKNOWN_QUALITY;
@@ -76,9 +86,9 @@ public class Auction implements Serializable {
     public boolean isParticipant(AID aid) {
         return participants.contains(aid);
     }
-    
+
     void addParticipants(AID participant) {
-        if(participant != null) {
+        if (participant != null) {
             this.participants.add(participant);
         }
     }
@@ -90,7 +100,7 @@ public class Auction implements Serializable {
     void setCurrentPrice(int price) {
         this.currentPrice = price;
     }
-    
+
     int getLowestPrice() {
         return lowestPrice;
     }
@@ -99,14 +109,14 @@ public class Auction implements Serializable {
         this.lowestPrice = price;
     }
 
-    public Object getItem() {
-        return item;
+    public Artifact getArtifact() {
+        return artifact;
     }
 
-    void setItem(Object item) {
-        this.item = item;
+    void setArtifact(Artifact item) {
+        this.artifact = item;
     }
-    
+
     public boolean isDone() {
         return isDone;
     }
@@ -122,12 +132,13 @@ public class Auction implements Serializable {
     void addParticipantWhoRejected(AID agent) {
         participantsWhichRejected.add(agent);
     }
-    
+
     void removeParticipantWhoRejected(AID agent) {
         participantsWhichRejected.remove(agent);
     }
-    
+
     List<AID> getParticipantsWhichRejected() {
         return participantsWhichRejected;
     }
+
 }

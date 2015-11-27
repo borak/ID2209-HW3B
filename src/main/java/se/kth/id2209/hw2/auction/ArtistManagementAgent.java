@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import se.kth.id2209.hw2.exhibition.Artifact;
@@ -28,14 +29,16 @@ public class ArtistManagementAgent extends Agent {
     private final Map<Integer, Auction> auctions = new HashMap();
     final Lock auctionsLock = new ReentrantLock();
     private static final int auctionsStartDelay = 3000;
-    private static final int auctionsCFPDelay = 6000;
+    private static final int auctionsCFPDelay = 8000; 
     private final List<AID> bidders = new ArrayList();
 
     @Override
     protected void setup() {
         registerService();
         initAuctions();
-        fetchBidders();
+        for(AID aid : fetchBidders()) {
+            bidders.add(aid);
+        }
         
         ParallelBehaviour pbr = new ParallelBehaviour(this,
                 ParallelBehaviour.WHEN_ALL);
@@ -45,13 +48,11 @@ public class ArtistManagementAgent extends Agent {
             public void onWake() {
                 auctionsLock.lock();
                 try {
+                    System.out.println("WAKEWAKEWAKE START bidders="+bidders.size());
                     for(Auction auc : auctions.values()) {
                         ArtistManagementAgent.this.addBehaviour(
                                 new InformStartOfAuctionBehaviour(auc,
                                         ArtistManagementAgent.this, bidders)); 
-                        if(auc != null) {
-                            break;
-                        } // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     }
                 } finally {
                     auctionsLock.unlock();
@@ -63,13 +64,11 @@ public class ArtistManagementAgent extends Agent {
             public void onWake() {
                 auctionsLock.lock();
                 try {
+                    System.out.println("WAKEWAKEWAKE CFP bidders="+bidders.size());
                     for(Auction auc : auctions.values()) {
                         ArtistManagementAgent.this.addBehaviour(
                                 new CFPBehaviour(auc,
                                         ArtistManagementAgent.this, bidders)); 
-                        if(auc != null) {
-                            break;
-                        } // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     }
                 } finally {
                     auctionsLock.unlock();
@@ -128,28 +127,33 @@ public class ArtistManagementAgent extends Agent {
                 "unknown", Artifact.GENRE.SCULPTURE, 
                 Artifact.Quality.UNKNOWN_QUALITY);
         
+        Random random = new Random();
+        int[] prices = new int[6];
+        int[] minprices = new int[6];
+        for(int i=0; i<6; i++) {
+            prices[i] = random.nextInt(40000) + 200;
+            minprices[i] = (int)((double)prices[i] * (random.nextInt(4)/10 + 0.1));
+        }
         auctionsLock.lock();
         try {
-            auctions.put(art1.getId(), new Auction(new ArrayList(), 1000, 550, 
+            auctions.put(art1.getId(), new Auction(bidders, prices[0], minprices[0], 
                     art1, false, Artifact.Quality.HIGH_QUALITY)); 
-            auctions.put(art2.getId(), new Auction(new ArrayList(), 5321, 3800, 
+            auctions.put(art2.getId(), new Auction(bidders, prices[1], minprices[1], 
                     art2, false, Artifact.Quality.LOW_QUALITY));
-            auctions.put(art3.getId(), new Auction(new ArrayList(), 100, 63, 
+            auctions.put(art3.getId(), new Auction(bidders, prices[2], minprices[2], 
                     art3, false, Artifact.Quality.LOW_QUALITY));
-            auctions.put(art4.getId(), new Auction(new ArrayList(), 433, 413, 
+            auctions.put(art4.getId(), new Auction(bidders, prices[3], minprices[3], 
                     art4, false, Artifact.Quality.LOW_QUALITY));
-            auctions.put(art5.getId(), new Auction(new ArrayList(), 60, 40, 
+            auctions.put(art5.getId(), new Auction(bidders, prices[4], minprices[4], 
                     art5, false, Artifact.Quality.HIGH_QUALITY));
-            auctions.put(art6.getId(), new Auction(new ArrayList(), 40200, 
-                    28000, art6, false, Artifact.Quality.HIGH_QUALITY));
+            auctions.put(art6.getId(), new Auction(bidders, prices[5], 
+                    minprices[5], art6, false, Artifact.Quality.HIGH_QUALITY));
         } finally {
             auctionsLock.unlock();
         }
     }
 
-    private void fetchBidders() {
-        for(AID aid : DFUtilities.searchAllDF(this, CuratorAgent.DF_NAME)) {
-            bidders.add(aid);
-        }
+    AID[] fetchBidders() {
+        return DFUtilities.searchAllDF(this, CuratorAgent.DF_NAME);
     }
 }

@@ -13,6 +13,8 @@ import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import se.kth.id2209.hw2.auction.Auction;
@@ -40,11 +42,26 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
     });
     final List<Auction> knownAuctions = new ArrayList();
     final List<Artifact> boughtArtifacts = new ArrayList();
-    final Map<Auction, Integer> participatingAuctions = new HashMap();
-    final Map<Auction, BidSettings> auctionSettings = new HashMap();
+    final List<Auction> participatingAuctions = new ArrayList();
+    final Map<Integer, BidSettings> auctionSettings = new HashMap();
+    final Lock partAucLock = new ReentrantLock();
 
     AuctionListenerBehaviour(CuratorAgent curator) {
         this.curator = curator;
+    }
+
+    private Auction getAuction(Auction auction) {
+        partAucLock.lock();
+        try {
+            for (Auction a : participatingAuctions) {
+                if (a.equals(auction)) {
+                    return a;
+                }
+            }
+        } finally {
+            partAucLock.unlock();
+        }
+        return null;
     }
 
     @Override
@@ -52,8 +69,8 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         ACLMessage msg = curator.receive(mt);
 
         if (msg != null) {
-            System.out.println(curator.getName() + " RECIEVED message: "
-                    + msg.getOntology());
+            //System.out.println(curator.getName() + " RECIEVED message: "
+            //        + msg.getOntology());
             String ontology = msg.getOntology();
 
             if (ontology.equalsIgnoreCase(Ontologies.AUCTION_START)) {
@@ -67,8 +84,8 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             } else if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
                 handleAcceptProposal(msg);
             } else if (msg.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-                handleAcceptReject(msg);
-            } 
+                handleReject(msg);
+            }
         } else {
             block();
         }
@@ -79,29 +96,22 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
                 knownAuctions.add(auction);
-                //System.out.println("Agent AID=" + myAgent.getAID()
-                 //       + " joined " + auction
-                 //       + ".");
-                //Decide if the agent shuld join in on the auction
+
                 myAgent.addBehaviour(new OneShotBehaviour() {
                     @Override
                     public void action() {
-                        // Join them all
-                        participatingAuctions.put(auction, 0);
+                        partAucLock.lock();
+                        try {
+                            participatingAuctions.add(auction);
+                        } finally {
+                            partAucLock.unlock();
+                        }
                         Random random = new Random();
-                        double maxFactor = (random.nextInt(8) + 6)/10 ;
-                        int maxPrice = (int)Math.floor(auction.getCurrentPrice() * maxFactor);
-
-
-                        //-------------------------------------------------------------
-                        //Change strategy, set to 0 to have one of each
-//                        int strategy = random.nextInt(4) + 1;
-                      int strategy = 0;
-                        //-------------------------------------------------------------
-
-
-                        BidSettings bs= new BidSettings(maxPrice, (int) Math.floor(0.7*maxPrice), strategy);
-                        auctionSettings.put(auction, bs);
+                        double maxFactor = (random.nextInt(8) + 2) / 10;
+                        int maxPrice = (int) Math.floor(auction.getCurrentPrice() * maxFactor);
+                        int strategy = 0;
+                        BidSettings bs = new BidSettings(maxPrice, (int) Math.floor(0.7 * maxPrice), strategy);
+                        auctionSettings.put(((Artifact) auction.getArtifact()).getId(), bs);
                     }
                 });
             } else {
@@ -111,13 +121,15 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             block();
         }
     }
-    
-    private Strategy getStrategy(ACLMessage msg, CuratorAgent agent, BidSettings bs) {
-        int i = curator.getCuratorId();
-        if(bs.getStrategy()!=0)
-            i = bs.getStrategy();
 
-        switch(i) {
+    private Strategy getStrategy(ACLMessage msg, CuratorAgent agent,
+            BidSettings bs) {
+        int i = curator.getCuratorId();
+        if (bs.getStrategy() != 0) {
+            i = bs.getStrategy();
+        }
+
+        switch (i) {
             case 1:
                 return new StrategyOne(msg, agent, bs);
             case 2:
@@ -135,16 +147,9 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
-
-                if (participatingAuctions.get(auction) != null) {
-
-
-                    myAgent.addBehaviour(getStrategy(msg, curator, auctionSettings.get(auction))); // change to appropriate bid setting
-                    //System.out.println("Agent AID=" + myAgent.getAID()
-                    //        + " got a CFP from " + msg.getSender()
-                    //        + " on auction " + auction
-                    //        + ". It said: " + msg.getContent() + " & " + msg.getContentObject().toString()
-                    //        + ".");
+                if (getAuction(auction) != null) {
+                    myAgent.addBehaviour(getStrategy(msg, curator,
+                            auctionSettings.get(auction.getArtifact().getId())));
                 }
             } else {
                 block();
@@ -159,8 +164,8 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
                 /*if (participatingAuctions.get(auction) != null) {
-                    participatingAuctions.remove(auction);
-                }*/
+                 participatingAuctions.remove(auction);
+                 }*/
             } else {
                 block();
             }
@@ -172,13 +177,15 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
     private void handleAuctionWon(ACLMessage msg) {
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
-                final Artifact art = (Artifact) msg.getContentObject();
+                final Artifact art = ((Auction) msg.getContentObject()).getArtifact();
                 boughtArtifacts.add(art);
-                
-                for(Auction auction : participatingAuctions.keySet()) {
-                    if(((Artifact)auction.getItem()).getId() == art.getId()) {
-                        participatingAuctions.remove(auction);
-                        knownAuctions.remove(auction);
+
+                for (Auction auction : participatingAuctions) {
+                    Auction match = getAuction(auction);
+                    if (match != null && match.getArtifact().getId()
+                            == art.getId()) {
+                        participatingAuctions.remove(match);
+                        knownAuctions.remove(match);
                         break;
                     }
                 }
@@ -189,7 +196,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             block();
         }
     }
-    
+
     private void handleAcceptProposal(ACLMessage msg) {
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
@@ -205,7 +212,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         }
     }
 
-    private void handleAcceptReject(ACLMessage msg) {
+    private void handleReject(ACLMessage msg) {
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();

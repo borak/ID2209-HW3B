@@ -21,4 +21,5 @@ public class Ontologies {
     public static final String AUCTION_START = "auction start";
     public static final String CALL_FOR_PROPOSALS = "call for proposals";
     public static final String AUCTION_WON = "auction won";
+    public static final String CALL_FOR_PROPOSALS_TIMEOUT = "call for proposals timeout";
 }

@@ -5,6 +5,8 @@ import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.UnreadableException;
+import java.io.IOException;
 import java.util.Map;
 import se.kth.id2209.hw2.util.Ontologies;
 
@@ -16,7 +18,7 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
 
     private final Agent agent;
     private final Map<Integer, Auction> auctions;
-    private float priceDecrementConstant = 0.9f;
+    private float priceDecrementConstant = 0.90f;
 
     DutchAuctioneerBehaviour(Agent agent,
             Map<Integer, Auction> auctions) {
@@ -30,54 +32,73 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
         ACLMessage msg = agent.receive();
 
         if (msg != null) {
-            System.out.println(myAgent.getName() + " RECIEVED message: "
-                    + msg.getOntology());
-            String ontology = msg.getOntology();
+            //System.out.println(myAgent.getName() + " RECIEVED message: ontology="
+            //        + msg.getOntology());
 
-            if (ontology.equalsIgnoreCase(Ontologies.AUCTION_BID)) {
-                ACLMessage reply = msg.createReply();
-                reply.addReceiver(msg.getSender());
-
-                if (!validateMessage(msg)) {
-                    block();
-                    return;
-                }
-
-                final Auction auction = getAuction(msg);
-
-                if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-                    try {
-                        handleAcceptProposal(msg);
-                    } catch (Exception ex) {
-                        System.err.println("Could not read or accept auction "
-                                + "bid content.");
-                        block();
-                        return;
-                    }
-                } else if (msg.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-                    auction.addParticipantWhoRejected(msg.getSender());
-                } else {
-                    block();
-                    return;
-                }
-
-                if (auction.getParticipantsWhichRejected().size() == auction.getParticipants().size()) {
-                    sendNoBidsCall(auction);
-                    int newPrice = (int) ((float) auction.getCurrentPrice() 
-                            * priceDecrementConstant);
-                    if (newPrice >= auction.getLowestPrice()) {
-                        auction.setCurrentPrice(newPrice);
-                        myAgent.addBehaviour(new CFPBehaviour(auction, myAgent,
-                                auction.getParticipants()));
-                    } else {
-                        auction.setIsDone(true);
-                    }
-                }
-            } else {
-                block();
+            int item = -1, price = -1;
+            try {
+                Object[] objs = (Object[]) msg.getContentObject();
+                item = (int) objs[0];
+                price = (int) objs[1];
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }
+            final Auction auction = auctions.get(item);
 
+            if (auction == null) {
+                System.err.println(myAgent.getName() + "Could not find auction.");
+                block();
+                return;
+            }
+            //System.out.println("AUCTION. nr=" + auction.getParticipants().size());
+            if (msg.getPerformative() == ACLMessage.INFORM
+                    && msg.getOntology().equalsIgnoreCase(
+                            Ontologies.CALL_FOR_PROPOSALS_TIMEOUT)) {
+                performCFP(auction);
+            } else if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+                try {
+                    handleAcceptProposal(msg, price, auction);
+                } catch (Exception ex) {
+                    System.err.println(myAgent.getName() + "Could not read or accept auction "
+                            + "bid content.");
+                    block();
+                }
+            } else if (msg.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
+                handleRejectProposal(auction, msg);
+            }
+
+        } else {
+            block();
+        }
+    }
+
+    private void handleRejectProposal(Auction auction, ACLMessage msg) {
+        auction.addParticipantWhoRejected(msg.getSender());
+
+        //System.out.println("GOT REJ. nr=" + auction.getParticipantsWhichRejected().size() 
+        //    + " of " + auction.getParticipants().size());
+        if (auction.getParticipantsWhichRejected().size()
+                == auction.getParticipants().size()) {
+            performCFP(auction);
+        }
+    }
+
+    private void performCFP(Auction auction) {
+        if (auction.getParticipants().isEmpty()) {
+            System.err.println(myAgent.getAID() + " performing CFP but no participants was found.");
+            return;
+        }
+        //System.out.println(myAgent.getAID() + " performing CFP.");
+        sendNoBidsCall(auction);
+        int newPrice = (int) ((float) auction.getCurrentPrice()
+                * priceDecrementConstant);
+        if (newPrice >= auction.getLowestPrice()) {
+            auction.setCurrentPrice(newPrice);
+            auction.getParticipantsWhichRejected().clear();
+            auction.CFPCounter++;
+            myAgent.addBehaviour(new CFPBehaviour(auction, myAgent,
+                    auction.getParticipants()));
+        }
     }
 
     private boolean validateMessage(ACLMessage msg) {
@@ -95,23 +116,17 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
         return auction != null;
     }
 
-    private void handleAcceptProposal(ACLMessage msg) throws Exception {
-        ACLMessage reply = msg.createReply();
-        reply.addReceiver(msg.getSender());
-        int item = Integer.parseInt(msg.getContent());
-        int price = (int) msg.getContentObject();
-        final Auction auction = auctions.get(item);
+    private void handleAcceptProposal(ACLMessage msg, int price,
+            final Auction auction) throws Exception {
 
-        if (auction != null || auction.isDone()
-                || price <= auction.getCurrentPrice()) {
-            reply.setPerformative(ACLMessage.FAILURE);
-            agent.send(reply);
-            System.out.println("Agent AID=" + msg.getSender()
-                    + " proposed bid on auction=" + auction
-                    + " with price=" + price
-                    + ". Auction could not be found or is "
-                    + "completed.");
-            block();
+        if (auction == null || auction.isDone()
+                || price < auction.getCurrentPrice()) {
+            handleRejectProposal(auction, msg);
+            ACLMessage reply = msg.createReply();
+            reply.setOntology(Ontologies.AUCTION_BID);
+            reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+            reply.addReceiver(msg.getSender());
+            myAgent.send(reply);
             return;
         }
 
@@ -130,7 +145,7 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
     private void sendNoBidsCall(Auction auction) {
         ACLMessage noBidsMsg = new ACLMessage(ACLMessage.INFORM);
         noBidsMsg.setOntology(Ontologies.AUCTION_NO_BIDS);
-        noBidsMsg.setContent(auction.getItem() + "");
+        noBidsMsg.setContent(auction.getArtifact().getId() + "");
         for (AID aid : auction.getParticipants()) {
             noBidsMsg.addReceiver(aid);
         }
@@ -143,10 +158,9 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
             int item = Integer.parseInt(msg.getContent());
             int price = (int) msg.getContentObject();
             auctionTest = auctions.get(item);
-        } catch (Exception ex) {
-            System.err.println("An unexpected error occurred when parsing "
-                    + "message. This should never happen and means that the "
-                    + "validation failed. ");
+        } catch (NumberFormatException | UnreadableException ex) {
+            System.err.println(myAgent.getName() + "An unexpected error occurred when parsing "
+                    + "message.");
         }
         return auctionTest;
     }

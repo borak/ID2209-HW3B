@@ -12,10 +12,9 @@ import java.io.IOException;
 /**
  * Created by Rickard on 2015-11-24.
  */
-public abstract class Strategy extends OneShotBehaviour
-{
-    private Auction auction;
+public abstract class Strategy extends OneShotBehaviour {
 
+    private Auction auction;
 
     private ACLMessage msg;
     private CuratorAgent curatorAgent;
@@ -23,8 +22,7 @@ public abstract class Strategy extends OneShotBehaviour
     private boolean shouldBuy = false;
     private int suggestPrice;
 
-    Strategy(ACLMessage msg, CuratorAgent curatorAgent, BidSettings bidSettings)
-    {
+    Strategy(ACLMessage msg, CuratorAgent curatorAgent, BidSettings bidSettings) {
         super(curatorAgent);
         this.msg = msg;
         this.curatorAgent = curatorAgent;
@@ -32,7 +30,6 @@ public abstract class Strategy extends OneShotBehaviour
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 this.auction = (Auction) msg.getContentObject();
-
 
             } else {
                 block();
@@ -46,95 +43,83 @@ public abstract class Strategy extends OneShotBehaviour
     public abstract void action();
 
     //Responds with a bid
-    protected void proceed()
-    {
-        if (msg != null)
-        {
+    protected void proceed() {
+        if (msg != null) {
             String ontology = msg.getOntology();
-           
-            if (ontology.equalsIgnoreCase(Ontologies.CALL_FOR_PROPOSALS))
-            {
-                ACLMessage reply = msg.createReply();
+
+            if (ontology.equalsIgnoreCase(Ontologies.CALL_FOR_PROPOSALS)) {
+                ACLMessage reply = new ACLMessage(msg.getPerformative());
+                reply.setOntology(Ontologies.AUCTION_BID);
                 reply.addReceiver(msg.getSender());
-                try
-                {
-                    reply.setContentObject(suggestPrice);
-                    reply.setContent(msg.getContent());
-
-
-                myAgent.send(reply);
-                    System.out.println(myAgent.getName() + " SENDING message: "
-                        + reply.getOntology());
-                } catch (IOException e)
-                {
-                     System.err.println(myAgent.getName() + " COULD NOT SEND: "
-                        + msg.getOntology());
-                     block();
+                try {
+                    if (suggestPrice >= 0 && shouldBuy()) {
+                        reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                    } else {
+                        reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                    }
+                    Object[] objs = new Object[2];
+                    objs[0] = auction.getArtifact().getId();
+                    objs[1] = suggestPrice;
+                    reply.setContentObject(objs);
+                    myAgent.send(reply);
+                } catch (IOException e) {
+                    System.err.println(myAgent.getName() + " COULD NOT SEND: "
+                            + msg.getOntology() + "" + e.getMessage());
+                    e.printStackTrace();
+                    block();
                 }
-                
+
             } else {
                 block();
             }
         }
     }
 
-
-    public boolean shouldBuy()
-    {
+    public boolean shouldBuy() {
         return shouldBuy;
     }
 
-    public void setShouldBuy(boolean shouldBuy)
-    {
+    public void setShouldBuy(boolean shouldBuy) {
         this.shouldBuy = shouldBuy;
     }
 
-    public Auction getAuction()
-    {
+    public Auction getAuction() {
         return auction;
     }
 
-    public void setAuction(Auction auction)
-    {
+    public void setAuction(Auction auction) {
         this.auction = auction;
     }
 
-    public int getSuggestPrice()
-    {
+    public int getSuggestPrice() {
         return suggestPrice;
     }
 
-    public ACLMessage getMsg()
-    {
+    public ACLMessage getMsg() {
         return msg;
     }
 
-    public void setMsg(ACLMessage msg)
-    {
+    public void setMsg(ACLMessage msg) {
         this.msg = msg;
     }
-    public void setSuggestPrice(int suggestPrice)
-    {
+
+    public void setSuggestPrice(int suggestPrice) {
         this.suggestPrice = suggestPrice;
     }
 
-    public CuratorAgent getCuratorAgent()
-    {
+    public CuratorAgent getCuratorAgent() {
         return curatorAgent;
     }
 
-    public void setCuratorAgent(CuratorAgent curatorAgent)
-    {
+    public void setCuratorAgent(CuratorAgent curatorAgent) {
         this.curatorAgent = curatorAgent;
     }
 
-    public BidSettings getBidSettings()
-    {
+    public BidSettings getBidSettings() {
         return bidSettings;
     }
 
-    public void setBidSettings(BidSettings bidSettings)
-    {
+    public void setBidSettings(BidSettings bidSettings) {
         this.bidSettings = bidSettings;
     }
 

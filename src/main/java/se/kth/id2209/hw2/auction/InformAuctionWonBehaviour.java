@@ -31,7 +31,8 @@ public class InformAuctionWonBehaviour extends OneShotBehaviour {
         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
         msg.setOntology(Ontologies.AUCTION_WON);
         try {
-            msg.setContentObject((Artifact) auction.getItem());
+            //msg.setContent(auction.getArtifact().getId() + "");
+            msg.setContentObject(auction); //.getArtifact()
             msg.addReceiver(auction.getWinner());
             myAgent.send(msg);
             System.out.println("Auction completed. " + auction);

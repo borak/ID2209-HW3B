@@ -9,8 +9,8 @@ import java.util.List;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
+ *  Sends messages to all the bidders, informing them that an auction is starting
  *
- * @author Kim
  */
 public class InformStartOfAuctionBehaviour extends OneShotBehaviour {
     private Auction auction;

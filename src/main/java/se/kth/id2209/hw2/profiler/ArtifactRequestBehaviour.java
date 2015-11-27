@@ -17,7 +17,7 @@ import se.kth.id2209.hw2.util.Ontologies;
  * 
  * TODO: Rename the curator agent type to something more unique.
  * 
- * @author Kim
+ *
  */
 class ArtifactRequestBehaviour extends OneShotBehaviour {
     private AID cAgent;

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.id2209.hw2.exhibition;
 
 import jade.core.AID;
@@ -22,8 +17,8 @@ import se.kth.id2209.hw2.auctionstrategies.*;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
+ * AuctionListener handles the incoming communication from an auctioneer, and handles each type of response accordingly
  *
- * @author Kim
  */
 public class AuctionListenerBehaviour extends CyclicBehaviour {
 
@@ -64,6 +59,9 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         return null;
     }
 
+    /**
+     * Looks at the message type and starts the appropriate handler
+     */
     @Override
     public void action() {
         ACLMessage msg = curator.receive(mt);
@@ -100,12 +98,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                 myAgent.addBehaviour(new OneShotBehaviour() {
                     @Override
                     public void action() {
-                        partAucLock.lock();
-                        try {
-                            participatingAuctions.add(auction);
-                        } finally {
-                            partAucLock.unlock();
-                        }
+                        participatingAuctions.put(auction, 0);
                         Random random = new Random();
                         double maxFactor = (random.nextInt(8) + 2) / 10;
                         int maxPrice = (int) Math.floor(auction.getCurrentPrice() * maxFactor);
@@ -147,9 +140,9 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
-                if (getAuction(auction) != null) {
-                    myAgent.addBehaviour(getStrategy(msg, curator,
-                            auctionSettings.get(auction.getArtifact().getId())));
+
+                if (participatingAuctions.get(auction) != null) {
+                    myAgent.addBehaviour(getStrategy(msg, curator, auctionSettings.get(auction)));
                 }
             } else {
                 block();

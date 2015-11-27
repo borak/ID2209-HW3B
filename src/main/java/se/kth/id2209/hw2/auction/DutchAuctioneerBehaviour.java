@@ -11,8 +11,8 @@ import java.util.Map;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
+ * Handles incoming and outgoing messages regarding a dutch auction
  *
- * @author Kim
  */
 class DutchAuctioneerBehaviour extends CyclicBehaviour {
 
@@ -27,6 +27,9 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
         this.auctions = auctions;
     }
 
+    /**
+     * Handles incoming messages from bidders
+     */
     @Override
     public void action() {
         ACLMessage msg = agent.receive();

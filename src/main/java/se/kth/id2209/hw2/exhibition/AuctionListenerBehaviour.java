@@ -98,13 +98,13 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                 myAgent.addBehaviour(new OneShotBehaviour() {
                     @Override
                     public void action() {
-                        participatingAuctions.put(auction, 0);
+                        participatingAuctions.add(auction);
                         Random random = new Random();
                         double maxFactor = (random.nextInt(8) + 2) / 10;
                         int maxPrice = (int) Math.floor(auction.getCurrentPrice() * maxFactor);
                         int strategy = 0;
                         BidSettings bs = new BidSettings(maxPrice, (int) Math.floor(0.7 * maxPrice), strategy);
-                        auctionSettings.put(((Artifact) auction.getArtifact()).getId(), bs);
+                        auctionSettings.put(auction.getArtifact().getId(), bs);
                     }
                 });
             } else {
@@ -117,7 +117,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
 
     private Strategy getStrategy(ACLMessage msg, CuratorAgent agent,
             BidSettings bs) {
-        int i = curator.getCuratorId();
+        int i = agent.getCuratorId();
         if (bs.getStrategy() != 0) {
             i = bs.getStrategy();
         }
@@ -141,8 +141,8 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
 
-                if (participatingAuctions.get(auction) != null) {
-                    myAgent.addBehaviour(getStrategy(msg, curator, auctionSettings.get(auction)));
+                if (participatingAuctions.contains(auction)) {
+                    myAgent.addBehaviour(getStrategy(msg, curator, auctionSettings.get(auction.getArtifact().getId())));
                 }
             } else {
                 block();

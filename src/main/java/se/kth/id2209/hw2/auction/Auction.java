@@ -26,6 +26,7 @@ public class Auction implements Serializable {
             Artifact item, boolean isDone, Artifact.Quality quality) {
         this.participants = participants;
         this.currentPrice = currentPrice;
+        this.lowestPrice = lowestPrice;
         this.artifact = item;
         this.isDone = isDone;
         this.quality = quality;

@@ -100,10 +100,11 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                     public void action() {
                         participatingAuctions.add(auction);
                         Random random = new Random();
-                        double maxFactor = (random.nextInt(8) + 2) / 10;
-                        int maxPrice = (int) Math.floor(auction.getCurrentPrice() * maxFactor);
+                        double maxFactor = ((double)(random.nextInt(60) + 30)) / 100;
+                        int maxPrice = (int)((float) auction.getCurrentPrice() * maxFactor);
                         int strategy = 0;
-                        BidSettings bs = new BidSettings(maxPrice, (int) Math.floor(0.7 * maxPrice), strategy);
+                        int prefPrice = (int)((float) 0.7 * maxPrice);
+                        BidSettings bs = new BidSettings(maxPrice, prefPrice, strategy);
                         auctionSettings.put(auction.getArtifact().getId(), bs);
                     }
                 });

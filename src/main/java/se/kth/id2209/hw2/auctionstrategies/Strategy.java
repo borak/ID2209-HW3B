@@ -72,8 +72,9 @@ public abstract class Strategy extends OneShotBehaviour
                 ACLMessage reply = new ACLMessage(msg.getPerformative());
                 reply.setOntology(Ontologies.AUCTION_BID);
                 reply.addReceiver(msg.getSender());
+                System.out.println("SUGGESTING PRICE " + suggestPrice + " shouldbuy=" +shouldBuy());
                 try {
-                    if (suggestPrice >= 0 && shouldBuy()) {
+                    if (suggestPrice > 0 && shouldBuy()) {
                         reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
                     } else {
                         reply.setPerformative(ACLMessage.REJECT_PROPOSAL);

@@ -33,17 +33,10 @@ public class CFPBehaviour extends OneShotBehaviour {
         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
         msg.setOntology(Ontologies.CALL_FOR_PROPOSALS);
         try {
-            //msg.setContent(auction.getArtifact().getId() + "");
             msg.setContentObject(auction);
-            /*if(receivers.isEmpty()) {
-             for(AID aid : ((ArtistManagementAgent)myAgent).fetchBidders()) {
-             receivers.add(aid);
-             }
-             } else {*/
             for (AID r : receivers) {
                 msg.addReceiver(r);
             }
-            //}
             myAgent.send(msg);
             System.out.println(myAgent.getName() + " SENDING message: "
                     + msg.getOntology() + " " + auction);

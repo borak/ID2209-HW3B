@@ -48,7 +48,6 @@ public class ArtistManagementAgent extends Agent {
             public void onWake() {
                 auctionsLock.lock();
                 try {
-                    System.out.println("WAKEWAKEWAKE START bidders="+bidders.size());
                     for(Auction auc : auctions.values()) {
                         ArtistManagementAgent.this.addBehaviour(
                                 new InformStartOfAuctionBehaviour(auc,
@@ -64,7 +63,6 @@ public class ArtistManagementAgent extends Agent {
             public void onWake() {
                 auctionsLock.lock();
                 try {
-                    System.out.println("WAKEWAKEWAKE CFP bidders="+bidders.size());
                     for(Auction auc : auctions.values()) {
                         ArtistManagementAgent.this.addBehaviour(
                                 new CFPBehaviour(auc,

@@ -35,9 +35,6 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
         ACLMessage msg = agent.receive();
 
         if (msg != null) {
-            System.out.println(myAgent.getName() + " RECIEVED message: ontology="
-                    + msg.getOntology());
-
             int item = -1, price = -1;
             try {
                 Object[] objs = (Object[]) msg.getContentObject();
@@ -53,7 +50,7 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
                 block();
                 return;
             }
-            //System.out.println("AUCTION. nr=" + auction.getParticipants().size());
+            
             if (msg.getPerformative() == ACLMessage.INFORM
                     && msg.getOntology().equalsIgnoreCase(
                             Ontologies.CALL_FOR_PROPOSALS_TIMEOUT)) {
@@ -78,10 +75,9 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
     private void handleRejectProposal(Auction auction, ACLMessage msg) {
         auction.addParticipantWhoRejected(msg.getSender());
 
-        //System.out.println("GOT REJ. nr=" + auction.getParticipantsWhichRejected().size() 
-        //    + " of " + auction.getParticipants().size());
         if (auction.getParticipantsWhichRejected().size()
                 == auction.getParticipants().size()) {
+            sendNoBidsCall(auction);
             performCFP(auction);
         }
     }
@@ -91,11 +87,10 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
             System.err.println(myAgent.getAID() + " performing CFP but no participants was found.");
             return;
         }
-        //System.out.println(myAgent.getAID() + " performing CFP.");
-        sendNoBidsCall(auction);
+        
         int newPrice = (int) ((float) auction.getCurrentPrice()
                 * priceDecrementConstant);
-        if (newPrice >= auction.getLowestPrice()) {
+        if (newPrice >= auction.getLowestPrice() && !auction.isDone()) {
             auction.setCurrentPrice(newPrice);
             auction.getParticipantsWhichRejected().clear();
             auction.CFPCounter++;

@@ -20,8 +20,9 @@ import se.kth.id2209.hw2.exhibition.CuratorAgent;
 import se.kth.id2209.hw2.util.DFUtilities;
 
 /**
- *
- * @author Kim
+ * The Artist Management Agent auctions out artifacts to any number of Curator Agents.
+ * It starts the Dutch auction, adds some artifacts to sell, and sets up delays for the start
+ *   of the auction and the first CFP.
  */
 public class ArtistManagementAgent extends Agent {
 

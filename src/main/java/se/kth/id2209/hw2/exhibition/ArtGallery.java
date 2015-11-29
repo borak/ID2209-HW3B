@@ -15,7 +15,6 @@ import se.kth.id2209.hw2.exhibition.Artifact.GENRE;
  * outside entity will have to put appropriate artifacts in this class in order
  * for any lookup to make hits.
  *
- * @author Kim
  */
 class ArtGallery {
 

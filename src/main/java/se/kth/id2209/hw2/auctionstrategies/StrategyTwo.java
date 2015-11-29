@@ -10,7 +10,6 @@ public class StrategyTwo extends Strategy
         super(msg, curatorAgent, bidSettings);
     }
 
-
     @Override
     public void action() {
         //Accept once we reach the preferred price of the bidder

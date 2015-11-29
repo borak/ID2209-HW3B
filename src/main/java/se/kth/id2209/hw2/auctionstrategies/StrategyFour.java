@@ -10,7 +10,6 @@ public class StrategyFour extends Strategy
         super(msg, curatorAgent, bidSettings);
     }
 
-
     @Override
     public void action()
     {
@@ -25,8 +24,6 @@ public class StrategyFour extends Strategy
             setShouldBuy(false);
             setSuggestPrice(getBidSettings().getMaxPrice());
         }
-
-
         proceed();
     }
 }

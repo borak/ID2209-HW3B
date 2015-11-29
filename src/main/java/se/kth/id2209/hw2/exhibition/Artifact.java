@@ -11,8 +11,7 @@ import se.kth.id2209.hw2.auction.Auction;
  * To the outside of this package it will serve as an DTO for protecting its 
  * attributes and should only only be initialized from a class within its 
  * package.
- * 
- * @author Kim
+ *
  */
 public class Artifact implements Serializable {
     private int id;

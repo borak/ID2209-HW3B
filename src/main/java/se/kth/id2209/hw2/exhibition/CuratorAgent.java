@@ -23,8 +23,6 @@ import se.kth.id2209.hw2.exhibition.Artifact.GENRE;
  * responses with the information about the various artifacts after appropriate
  * requests made by other agents.
  *
- *
- * @author Kim
  */
 @SuppressWarnings("serial")
 public class CuratorAgent extends Agent {

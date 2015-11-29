@@ -15,8 +15,7 @@ import se.kth.id2209.hw2.util.Ontologies;
 /**
  * This agent behavior is listening for artifact recommendation requests and 
  * performs appropriate responses.
- * 
- * @author Kim
+ *
  */
 class ArtifactListenerBehaviour extends CyclicBehaviour {
     AID travelGuide, profiler;

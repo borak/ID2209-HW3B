@@ -25,8 +25,6 @@ public class StrategyThree extends Strategy
             setShouldBuy(false);
             setSuggestPrice(getBidSettings().getPreferredPrice());
         }
-
-
         proceed();
     }
 }

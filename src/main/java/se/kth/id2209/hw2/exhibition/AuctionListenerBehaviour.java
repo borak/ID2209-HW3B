@@ -67,8 +67,6 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         ACLMessage msg = curator.receive(mt);
 
         if (msg != null) {
-            //System.out.println(curator.getName() + " RECIEVED message: "
-            //        + msg.getOntology());
             String ontology = msg.getOntology();
 
             if (ontology.equalsIgnoreCase(Ontologies.AUCTION_START)) {
@@ -94,7 +92,6 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
                 knownAuctions.add(auction);
-
                 myAgent.addBehaviour(new OneShotBehaviour() {
                     @Override
                     public void action() {
@@ -157,9 +154,6 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
-                /*if (participatingAuctions.get(auction) != null) {
-                 participatingAuctions.remove(auction);
-                 }*/
             } else {
                 block();
             }
@@ -195,9 +189,6 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
-                //boughtAuctions.add(auction);
-                //participatingAuctions.remove(auction);
-                //knownAuctions.remove(auction);
             } else {
                 block();
             }
@@ -210,8 +201,6 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         try {
             if (msg.getContentObject() != null && msg.getContentObject() instanceof Auction) {
                 final Auction auction = (Auction) msg.getContentObject();
-                //participatingAuctions.remove(auction);
-                //knownAuctions.remove(auction);
             } else {
                 block();
             }

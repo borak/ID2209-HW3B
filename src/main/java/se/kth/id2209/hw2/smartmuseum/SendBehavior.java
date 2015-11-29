@@ -18,7 +18,7 @@ import se.kth.id2209.hw2.util.SList;
 /**
  * This behavior sends recommendations that the tour agent has put togheter to
  * the corresponding user that had had requested recommendations.
- * 
+ *
  * @author Kim
  */
 class SendBehavior extends OneShotBehaviour {

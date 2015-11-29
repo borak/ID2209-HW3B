@@ -3,7 +3,7 @@ package se.kth.id2209.hw2.util;
 /**
  * In this class the ontologies used in the application are kept. 
  * 
- * @author Kim
+ *
  */
 public class Ontologies {
     public final static String ARTIFACT_REQUEST_INFO = "artifact request";

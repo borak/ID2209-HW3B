@@ -14,7 +14,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
  * This class provides some utilities for communicating via the DFService. More
  * specifically, searching for agents.
  * 
- * @author Kim
+ *
  */
 public class DFUtilities {
 

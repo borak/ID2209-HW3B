@@ -45,7 +45,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         this.curator = curator;
     }
 
-    
+
     private Auction getAuction(Auction auction) {
         partAucLock.lock();
         try {
@@ -66,7 +66,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
     @Override
     public void action() {
         ACLMessage msg = curator.receive(mt);
-
+        
         if (msg != null) {
             String ontology = msg.getOntology();
 

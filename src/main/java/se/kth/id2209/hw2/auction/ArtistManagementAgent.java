@@ -1,9 +1,12 @@
 package se.kth.id2209.hw2.auction;
 
+import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.ProfileImpl;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.WakerBehaviour;
+import jade.core.Runtime;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
@@ -15,6 +18,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
+import jade.wrapper.AgentContainer;
+import jade.wrapper.AgentController;
+import jade.wrapper.ControllerException;
 import se.kth.id2209.hw2.exhibition.Artifact;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 import se.kth.id2209.hw2.util.DFUtilities;
@@ -40,7 +48,29 @@ public class ArtistManagementAgent extends Agent {
         for(AID aid : fetchBidders()) {
             bidders.add(aid);
         }
-        
+        Runtime runtime = Runtime.instance();
+        ProfileImpl p1 = new ProfileImpl();
+        p1.setParameter("container-name", "auctioneer-Agent-Container");
+//        ProfileImpl p2 = new ProfileImpl();
+//        p2.setParameter("container-name", "participants-Louvre-Container");
+//        AgentContainer containers[] = new jade.wrapper.AgentContainer[2];
+        AgentContainer auctioneerContainer =  runtime.createAgentContainer(p1);
+
+
+//        containers[1] =  runtime.createAgentContainer(new ProfileImpl());
+        try
+        {
+            AgentController ac = auctioneerContainer.createNewAgent("testaren","se.kth.id2209.hw2.exhibition.CuratorAgent", null);
+//            containers[0].start();
+            ac.start();
+        } catch (ControllerException e)
+        {
+            e.printStackTrace();
+        }
+
+
+//        sendRequest(new Action(getAMS(), new QueryPlatformLocationsAction()));
+
         ParallelBehaviour pbr = new ParallelBehaviour(this,
                 ParallelBehaviour.WHEN_ALL);
         pbr.addSubBehaviour(new DutchAuctioneerBehaviour(this, auctions));

@@ -45,6 +45,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
         this.curator = curator;
     }
 
+    
     private Auction getAuction(Auction auction) {
         partAucLock.lock();
         try {

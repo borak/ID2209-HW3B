@@ -1,12 +1,16 @@
 package se.kth.id2209.hw2.exhibition;
 
 import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
 import jade.content.onto.OntologyException;
 import jade.content.onto.basic.Result;
 import jade.core.Agent;
 import jade.core.Location;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.domain.FIPANames;
+import jade.domain.FIPANames.ContentLanguage;
+import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.domain.mobility.MobilityOntology;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -38,14 +42,19 @@ public class MobilityListener extends Behaviour {
             try {
                 r = (Result) myAgent.getContentManager().extractContent(msg);
             } catch (Codec.CodecException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             } catch (OntologyException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
-            jade.util.leap.Iterator it = r.getItems().iterator();
-            while (it.hasNext()) {
-                Location loc = (Location) it.next();
-                locations.put(loc.getName(), loc);
+            jade.util.leap.Iterator it = null;
+            try {
+                it = r.getItems().iterator();
+                while (it.hasNext()) {
+                    Location loc = (Location) it.next();
+                    locations.put(loc.getName(), loc);
+                }
+            } catch (Exception e) {
+                block();
             }
         }
     }
@@ -54,7 +63,5 @@ public class MobilityListener extends Behaviour {
     public boolean done() {
         return !locations.isEmpty();
     }
-    
-    
 
 }

@@ -31,6 +31,7 @@ import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
 import jade.domain.mobility.MobileAgentDescription;
 import jade.domain.mobility.MobilityOntology;
+//import jade.domain.mobility.MobilityOntology;
 import jade.domain.mobility.MoveAction;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentContainer;
@@ -94,36 +95,35 @@ public class CuratorAgent extends Agent {
             fe.printStackTrace();
         }
 
-        ParallelBehaviour pbr = new ParallelBehaviour(this,
+        final ParallelBehaviour pbr = new ParallelBehaviour(this,
                 ParallelBehaviour.WHEN_ALL);
         pbr.addSubBehaviour(new ArtifactListenerBehaviour(this));
         pbr.addSubBehaviour(new AuctionListenerBehaviour(this));
         if (curatorId == UniqueCuratorIdGiver.FIRST_ID) {
             pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
         }
-        SequentialBehaviour sb = new SequentialBehaviour();
+        final SequentialBehaviour sb = new SequentialBehaviour();
         sb.addSubBehaviour(new MobilityListener(this, containerMap));
-        sb.addSubBehaviour(new OneShotBehaviour() {
+        sb.addSubBehaviour(new OneShotBehaviour(this) {
             @Override
             public void action() {
                 //flytta, klona, faster, stronger, better
-//                doClone((ContainerID)containerMap.get(index), getLocalName() + "_clone" + index);
-                try {
-                    Thread.sleep(2000);
-                    //Register the SL content language
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(CuratorAgent.class.getName()).log(Level.SEVERE, null, ex);
-                }
                 //flytta
-                AID aid = new AID(getName(), AID.ISLOCALNAME);
-                Location dest = (Location) containerMap.get(containerName);
-                System.out.println("ATTEMPTING MOVING ATTEMPTING MOVING ATTEMPTING" + " size=" + containerMap.size());
+                final Location dest = (Location) containerMap.get(containerName);
+                System.out.println("1 ATTEMPTING MOVING from=" + here() + " to " + dest);
                 if (dest != null) {
-                    System.out.println("MOVING MOVING MOVING MOVING MOVING MOVING ");
                     doMove(dest);
                 }
-
+                
                 //clone
+                pbr.addSubBehaviour(new OneShotBehaviour(myAgent) {
+
+                    @Override
+                    public void action() {
+                        CuratorAgent.this.doClone(dest, getLocalName() + "_clone1");
+                        CuratorAgent.this.doClone(dest, getLocalName() + "_clone2");
+                    }
+                });
             }
         });
         sb.addSubBehaviour(pbr);
@@ -161,15 +161,6 @@ public class CuratorAgent extends Agent {
     }
 
     private void requestContainers() {
-        try {
-            Thread.sleep(1000);
-            //Register the SL content language
-        } catch (InterruptedException ex) {
-            Logger.getLogger(CuratorAgent.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        //Register the mobility ontology
-//        getContentManager().registerOntology(JADEManagementOntology.getInstance());
         // Send a request to the AMS to obtain the Containers
         Action action = new Action(getAMS(), new QueryPlatformLocationsAction());
         ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
@@ -200,7 +191,7 @@ public class CuratorAgent extends Agent {
         try {
             DFService.deregister(this);
         } catch (FIPAException fe) {
-            fe.printStackTrace();
+            //fe.printStackTrace();
         }
         System.out.println("Agent " + getAID().getName() + " is terminating.");
     }

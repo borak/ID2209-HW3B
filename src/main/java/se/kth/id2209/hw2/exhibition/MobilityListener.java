@@ -6,6 +6,7 @@ import jade.content.onto.basic.Result;
 import jade.core.Agent;
 import jade.core.Location;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.domain.mobility.MobilityOntology;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
@@ -28,7 +29,8 @@ public class MobilityListener extends OneShotBehaviour
 
     @Override
     public void action() {
-        ACLMessage msg = myAgent.receive(MessageTemplate.MatchSender(myAgent.getAMS()));
+        ACLMessage msg = myAgent.receive(MessageTemplate.MatchOntology((MobilityOntology.getInstance().getName())));
+
 
         if (msg != null) {
 

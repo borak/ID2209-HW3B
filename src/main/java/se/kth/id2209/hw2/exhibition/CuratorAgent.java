@@ -62,6 +62,9 @@ public class CuratorAgent extends Agent {
         artGallery = ArtGallery.getInstance();
         containerName = getLocalName()+"-Agent-Container";
 
+        getContentManager().registerOntology(MobilityOntology.getInstance());
+        getContentManager().registerOntology(JADEManagementOntology.getInstance());
+        
         Runtime runtime = Runtime.instance();
         ProfileImpl p = new ProfileImpl();
         p.setParameter("container-name", containerName);
@@ -181,7 +184,7 @@ public class CuratorAgent extends Agent {
         Action action = new Action(getAMS(), new QueryPlatformLocationsAction());
         ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
         request.addReceiver(getAMS());
-//        request.setOntology(JADEManagementOntology.getInstance().getName());
+        request.setOntology(JADEManagementOntology.getInstance().getName());
         request.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
         request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 

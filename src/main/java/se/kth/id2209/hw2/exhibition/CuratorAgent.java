@@ -42,7 +42,10 @@ public class CuratorAgent extends Agent {
     private final static int DB_CHECKER_DELAY = 100;
     public static final String DF_NAME = "Curator-agent";
     private static int curatorId;
-
+    private List containerList = new ArrayList(); 
+    private AgentContainer currentContainer = null;
+    private String containerName;
+    
     /**
      * Initializes its state and the ArtGallery by checking and parsing a 
      * database of the artifacts and by adding a message listener for the
@@ -52,17 +55,13 @@ public class CuratorAgent extends Agent {
     protected void setup() {
         curatorId = UniqueCuratorIdGiver.createUniqueId();
         artGallery = ArtGallery.getInstance();
+        containerName = getLocalName()+"-Agent-Container";
 
         Runtime runtime = Runtime.instance();
-        ProfileImpl p1 = new ProfileImpl();
-        p1.setParameter("container-name", "curator1-Agent-Container");
-        ProfileImpl p2 = new ProfileImpl();
-        p2.setParameter("container-name", "curator2-Agent-Container");
-        AgentContainer curatorContainer1 =  runtime.createAgentContainer(p1);
-        AgentContainer curatorContainer2 =  runtime.createAgentContainer(p2);
-
-
-
+        ProfileImpl p = new ProfileImpl();
+        p.setParameter("container-name", containerName);
+        AgentContainer curatorContainer =  runtime.createAgentContainer(p);
+        
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
 
@@ -84,6 +83,7 @@ public class CuratorAgent extends Agent {
         if(curatorId == UniqueCuratorIdGiver.FIRST_ID) {
             pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
         }
+        pbr.addSubBehaviour(new MobilityListener(this));
         addBehaviour(pbr);
     }
     

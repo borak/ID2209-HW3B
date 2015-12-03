@@ -116,12 +116,7 @@ public class CuratorAgent extends Agent {
                 //flytta
                 AID aid = new AID(getName() , AID.ISLOCALNAME);
                 Location dest = (Location) containerMap.get(containerName);
-                MobileAgentDescription mad = new MobileAgentDescription();
-                mad.setName(aid);
-                mad.setDestination(dest);
-                MoveAction ma = new MoveAction();
-                ma.setMobileAgentDescription(mad);
-                sendRequest(new Action(aid, ma));
+                if (dest != null) doMove(dest);
 
 
                 //clone
@@ -133,32 +128,6 @@ public class CuratorAgent extends Agent {
         addBehaviour(sb);
     }
 
-    /**
-     * Action action = new Action(getAMS(), new QueryPlatformLocationsAction());
-		ACLMessage request = new ACLMessage(ACLMessage.REQUEST); 
-		request.addReceiver(getAMS()); 
-		request.setOntology(JADEManagementOntology.getInstance().getName());
-		request.setLanguage(ContentLanguage.FIPA_SL);
-		request.setProtocol(InteractionProtocol.FIPA_REQUEST);
-     * @param action 
-     */
-
-    void sendRequest(Action action) {
-        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-		request.addReceiver(getAMS()); 
-		request.setOntology(JADEManagementOntology.getInstance().getName());
-		request.setLanguage(new SLCodec().getName());//ContentLanguage.FIPA_SL);
-		request.setProtocol(InteractionProtocol.FIPA_REQUEST);
-                send(request);
-        /*request.setLanguage(new SLCodec().getName());
-        request.setOntology(MobilityOntology.getInstance().getName());
-        try {
-            getContentManager().fillContent(request, action);
-            request.addReceiver(action.getActor());
-            send(request);
-        }
-        catch (Exception ex) { ex.printStackTrace(); }*/
-    }
     
     int getCuratorId() {
         return curatorId;

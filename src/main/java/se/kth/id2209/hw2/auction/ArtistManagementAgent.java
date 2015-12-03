@@ -20,6 +20,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
+import jade.domain.mobility.CloneAction;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.ControllerException;
@@ -55,7 +56,7 @@ public class ArtistManagementAgent extends Agent {
 //        p2.setParameter("container-name", "participants-Louvre-Container");
 //        AgentContainer containers[] = new jade.wrapper.AgentContainer[2];
         AgentContainer auctioneerContainer =  runtime.createAgentContainer(p1);
-
+       
 
 //        containers[1] =  runtime.createAgentContainer(new ProfileImpl());
         try

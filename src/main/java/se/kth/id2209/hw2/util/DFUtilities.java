@@ -59,8 +59,8 @@ public class DFUtilities {
             for (i = 0; i < result.length; i++) {
                 agents[i] = result[i].getName();
             }
-
             return agents[0];
+            //return agents.length==0?null:agents[0];
         } catch (Exception fe) {
             fe.printStackTrace();
         }

@@ -25,6 +25,8 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPANames;
+import jade.domain.FIPANames.ContentLanguage;
+import jade.domain.FIPANames.InteractionProtocol;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
 import jade.domain.mobility.MobileAgentDescription;
@@ -64,6 +66,7 @@ public class CuratorAgent extends Agent {
 
         getContentManager().registerOntology(MobilityOntology.getInstance());
         getContentManager().registerOntology(JADEManagementOntology.getInstance());
+        getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
         
         Runtime runtime = Runtime.instance();
         ProfileImpl p = new ProfileImpl();
@@ -130,17 +133,31 @@ public class CuratorAgent extends Agent {
         addBehaviour(sb);
     }
 
+    /**
+     * Action action = new Action(getAMS(), new QueryPlatformLocationsAction());
+		ACLMessage request = new ACLMessage(ACLMessage.REQUEST); 
+		request.addReceiver(getAMS()); 
+		request.setOntology(JADEManagementOntology.getInstance().getName());
+		request.setLanguage(ContentLanguage.FIPA_SL);
+		request.setProtocol(InteractionProtocol.FIPA_REQUEST);
+     * @param action 
+     */
 
     void sendRequest(Action action) {
         ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-        request.setLanguage(new SLCodec().getName());
+		request.addReceiver(getAMS()); 
+		request.setOntology(JADEManagementOntology.getInstance().getName());
+		request.setLanguage(new SLCodec().getName());//ContentLanguage.FIPA_SL);
+		request.setProtocol(InteractionProtocol.FIPA_REQUEST);
+                send(request);
+        /*request.setLanguage(new SLCodec().getName());
         request.setOntology(MobilityOntology.getInstance().getName());
         try {
             getContentManager().fillContent(request, action);
             request.addReceiver(action.getActor());
             send(request);
         }
-        catch (Exception ex) { ex.printStackTrace(); }
+        catch (Exception ex) { ex.printStackTrace(); }*/
     }
     
     int getCuratorId() {
@@ -175,7 +192,7 @@ public class CuratorAgent extends Agent {
     private void requestContainers()
     {
         //Register the SL content language
-        getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
+        
         //Register the mobility ontology
 //        getContentManager().registerOntology(JADEManagementOntology.getInstance());
 

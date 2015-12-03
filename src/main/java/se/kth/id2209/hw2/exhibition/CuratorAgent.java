@@ -2,10 +2,11 @@ package se.kth.id2209.hw2.exhibition;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,11 +14,11 @@ import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.OntologyException;
 import jade.content.onto.basic.Action;
-import jade.core.Agent;
-import jade.core.ProfileImpl;
+import jade.core.*;
 import jade.core.Runtime;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -26,6 +27,9 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPANames;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
+import jade.domain.mobility.MobileAgentDescription;
+import jade.domain.mobility.MobilityOntology;
+import jade.domain.mobility.MoveAction;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentContainer;
 import se.kth.id2209.hw2.exhibition.Artifact.GENRE;
@@ -43,7 +47,7 @@ public class CuratorAgent extends Agent {
     private final static int DB_CHECKER_DELAY = 100;
     public static final String DF_NAME = "Curator-agent";
     private static int curatorId;
-    private List containerList = new ArrayList();
+    private Map containerMap = new HashMap();
     private AgentContainer currentContainer = null;
     private String containerName;
 
@@ -93,8 +97,47 @@ public class CuratorAgent extends Agent {
         if(curatorId == UniqueCuratorIdGiver.FIRST_ID) {
             pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
         }
-        pbr.addSubBehaviour(new MobilityListener(this, containerList));
-        addBehaviour(pbr);
+        SequentialBehaviour sb = new SequentialBehaviour();
+        sb.addSubBehaviour(new MobilityListener(this, containerMap));
+        sb.addSubBehaviour(new OneShotBehaviour()
+        {
+            @Override
+            public void action()
+            {
+                //flytta, klona, faster, stronger, better
+//                doClone((ContainerID)containerMap.get(index), getLocalName() + "_clone" + index);
+
+                //flytta
+                AID aid = new AID(getName() , AID.ISLOCALNAME);
+                Location dest = (Location) containerMap.get(containerName);
+                MobileAgentDescription mad = new MobileAgentDescription();
+                mad.setName(aid);
+                mad.setDestination(dest);
+                MoveAction ma = new MoveAction();
+                ma.setMobileAgentDescription(mad);
+                sendRequest(new Action(aid, ma));
+
+
+                //clone
+
+
+            }
+        });
+        sb.addSubBehaviour(pbr);
+        addBehaviour(sb);
+    }
+
+
+    void sendRequest(Action action) {
+        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+        request.setLanguage(new SLCodec().getName());
+        request.setOntology(MobilityOntology.getInstance().getName());
+        try {
+            getContentManager().fillContent(request, action);
+            request.addReceiver(action.getActor());
+            send(request);
+        }
+        catch (Exception ex) { ex.printStackTrace(); }
     }
     
     int getCuratorId() {
@@ -131,14 +174,14 @@ public class CuratorAgent extends Agent {
         //Register the SL content language
         getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
         //Register the mobility ontology
-        getContentManager().registerOntology(JADEManagementOntology.getInstance());
+//        getContentManager().registerOntology(JADEManagementOntology.getInstance());
 
 
         // Send a request to the AMS to obtain the Containers
         Action action = new Action(getAMS(), new QueryPlatformLocationsAction());
         ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
         request.addReceiver(getAMS());
-        request.setOntology(JADEManagementOntology.getInstance().getName());
+//        request.setOntology(JADEManagementOntology.getInstance().getName());
         request.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
         request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 

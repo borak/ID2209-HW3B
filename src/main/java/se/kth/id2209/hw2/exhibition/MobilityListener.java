@@ -3,7 +3,9 @@ package se.kth.id2209.hw2.exhibition;
 import jade.content.lang.Codec;
 import jade.content.onto.OntologyException;
 import jade.content.onto.basic.Result;
+import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -17,10 +19,13 @@ import se.kth.id2209.hw2.util.Ontologies;
  *
  * @author Kim
  */
-public class MobilityListener extends CyclicBehaviour {
+public class MobilityListener extends OneShotBehaviour
+{
+    List loc;
 
-    MobilityListener(CuratorAgent curator) {
-        super(curator);
+    MobilityListener(Agent agent, List locations) {
+        super(agent);
+        loc = locations;
     }
 
     @Override
@@ -30,8 +35,7 @@ public class MobilityListener extends CyclicBehaviour {
         if (msg != null) {
             try {
                 Result r = (Result) myAgent.getContentManager().extractContent(msg);
-                List containerList = (List) r.getValue();
-                //send
+                loc = (List) r.getValue();
             } catch (Codec.CodecException ex) {
                 Logger.getLogger(MobilityListener.class.getName()).log(Level.SEVERE, null, ex);
             } catch (OntologyException ex) {

@@ -41,6 +41,7 @@ public class ArtistManagementAgent extends Agent {
     private static final int auctionsCFPDelay = 8000; 
     private final List<AID> bidders = new ArrayList();
 
+
     @Override
     protected void setup() {
         registerService();
@@ -53,6 +54,7 @@ public class ArtistManagementAgent extends Agent {
         p1.setParameter("container-name", "auctioneer-Agent-Container");
 
         AgentContainer artistManagementContainer =  runtime.createAgentContainer(p1);
+
 
 //        this.doMove();
 

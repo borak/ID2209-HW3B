@@ -10,12 +10,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jade.core.Agent;
+import jade.core.ProfileImpl;
+import jade.core.Runtime;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.wrapper.AgentContainer;
 import se.kth.id2209.hw2.exhibition.Artifact.GENRE;
 
 /**
@@ -41,6 +44,16 @@ public class CuratorAgent extends Agent {
     protected void setup() {
         curatorId = UniqueCuratorIdGiver.createUniqueId();
         artGallery = ArtGallery.getInstance();
+
+        Runtime runtime = Runtime.instance();
+        ProfileImpl p1 = new ProfileImpl();
+        p1.setParameter("container-name", "curator1-Agent-Container");
+        ProfileImpl p2 = new ProfileImpl();
+        p2.setParameter("container-name", "curator2-Agent-Container");
+        AgentContainer curatorContainer1 =  runtime.createAgentContainer(p1);
+        AgentContainer curatorContainer2 =  runtime.createAgentContainer(p2);
+
+        
 
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());

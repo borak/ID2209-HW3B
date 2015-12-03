@@ -64,6 +64,7 @@ public class ArtistManagementAgent extends Agent {
             AgentController ac = auctioneerContainer.createNewAgent("testaren","se.kth.id2209.hw2.exhibition.CuratorAgent", null);
 //            containers[0].start();
             ac.start();
+
         } catch (ControllerException e)
         {
             e.printStackTrace();

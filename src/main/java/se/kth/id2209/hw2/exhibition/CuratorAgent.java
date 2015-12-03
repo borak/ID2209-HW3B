@@ -9,13 +9,24 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.OntologyException;
+import jade.content.onto.basic.Action;
 import jade.core.Agent;
+import jade.core.ProfileImpl;
+import jade.core.Runtime;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPANames;
+import jade.domain.JADEAgentManagement.JADEManagementOntology;
+import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
+import jade.lang.acl.ACLMessage;
+import jade.wrapper.AgentContainer;
 import se.kth.id2209.hw2.exhibition.Artifact.GENRE;
 
 /**
@@ -41,6 +52,16 @@ public class CuratorAgent extends Agent {
     protected void setup() {
         curatorId = UniqueCuratorIdGiver.createUniqueId();
         artGallery = ArtGallery.getInstance();
+
+        Runtime runtime = Runtime.instance();
+        ProfileImpl p1 = new ProfileImpl();
+        p1.setParameter("container-name", "curator1-Agent-Container");
+        ProfileImpl p2 = new ProfileImpl();
+        p2.setParameter("container-name", "curator2-Agent-Container");
+        AgentContainer curatorContainer1 =  runtime.createAgentContainer(p1);
+        AgentContainer curatorContainer2 =  runtime.createAgentContainer(p2);
+
+
 
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
@@ -93,6 +114,35 @@ public class CuratorAgent extends Agent {
                 Logger.getLogger(CuratorAgent.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+
+    private void requestContainers()
+    {
+        //Register the SL content language
+        getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
+        //Register the mobility ontology
+        getContentManager().registerOntology(JADEManagementOntology.getInstance());
+
+
+        // Send a request to the AMS to obtain the Containers
+        Action action = new Action(getAMS(), new QueryPlatformLocationsAction());
+        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+        request.addReceiver(getAMS());
+        request.setOntology(JADEManagementOntology.getInstance().getName());
+        request.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
+        request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+
+        try
+        {
+            getContentManager().fillContent(request, action);
+        } catch (Codec.CodecException e)
+        {
+            e.printStackTrace();
+        } catch (OntologyException e)
+        {
+            e.printStackTrace();
+        }
+        send(request);
     }
 
     public Artifact getArtifact(int id) {

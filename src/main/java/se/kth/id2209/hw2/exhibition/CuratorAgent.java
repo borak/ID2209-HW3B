@@ -108,35 +108,20 @@ public class CuratorAgent extends Agent {
             public void action() {
                 //flytta, klona, faster, stronger, better
 //                doClone((ContainerID)containerMap.get(index), getLocalName() + "_clone" + index);
-
+                try {
+                    Thread.sleep(2000);
+                    //Register the SL content language
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(CuratorAgent.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 //flytta
                 AID aid = new AID(getName(), AID.ISLOCALNAME);
                 Location dest = (Location) containerMap.get(containerName);
+                System.out.println("ATTEMPTING MOVING ATTEMPTING MOVING ATTEMPTING" + " size=" + containerMap.size());
                 if (dest != null) {
+                    System.out.println("MOVING MOVING MOVING MOVING MOVING MOVING ");
                     doMove(dest);
                 }
-
-                String destName = dest.getName();
-                MobileAgentDescription mad = new MobileAgentDescription();
-                mad.setName(aid);
-                mad.setDestination(dest);
-                MoveAction ma = new MoveAction();
-                ma.setMobileAgentDescription(mad);
-                Action action = new Action(aid, ma);
-                ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-                request.addReceiver(getAMS());
-                request.setOntology(JADEManagementOntology.getInstance().getName());
-                request.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
-                request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-
-                try {
-                    getContentManager().fillContent(request, action);
-                } catch (Codec.CodecException e) {
-                    e.printStackTrace();
-                } catch (OntologyException e) {
-                    e.printStackTrace();
-                }
-                send(request);
 
                 //clone
             }
@@ -176,7 +161,12 @@ public class CuratorAgent extends Agent {
     }
 
     private void requestContainers() {
-        //Register the SL content language
+        try {
+            Thread.sleep(1000);
+            //Register the SL content language
+        } catch (InterruptedException ex) {
+            Logger.getLogger(CuratorAgent.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         //Register the mobility ontology
 //        getContentManager().registerOntology(JADEManagementOntology.getInstance());

@@ -5,6 +5,7 @@ import jade.content.onto.OntologyException;
 import jade.content.onto.basic.Result;
 import jade.core.Agent;
 import jade.core.Location;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.mobility.MobilityOntology;
 import jade.lang.acl.ACLMessage;
@@ -18,8 +19,8 @@ import java.util.logging.Logger;
  *
  * @author Kim
  */
-public class MobilityListener extends OneShotBehaviour
-{
+public class MobilityListener extends Behaviour {
+
     Map<String, Location> locations;
 
     MobilityListener(Agent agent, Map<String, Location> locations) {
@@ -31,28 +32,29 @@ public class MobilityListener extends OneShotBehaviour
     public void action() {
         ACLMessage msg = myAgent.receive(MessageTemplate.MatchOntology((MobilityOntology.getInstance().getName())));
 
-
         if (msg != null) {
 
             Result r = null;
-            try
-            {
+            try {
                 r = (Result) myAgent.getContentManager().extractContent(msg);
-            } catch (Codec.CodecException e)
-            {
+            } catch (Codec.CodecException e) {
                 e.printStackTrace();
-            } catch (OntologyException e)
-            {
+            } catch (OntologyException e) {
                 e.printStackTrace();
             }
             jade.util.leap.Iterator it = r.getItems().iterator();
-                while (it.hasNext()) {
-                    Location loc = (Location)it.next();
-                    locations.put(loc.getName(), loc);
-                }
+            while (it.hasNext()) {
+                Location loc = (Location) it.next();
+                locations.put(loc.getName(), loc);
             }
-
         }
+    }
 
+    @Override
+    public boolean done() {
+        return !locations.isEmpty();
+    }
+    
+    
 
 }

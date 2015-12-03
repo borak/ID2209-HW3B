@@ -20,7 +20,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
-import jade.domain.mobility.CloneAction;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.ControllerException;
@@ -52,23 +51,22 @@ public class ArtistManagementAgent extends Agent {
         Runtime runtime = Runtime.instance();
         ProfileImpl p1 = new ProfileImpl();
         p1.setParameter("container-name", "auctioneer-Agent-Container");
-//        ProfileImpl p2 = new ProfileImpl();
-//        p2.setParameter("container-name", "participants-Louvre-Container");
-//        AgentContainer containers[] = new jade.wrapper.AgentContainer[2];
-        AgentContainer auctioneerContainer =  runtime.createAgentContainer(p1);
-       
+
+        AgentContainer artistManagementContainer =  runtime.createAgentContainer(p1);
+
+//        this.doMove();
 
 //        containers[1] =  runtime.createAgentContainer(new ProfileImpl());
-        try
-        {
-            AgentController ac = auctioneerContainer.createNewAgent("testaren","se.kth.id2209.hw2.exhibition.CuratorAgent", null);
+//        try
+//        {
+//            AgentController ac = artistManagementContainer.createNewAgent("testaren","se.kth.id2209.hw2.exhibition.CuratorAgent", null);
 //            containers[0].start();
-            ac.start();
+//            ac.start();
 
-        } catch (ControllerException e)
-        {
-            e.printStackTrace();
-        }
+//        } catch (ControllerException e)
+//        {
+//            e.printStackTrace();
+//        }
 
 
 //        sendRequest(new Action(getAMS(), new QueryPlatformLocationsAction()));

@@ -25,6 +25,8 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPANames;
+import jade.domain.FIPANames.ContentLanguage;
+import jade.domain.FIPANames.InteractionProtocol;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
 import jade.domain.mobility.MobileAgentDescription;
@@ -53,27 +55,26 @@ public class CuratorAgent extends Agent {
 
     /**
      * Initializes its state and the ArtGallery by checking and parsing a
-     * database of the artifacts and by adding a message listener for the
-     * agents incomming message requests.
+     * database of the artifacts and by adding a message listener for the agents
+     * incomming message requests.
      */
     @Override
     protected void setup() {
         curatorId = UniqueCuratorIdGiver.createUniqueId();
         artGallery = ArtGallery.getInstance();
-        containerName = getLocalName()+"-Agent-Container";
+        containerName = getLocalName() + "-Agent-Container";
 
         getContentManager().registerOntology(MobilityOntology.getInstance());
         getContentManager().registerOntology(JADEManagementOntology.getInstance());
-        
+        getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
+
         Runtime runtime = Runtime.instance();
         ProfileImpl p = new ProfileImpl();
         p.setParameter("container-name", containerName);
-        AgentContainer curatorContainer =  runtime.createAgentContainer(p);
-        addBehaviour(new OneShotBehaviour()
-        {
+        AgentContainer curatorContainer = runtime.createAgentContainer(p);
+        addBehaviour(new OneShotBehaviour() {
             @Override
-            public void action()
-            {
+            public void action() {
                 requestContainers();
 
             }
@@ -84,7 +85,7 @@ public class CuratorAgent extends Agent {
 
         ServiceDescription sd = new ServiceDescription();
         sd.setType(DF_NAME);
-        sd.setName(getLocalName()+curatorId);
+        sd.setName(getLocalName() + curatorId);
         dfd.addServices(sd);
 
         try {
@@ -97,44 +98,63 @@ public class CuratorAgent extends Agent {
                 ParallelBehaviour.WHEN_ALL);
         pbr.addSubBehaviour(new ArtifactListenerBehaviour(this));
         pbr.addSubBehaviour(new AuctionListenerBehaviour(this));
-        if(curatorId == UniqueCuratorIdGiver.FIRST_ID) {
+        if (curatorId == UniqueCuratorIdGiver.FIRST_ID) {
             pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
         }
         SequentialBehaviour sb = new SequentialBehaviour();
         sb.addSubBehaviour(new MobilityListener(this, containerMap));
-        sb.addSubBehaviour(new OneShotBehaviour()
-        {
+        sb.addSubBehaviour(new OneShotBehaviour() {
             @Override
-            public void action()
-            {
+            public void action() {
                 //flytta, klona, faster, stronger, better
 //                doClone((ContainerID)containerMap.get(index), getLocalName() + "_clone" + index);
 
                 //flytta
-                AID aid = new AID(getName() , AID.ISLOCALNAME);
+                AID aid = new AID(getName(), AID.ISLOCALNAME);
                 Location dest = (Location) containerMap.get(containerName);
-                if (dest != null) doMove(dest);
+                if (dest != null) {
+                    doMove(dest);
+                }
 
+                String destName = dest.getName();
+                MobileAgentDescription mad = new MobileAgentDescription();
+                mad.setName(aid);
+                mad.setDestination(dest);
+                MoveAction ma = new MoveAction();
+                ma.setMobileAgentDescription(mad);
+                Action action = new Action(aid, ma);
+                ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+                request.addReceiver(getAMS());
+                request.setOntology(JADEManagementOntology.getInstance().getName());
+                request.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
+                request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+
+                try {
+                    getContentManager().fillContent(request, action);
+                } catch (Codec.CodecException e) {
+                    e.printStackTrace();
+                } catch (OntologyException e) {
+                    e.printStackTrace();
+                }
+                send(request);
 
                 //clone
-
-
             }
         });
         sb.addSubBehaviour(pbr);
         addBehaviour(sb);
     }
 
-    
     int getCuratorId() {
         return curatorId;
     }
 
     /**
-     * This behavior is performing the parsing of the database's content as 
+     * This behavior is performing the parsing of the database's content as
      * Artifact objects to the ArtGallery.
      */
     private class DatabaseChecker extends WakerBehaviour {
+
         private static final String DB_PATH = "src/main/resources/db.txt";
 
         public DatabaseChecker(Agent a, long timeout) {
@@ -155,14 +175,11 @@ public class CuratorAgent extends Agent {
         }
     }
 
-    private void requestContainers()
-    {
+    private void requestContainers() {
         //Register the SL content language
-        getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
+
         //Register the mobility ontology
 //        getContentManager().registerOntology(JADEManagementOntology.getInstance());
-
-
         // Send a request to the AMS to obtain the Containers
         Action action = new Action(getAMS(), new QueryPlatformLocationsAction());
         ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
@@ -171,14 +188,11 @@ public class CuratorAgent extends Agent {
         request.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
         request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
-        try
-        {
+        try {
             getContentManager().fillContent(request, action);
-        } catch (Codec.CodecException e)
-        {
+        } catch (Codec.CodecException e) {
             e.printStackTrace();
-        } catch (OntologyException e)
-        {
+        } catch (OntologyException e) {
             e.printStackTrace();
         }
         send(request);
@@ -209,12 +223,12 @@ public class CuratorAgent extends Agent {
         return artGallery.getArtifactNameList(genre);
     }
 
-	public ArrayList<Integer> getArtifactIdList(ArrayList<GENRE> genres) {
-		ArrayList<Integer> artIds = new ArrayList<Integer>();
-		for (GENRE genre : genres) {
-			artIds.addAll(artGallery.getArtifactIdList(genre));
-		}
-		return artIds;		
-	}
+    public ArrayList<Integer> getArtifactIdList(ArrayList<GENRE> genres) {
+        ArrayList<Integer> artIds = new ArrayList<Integer>();
+        for (GENRE genre : genres) {
+            artIds.addAll(artGallery.getArtifactIdList(genre));
+        }
+        return artIds;
+    }
 
 }

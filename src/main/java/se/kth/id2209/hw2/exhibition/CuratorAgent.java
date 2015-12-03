@@ -16,6 +16,7 @@ import jade.content.onto.basic.Action;
 import jade.core.Agent;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
@@ -42,12 +43,12 @@ public class CuratorAgent extends Agent {
     private final static int DB_CHECKER_DELAY = 100;
     public static final String DF_NAME = "Curator-agent";
     private static int curatorId;
-    private List containerList = new ArrayList(); 
+    private List containerList = new ArrayList();
     private AgentContainer currentContainer = null;
     private String containerName;
-    
+
     /**
-     * Initializes its state and the ArtGallery by checking and parsing a 
+     * Initializes its state and the ArtGallery by checking and parsing a
      * database of the artifacts and by adding a message listener for the
      * agents incomming message requests.
      */
@@ -61,7 +62,16 @@ public class CuratorAgent extends Agent {
         ProfileImpl p = new ProfileImpl();
         p.setParameter("container-name", containerName);
         AgentContainer curatorContainer =  runtime.createAgentContainer(p);
-        
+        addBehaviour(new OneShotBehaviour()
+        {
+            @Override
+            public void action()
+            {
+                requestContainers();
+
+            }
+        });
+
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
 
@@ -83,7 +93,7 @@ public class CuratorAgent extends Agent {
         if(curatorId == UniqueCuratorIdGiver.FIRST_ID) {
             pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
         }
-        pbr.addSubBehaviour(new MobilityListener(this));
+        pbr.addSubBehaviour(new MobilityListener(this, containerList));
         addBehaviour(pbr);
     }
     

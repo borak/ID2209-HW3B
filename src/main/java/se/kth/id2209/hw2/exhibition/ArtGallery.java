@@ -1,5 +1,6 @@
 package se.kth.id2209.hw2.exhibition;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,7 +17,7 @@ import se.kth.id2209.hw2.exhibition.Artifact.GENRE;
  * for any lookup to make hits.
  *
  */
-class ArtGallery {
+class ArtGallery implements Serializable {
 
     HashMap<Integer, Artifact> map = new HashMap<Integer, Artifact>();
     private static ArtGallery instance = new ArtGallery();

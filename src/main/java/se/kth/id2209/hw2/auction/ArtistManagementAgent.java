@@ -36,10 +36,12 @@ import jade.domain.mobility.MobilityOntology;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.wrapper.AgentContainer;
+import java.io.Serializable;
 import se.kth.id2209.hw2.exhibition.Artifact;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 import se.kth.id2209.hw2.util.DFUtilities;
 import se.kth.id2209.hw2.util.MobilityListener;
+import se.kth.id2209.hw2.util.SList;
 
 /**
  * The Artist Management Agent auctions out artifacts to any number of Curator
@@ -53,7 +55,7 @@ public class ArtistManagementAgent extends Agent {
     final Lock auctionsLock = new ReentrantLock();
     private static final int auctionsStartDelay = 3000;
     private static final int auctionsCFPDelay = 8000;
-    private final List<AID> bidders = new ArrayList();
+    private final SList<AID> bidders = new SList();
     private final Object bidderLock = new Object();
     private final Map<String, Location> containerMap = new HashMap();
     private final static String ARTIST_CONTAINER_NAME = "auctioneer-Agent-Container";

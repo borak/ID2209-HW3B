@@ -42,11 +42,16 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
                 price = (int) objs[1];
             } catch (Exception e) {
                 e.printStackTrace();
+                /*try {
+                    System.err.println(myAgent.getName() + ": GOT AUCTION=" + (Auction) msg.getContentObject());
+                } catch(Exception ex) {
+                    
+                }*/
             }
             final Auction auction = auctions.get(item);
 
             if (auction == null) {
-                System.err.println(myAgent.getName() + "Could not find auction.");
+                System.err.println(myAgent.getName() + ": Could not find auction.");
                 block();
                 return;
             }

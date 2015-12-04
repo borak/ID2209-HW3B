@@ -1,4 +1,4 @@
-package se.kth.id2209.hw2.exhibition;
+package se.kth.id2209.hw2.util;
 
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
@@ -25,11 +25,17 @@ import java.util.logging.Logger;
  */
 public class MobilityListener extends Behaviour {
 
-    Map<String, Location> locations;
+    Map<String, Location> locations = null;
+    Location location = null;
 
-    MobilityListener(Agent agent, Map<String, Location> locations) {
+    public MobilityListener(Agent agent, Map<String, Location> locations) {
         super(agent);
         this.locations = locations;
+    }
+    
+    public MobilityListener(Agent agent, Location location) {
+        super(agent);
+        this.location = location;
     }
 
     @Override
@@ -51,7 +57,12 @@ public class MobilityListener extends Behaviour {
                 it = r.getItems().iterator();
                 while (it.hasNext()) {
                     Location loc = (Location) it.next();
-                    locations.put(loc.getName(), loc);
+                    if(locations != null) {
+                        locations.put(loc.getName(), loc);
+                    } else {
+                        location = loc;
+                        break;
+                    }
                 }
             } catch (Exception e) {
                 block();

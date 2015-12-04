@@ -1,16 +1,28 @@
 package se.kth.id2209.hw2.auction;
 
+import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.OntologyException;
 import jade.content.onto.basic.Action;
+import jade.content.onto.basic.Result;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.Location;
 import jade.core.ProfileImpl;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.core.Runtime;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.SequentialBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
+import jade.domain.FIPANames;
+import jade.domain.FIPANames.ContentLanguage;
+import jade.domain.FIPANames.InteractionProtocol;
+import jade.domain.JADEAgentManagement.JADEManagementOntology;
+import jade.domain.JADEAgentManagement.QueryAgentsOnLocation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,17 +32,19 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
+import jade.domain.mobility.MobilityOntology;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.wrapper.AgentContainer;
-import jade.wrapper.AgentController;
-import jade.wrapper.ControllerException;
 import se.kth.id2209.hw2.exhibition.Artifact;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 import se.kth.id2209.hw2.util.DFUtilities;
+import se.kth.id2209.hw2.util.MobilityListener;
 
 /**
- * The Artist Management Agent auctions out artifacts to any number of Curator Agents.
- * It starts the Dutch auction, adds some artifacts to sell, and sets up delays for the start
- *   of the auction and the first CFP.
+ * The Artist Management Agent auctions out artifacts to any number of Curator
+ * Agents. It starts the Dutch auction, adds some artifacts to sell, and sets up
+ * delays for the start of the auction and the first CFP.
  */
 public class ArtistManagementAgent extends Agent {
 
@@ -38,41 +52,30 @@ public class ArtistManagementAgent extends Agent {
     private final Map<Integer, Auction> auctions = new HashMap();
     final Lock auctionsLock = new ReentrantLock();
     private static final int auctionsStartDelay = 3000;
-    private static final int auctionsCFPDelay = 8000; 
+    private static final int auctionsCFPDelay = 8000;
     private final List<AID> bidders = new ArrayList();
-
+    private final Object bidderLock = new Object();
+    private final Map<String, Location> containerMap = new HashMap();
+    private final static String ARTIST_CONTAINER_NAME = "auctioneer-Agent-Container";
 
     @Override
     protected void setup() {
         registerService();
         initAuctions();
-        for(AID aid : fetchBidders()) {
-            bidders.add(aid);
+        synchronized (bidderLock) {
+            for (AID aid : fetchBidders()) {
+                bidders.add(aid);
+            }
         }
         Runtime runtime = Runtime.instance();
-        ProfileImpl p1 = new ProfileImpl();
-        p1.setParameter("container-name", "auctioneer-Agent-Container");
+        ProfileImpl p = new ProfileImpl();
+        p.setParameter("container-name", ARTIST_CONTAINER_NAME);
+        final AgentContainer curatorContainer = runtime.createAgentContainer(p);
 
-        AgentContainer artistManagementContainer =  runtime.createAgentContainer(p1);
-
-
-//        this.doMove();
-
-//        containers[1] =  runtime.createAgentContainer(new ProfileImpl());
-//        try
-//        {
-//            AgentController ac = artistManagementContainer.createNewAgent("testaren","se.kth.id2209.hw2.exhibition.CuratorAgent", null);
-//            containers[0].start();
-//            ac.start();
-
-//        } catch (ControllerException e)
-//        {
-//            e.printStackTrace();
-//        }
-
-
-//        sendRequest(new Action(getAMS(), new QueryPlatformLocationsAction()));
-
+        getContentManager().registerOntology(MobilityOntology.getInstance());
+        getContentManager().registerOntology(JADEManagementOntology.getInstance());
+        getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
+        
         ParallelBehaviour pbr = new ParallelBehaviour(this,
                 ParallelBehaviour.WHEN_ALL);
         pbr.addSubBehaviour(new DutchAuctioneerBehaviour(this, auctions));
@@ -81,10 +84,10 @@ public class ArtistManagementAgent extends Agent {
             public void onWake() {
                 auctionsLock.lock();
                 try {
-                    for(Auction auc : auctions.values()) {
+                    for (Auction auc : auctions.values()) {
                         ArtistManagementAgent.this.addBehaviour(
                                 new InformStartOfAuctionBehaviour(auc,
-                                        ArtistManagementAgent.this, bidders)); 
+                                        ArtistManagementAgent.this, bidders));
                     }
                 } finally {
                     auctionsLock.unlock();
@@ -96,17 +99,74 @@ public class ArtistManagementAgent extends Agent {
             public void onWake() {
                 auctionsLock.lock();
                 try {
-                    for(Auction auc : auctions.values()) {
+                    for (Auction auc : auctions.values()) {
                         ArtistManagementAgent.this.addBehaviour(
                                 new CFPBehaviour(auc,
-                                        ArtistManagementAgent.this, bidders)); 
+                                        ArtistManagementAgent.this, bidders));
                     }
                 } finally {
                     auctionsLock.unlock();
                 }
             }
         });
-        addBehaviour(pbr);
+
+        final SequentialBehaviour sb = new SequentialBehaviour();
+        sb.addSubBehaviour(new OneShotBehaviour() {
+            @Override
+            public void action() {
+                requestContainers();
+                System.out.println("ARTIST ::::: REQUEST FOR CONTAINERS SENT.");
+            }
+        });
+        sb.addSubBehaviour(new MobilityListener(this, containerMap));
+        sb.addSubBehaviour(new OneShotBehaviour(this) { // moves itself
+            @Override
+            public void action() {
+                final Location dest = (Location) containerMap.get(ARTIST_CONTAINER_NAME);
+                System.out.println("ARTIST ::::: ATTEMPTING MOVING from=" + here() + " to " + dest);
+                if (dest != null) {
+                    doMove(dest);
+                }
+            }
+        });
+        sb.addSubBehaviour(new OneShotBehaviour(this) { // find the curators
+            @Override
+            public void action() {
+                jade.util.leap.List result = fetchBiddersFromOtherContainers();
+                synchronized (bidderLock) {
+                    for (Object o : result.toArray()) {
+                        if(o instanceof AID && ((AID) o).equals(getAID())) {
+                            bidders.add((AID) o);
+                        } else if(o instanceof Agent && ((Agent) o).getAID().equals(getAID())) {
+                            bidders.add(((Agent) o).getAID());
+                        } else {
+                            System.out.println("COULD NOT ADD OBJECT " + o);
+                        }
+                    }
+                }
+                System.out.println("ARTIST ::::: BIDDERS FETCHED FROM CONTAINERS ="
+                        +result.size() + " TOTAL ="+bidders.size());
+            }
+        });
+        sb.addSubBehaviour(pbr);
+        addBehaviour(sb);
+    }
+
+    private void requestContainers() {
+        // Send a request to the AMS to obtain the Containers
+        Action action = new Action(getAMS(), new QueryPlatformLocationsAction());
+        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+        request.addReceiver(getAMS());
+        request.setOntology((MobilityOntology.getInstance().getName()));
+        request.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
+        request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+
+        try {
+            getContentManager().fillContent(request, action);
+        } catch (Codec.CodecException | OntologyException e) {
+            //e.printStackTrace();
+        }
+        send(request);
     }
 
     private void registerService() {
@@ -139,52 +199,77 @@ public class ArtistManagementAgent extends Agent {
     }
 
     private void initAuctions() {
-        Artifact art1 = new Artifact(432, "artifact432", "unknown", "unknown", 
-                "unknown", Artifact.GENRE.PAINTING, 
+        Artifact art1 = new Artifact(432, "artifact432", "unknown", "unknown",
+                "unknown", Artifact.GENRE.PAINTING,
                 Artifact.Quality.UNKNOWN_QUALITY);
-        Artifact art2 = new Artifact(743, "artifact743", "unknown", "unknown", 
-                "unknown", Artifact.GENRE.JEWELRY, 
+        Artifact art2 = new Artifact(743, "artifact743", "unknown", "unknown",
+                "unknown", Artifact.GENRE.JEWELRY,
                 Artifact.Quality.UNKNOWN_QUALITY);
-        Artifact art3 = new Artifact(344, "artifact344", "unknown", "unknown", 
-                "unknown", Artifact.GENRE.FASHION, 
+        Artifact art3 = new Artifact(344, "artifact344", "unknown", "unknown",
+                "unknown", Artifact.GENRE.FASHION,
                 Artifact.Quality.UNKNOWN_QUALITY);
-        Artifact art4 = new Artifact(888, "artifact888", "unknown", "unknown", 
-                "unknown", Artifact.GENRE.MUSIC, 
+        Artifact art4 = new Artifact(888, "artifact888", "unknown", "unknown",
+                "unknown", Artifact.GENRE.MUSIC,
                 Artifact.Quality.UNKNOWN_QUALITY);
-        Artifact art5 = new Artifact(777, "artifact777", "unknown", "unknown", 
-                "unknown", Artifact.GENRE.PAINTING, 
+        Artifact art5 = new Artifact(777, "artifact777", "unknown", "unknown",
+                "unknown", Artifact.GENRE.PAINTING,
                 Artifact.Quality.UNKNOWN_QUALITY);
-        Artifact art6 = new Artifact(999, "artifact999", "unknown", "unknown", 
-                "unknown", Artifact.GENRE.SCULPTURE, 
+        Artifact art6 = new Artifact(999, "artifact999", "unknown", "unknown",
+                "unknown", Artifact.GENRE.SCULPTURE,
                 Artifact.Quality.UNKNOWN_QUALITY);
-        
+
         Random random = new Random();
         int[] prices = new int[6];
         int[] minprices = new int[6];
-        for(int i=0; i<6; i++) {
+        for (int i = 0; i < 6; i++) {
             prices[i] = random.nextInt(40000) + 200;
-            minprices[i] = (int)((double)prices[i] * (random.nextInt(4)/10 + 0.1));
+            minprices[i] = (int) ((double) prices[i] * (random.nextInt(4) / 10 + 0.1));
         }
-        auctionsLock.lock();
-        try {
-            auctions.put(art1.getId(), new Auction(bidders, prices[0], minprices[0], 
-                    art1, false, Artifact.Quality.HIGH_QUALITY)); 
-            auctions.put(art2.getId(), new Auction(bidders, prices[1], minprices[1], 
-                    art2, false, Artifact.Quality.LOW_QUALITY));
-            auctions.put(art3.getId(), new Auction(bidders, prices[2], minprices[2], 
-                    art3, false, Artifact.Quality.LOW_QUALITY));
-            auctions.put(art4.getId(), new Auction(bidders, prices[3], minprices[3], 
-                    art4, false, Artifact.Quality.LOW_QUALITY));
-            auctions.put(art5.getId(), new Auction(bidders, prices[4], minprices[4], 
-                    art5, false, Artifact.Quality.HIGH_QUALITY));
-            auctions.put(art6.getId(), new Auction(bidders, prices[5], 
-                    minprices[5], art6, false, Artifact.Quality.HIGH_QUALITY));
-        } finally {
-            auctionsLock.unlock();
+        synchronized (bidderLock) {
+            auctionsLock.lock();
+            try {
+                auctions.put(art1.getId(), new Auction(bidders, prices[0], minprices[0],
+                        art1, false, Artifact.Quality.HIGH_QUALITY));
+                auctions.put(art2.getId(), new Auction(bidders, prices[1], minprices[1],
+                        art2, false, Artifact.Quality.LOW_QUALITY));
+                auctions.put(art3.getId(), new Auction(bidders, prices[2], minprices[2],
+                        art3, false, Artifact.Quality.LOW_QUALITY));
+                auctions.put(art4.getId(), new Auction(bidders, prices[3], minprices[3],
+                        art4, false, Artifact.Quality.LOW_QUALITY));
+                auctions.put(art5.getId(), new Auction(bidders, prices[4], minprices[4],
+                        art5, false, Artifact.Quality.HIGH_QUALITY));
+                auctions.put(art6.getId(), new Auction(bidders, prices[5],
+                        minprices[5], art6, false, Artifact.Quality.HIGH_QUALITY));
+            } finally {
+                auctionsLock.unlock();
+            }
         }
     }
 
     AID[] fetchBidders() {
         return DFUtilities.searchAllDF(this, CuratorAgent.DF_NAME);
+    }
+
+    private jade.util.leap.List fetchBiddersFromOtherContainers() {
+        QueryAgentsOnLocation agentAction = new QueryAgentsOnLocation();
+        agentAction.setLocation(here());
+        Action newAction = new Action(getAMS(), agentAction);
+        ACLMessage agentRequest = new ACLMessage(ACLMessage.REQUEST);
+        agentRequest.addReceiver(getAMS());
+        agentRequest.setOntology(JADEManagementOntology.getInstance().getName());
+        agentRequest.setLanguage(ContentLanguage.FIPA_SL);
+        agentRequest.setProtocol(InteractionProtocol.FIPA_REQUEST);
+
+        try {
+            getContentManager().fillContent(agentRequest, newAction);
+            send(agentRequest);
+            ACLMessage receivedMessage = blockingReceive(MessageTemplate.MatchSender(getAMS()));
+            Result r = (Result) getContentManager().extractContent(receivedMessage);
+            jade.util.leap.List list = (jade.util.leap.List)r.getValue();
+            return list;
+        } catch (Codec.CodecException | OntologyException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

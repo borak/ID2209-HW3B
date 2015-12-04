@@ -1,5 +1,6 @@
 package se.kth.id2209.hw2.exhibition;
 
+import se.kth.id2209.hw2.util.MobilityListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,7 +52,6 @@ public class CuratorAgent extends Agent {
     public static final String DF_NAME = "Curator-agent";
     private static int curatorId;
     private Map containerMap = new HashMap();
-    private AgentContainer currentContainer = null;
     private String containerName;
 
     /**

@@ -42,6 +42,7 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
                 price = (int) objs[1];
             } catch (Exception e) {
                 e.printStackTrace();
+                System.err.println(myAgent.getLocalName() + ": received (AUCTION) from " + msg.getSender().getLocalName());
                 /*try {
                     System.err.println(myAgent.getName() + ": GOT AUCTION=" + (Auction) msg.getContentObject());
                 } catch(Exception ex) {

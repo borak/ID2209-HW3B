@@ -56,7 +56,7 @@ public class ArtistManagementAgent extends Agent {
     private static final int auctionsStartDelay = 3000;
     private static final int auctionsCFPDelay = 8000;
     private final SList<AID> bidders = new SList();
-    private final Object bidderLock = new Object();
+    private final Lock bidderLock = new ReentrantLock();
     private final Map<String, Location> containerMap = new HashMap();
     private final static String ARTIST_CONTAINER_NAME = "auctioneer-Agent-Container";
 
@@ -64,10 +64,13 @@ public class ArtistManagementAgent extends Agent {
     protected void setup() {
         registerService();
         initAuctions();
-        synchronized (bidderLock) {
+        bidderLock.lock();
+        try {
             for (AID aid : fetchBidders()) {
                 bidders.add(aid);
             }
+        } finally {
+            bidderLock.unlock();
         }
         Runtime runtime = Runtime.instance();
         ProfileImpl p = new ProfileImpl();
@@ -77,7 +80,7 @@ public class ArtistManagementAgent extends Agent {
         getContentManager().registerOntology(MobilityOntology.getInstance());
         getContentManager().registerOntology(JADEManagementOntology.getInstance());
         getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
-        
+
         ParallelBehaviour pbr = new ParallelBehaviour(this,
                 ParallelBehaviour.WHEN_ALL);
         pbr.addSubBehaviour(new DutchAuctioneerBehaviour(this, auctions));
@@ -127,7 +130,12 @@ public class ArtistManagementAgent extends Agent {
                 final Location dest = (Location) containerMap.get(ARTIST_CONTAINER_NAME);
                 System.out.println("ARTIST ::::: ATTEMPTING MOVING from=" + here() + " to " + dest);
                 if (dest != null) {
-                    doMove(dest);
+                    myAgent.addBehaviour(new OneShotBehaviour(myAgent) { // FÖrmodligen ett onödigt beteende. serialiseringsfel
+                        @Override
+                        public void action() {
+                            doMove(dest);
+                        }
+                    });
                 }
             }
         });
@@ -135,19 +143,24 @@ public class ArtistManagementAgent extends Agent {
             @Override
             public void action() {
                 jade.util.leap.List result = fetchBiddersFromOtherContainers();
-                synchronized (bidderLock) {
+                bidderLock.lock();
+                try {
                     for (Object o : result.toArray()) {
-                        if(o instanceof AID && ((AID) o).equals(getAID())) {
-                            bidders.add((AID) o);
-                        } else if(o instanceof Agent && ((Agent) o).getAID().equals(getAID())) {
-                            bidders.add(((Agent) o).getAID());
-                        } else {
-                            System.out.println("COULD NOT ADD OBJECT " + o);
-                        }
+                        bidders.add((AID) o);
+                        /*if(o instanceof AID && ((AID) o).equals(getAID())) {
+                         bidders.add((AID) o);
+                         } else if(o instanceof Agent && ((Agent) o).getAID().equals(getAID())) {
+                         bidders.add(((Agent) o).getAID());
+                         } else {
+                         System.out.println("COULD NOT ADD OBJECT " + o);
+                         }*/
                     }
+                } finally {
+                    bidderLock.unlock();
                 }
+
                 System.out.println("ARTIST ::::: BIDDERS FETCHED FROM CONTAINERS ="
-                        +result.size() + " TOTAL ="+bidders.size());
+                        + result.size() + " TOTAL =" + bidders.size());
             }
         });
         sb.addSubBehaviour(pbr);
@@ -227,24 +240,24 @@ public class ArtistManagementAgent extends Agent {
             prices[i] = random.nextInt(40000) + 200;
             minprices[i] = (int) ((double) prices[i] * (random.nextInt(4) / 10 + 0.1));
         }
-        synchronized (bidderLock) {
-            auctionsLock.lock();
-            try {
-                auctions.put(art1.getId(), new Auction(bidders, prices[0], minprices[0],
-                        art1, false, Artifact.Quality.HIGH_QUALITY));
-                auctions.put(art2.getId(), new Auction(bidders, prices[1], minprices[1],
-                        art2, false, Artifact.Quality.LOW_QUALITY));
-                auctions.put(art3.getId(), new Auction(bidders, prices[2], minprices[2],
-                        art3, false, Artifact.Quality.LOW_QUALITY));
-                auctions.put(art4.getId(), new Auction(bidders, prices[3], minprices[3],
-                        art4, false, Artifact.Quality.LOW_QUALITY));
-                auctions.put(art5.getId(), new Auction(bidders, prices[4], minprices[4],
-                        art5, false, Artifact.Quality.HIGH_QUALITY));
-                auctions.put(art6.getId(), new Auction(bidders, prices[5],
-                        minprices[5], art6, false, Artifact.Quality.HIGH_QUALITY));
-            } finally {
-                auctionsLock.unlock();
-            }
+        bidderLock.lock();
+        auctionsLock.lock();
+        try {
+            auctions.put(art1.getId(), new Auction(bidders, prices[0], minprices[0],
+                    art1, false, Artifact.Quality.HIGH_QUALITY));
+            auctions.put(art2.getId(), new Auction(bidders, prices[1], minprices[1],
+                    art2, false, Artifact.Quality.LOW_QUALITY));
+            auctions.put(art3.getId(), new Auction(bidders, prices[2], minprices[2],
+                    art3, false, Artifact.Quality.LOW_QUALITY));
+            auctions.put(art4.getId(), new Auction(bidders, prices[3], minprices[3],
+                    art4, false, Artifact.Quality.LOW_QUALITY));
+            auctions.put(art5.getId(), new Auction(bidders, prices[4], minprices[4],
+                    art5, false, Artifact.Quality.HIGH_QUALITY));
+            auctions.put(art6.getId(), new Auction(bidders, prices[5],
+                    minprices[5], art6, false, Artifact.Quality.HIGH_QUALITY));
+        } finally {
+            auctionsLock.unlock();
+            bidderLock.unlock();
         }
     }
 
@@ -267,7 +280,7 @@ public class ArtistManagementAgent extends Agent {
             send(agentRequest);
             ACLMessage receivedMessage = blockingReceive(MessageTemplate.MatchSender(getAMS()));
             Result r = (Result) getContentManager().extractContent(receivedMessage);
-            jade.util.leap.List list = (jade.util.leap.List)r.getValue();
+            jade.util.leap.List list = (jade.util.leap.List) r.getValue();
             return list;
         } catch (Codec.CodecException | OntologyException e) {
             e.printStackTrace();

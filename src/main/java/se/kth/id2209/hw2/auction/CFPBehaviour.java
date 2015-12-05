@@ -35,7 +35,9 @@ public class CFPBehaviour extends OneShotBehaviour {
         try {
             msg.setContentObject(auction);
             for (AID r : receivers) {
-                msg.addReceiver(r);
+                if(!r.equals(myAgent.getAID())) {
+                    msg.addReceiver(r);
+                }
             }
             myAgent.send(msg);
             System.out.println(myAgent.getName() + " SENDING message: "

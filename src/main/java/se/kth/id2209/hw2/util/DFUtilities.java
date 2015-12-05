@@ -59,8 +59,12 @@ public class DFUtilities {
             for (i = 0; i < result.length; i++) {
                 agents[i] = result[i].getName();
             }
+            if(agents.length == 0) {
+                System.err.println("NO RESULT FROM DFSERVICE type="+type
+                        +", requester="+agent.getAID().getLocalName());
+                return null;
+            }
             return agents[0];
-            //return agents.length==0?null:agents[0];
         } catch (Exception fe) {
             fe.printStackTrace();
         }

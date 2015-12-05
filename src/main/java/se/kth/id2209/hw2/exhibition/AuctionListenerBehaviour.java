@@ -102,7 +102,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                     return;
                 }
                 Location home = agent.getHome();
-                System.out.println("ARTIST ::::: ATTEMPTING MOVING from=" + myAgent.here() + " to " + home);
+                System.out.println("CURATOR ::::: ATTEMPTING MOVING from=" + myAgent.here() + " to " + home);
                 if (home != null) {
                     myAgent.doMove(home);
                 }

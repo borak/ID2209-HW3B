@@ -66,6 +66,9 @@ public class CuratorAgent extends Agent {
         artGallery = ArtGallery.getInstance();
         containerName = getLocalName() + "-Agent-Container";
         home = here();
+        
+        registerService();
+        
         getContentManager().registerOntology(MobilityOntology.getInstance());
         getContentManager().registerOntology(JADEManagementOntology.getInstance());
         getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
@@ -81,26 +84,12 @@ public class CuratorAgent extends Agent {
 
             }
         });
-
-        DFAgentDescription dfd = new DFAgentDescription();
-        dfd.setName(getAID());
-
-        ServiceDescription sd = new ServiceDescription();
-        sd.setType(DF_NAME);
-        sd.setName(getLocalName() + curatorId);
-        dfd.addServices(sd);
-
-        try {
-            DFService.register(this, dfd);
-        } catch (FIPAException fe) {
-            fe.printStackTrace();
-        }
-
+        
         final ParallelBehaviour pbr = new ParallelBehaviour(this,
                 ParallelBehaviour.WHEN_ALL);
         pbr.addSubBehaviour(new ArtifactListenerBehaviour(this));
         pbr.addSubBehaviour(new AuctionListenerBehaviour(this));
-        if (curatorId == UniqueCuratorIdGiver.FIRST_ID) {
+        if(getCuratorId() == 1) {
             pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
         }
         final SequentialBehaviour sb = new SequentialBehaviour();
@@ -108,15 +97,12 @@ public class CuratorAgent extends Agent {
         sb.addSubBehaviour(new OneShotBehaviour(this) {
             @Override
             public void action() {
-                //flytta, klona, faster, stronger, better
-                //flytta
                 final Location dest = (Location) containerMap.get(containerName);
                 System.out.println("1 ATTEMPTING MOVING from=" + here() + " to " + dest);
                 if (dest != null) {
                     doMove(dest);
                 }
 
-                //clone
                 SequentialBehaviour seq = new SequentialBehaviour();
                 seq.addSubBehaviour(new OneShotBehaviour(myAgent) {
 
@@ -147,8 +133,65 @@ public class CuratorAgent extends Agent {
         return home;
     }
 
-    boolean isClone() {
+    public boolean isClone() {
         return getName().contains("clone");
+    }
+
+    private void registerService() {
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(getAID());
+
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType(DF_NAME);
+        sd.setName(getLocalName() + curatorId);
+        dfd.addServices(sd);
+
+        try {
+            DFService.register(this, dfd);
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
+    }
+
+    private void startAllBehaviours() {
+        final ParallelBehaviour pbr = new ParallelBehaviour(this,
+                ParallelBehaviour.WHEN_ALL);
+        pbr.addSubBehaviour(new ArtifactListenerBehaviour(this));
+        pbr.addSubBehaviour(new AuctionListenerBehaviour(this));
+        if(getCuratorId() == 1) {
+            pbr.addSubBehaviour(new DatabaseChecker(this, DB_CHECKER_DELAY));
+        }
+        final SequentialBehaviour sb = new SequentialBehaviour();
+        sb.addSubBehaviour(new MobilityListener(this, containerMap));
+        sb.addSubBehaviour(new OneShotBehaviour(this) {
+            @Override
+            public void action() {
+                final Location dest = (Location) containerMap.get(containerName);
+                System.out.println("1 ATTEMPTING MOVING from=" + here() + " to " + dest);
+                if (dest != null) {
+                    doMove(dest);
+                }
+
+                SequentialBehaviour seq = new SequentialBehaviour();
+                seq.addSubBehaviour(new OneShotBehaviour(myAgent) {
+
+                    @Override
+                    public void action() {
+                        CuratorAgent.this.doClone(dest, getLocalName() + "_clone1");
+                    }
+                });
+                seq.addSubBehaviour(new OneShotBehaviour(myAgent) {
+
+                    @Override
+                    public void action() {
+                        CuratorAgent.this.doClone(dest, getLocalName() + "_clone2");
+                    }
+                });
+                addBehaviour(seq);
+            }
+        });
+        sb.addSubBehaviour(pbr);
+        addBehaviour(sb);
     }
 
     /**
@@ -177,8 +220,10 @@ public class CuratorAgent extends Agent {
         }
     }
 
+    /**
+     * Send a request to the AMS to obtain the Containers
+     */
     private void requestContainers() {
-        // Send a request to the AMS to obtain the Containers
         Action action = new Action(getAMS(), new QueryPlatformLocationsAction());
         ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
         request.addReceiver(getAMS());
@@ -229,7 +274,6 @@ public class CuratorAgent extends Agent {
         return artIds;
     }
 
-    // WORKS BUT THROWS 999 errors
     @Override
     public void afterClone() {
         if(getName().split("clone").length >= 3) {
@@ -239,16 +283,12 @@ public class CuratorAgent extends Agent {
             } catch(Exception e) {
                 
             }
+        } else {
+            getContentManager().registerOntology(MobilityOntology.getInstance());
+            getContentManager().registerOntology(JADEManagementOntology.getInstance());
+            getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
+            System.out.println("CURATOR CLONED " + getLocalName());
         }
-        
     }
     
-    /* DOESNT WORK
-    @Override
-    public Object clone() throws CloneNotSupportedException { // throws CloneNotSupportedException
-        if(getName().split("clone").length >= 2) {
-            throw new CloneNotSupportedException("Do not clone a clone");
-        }
-        return super.clone();
-    }*/
 }

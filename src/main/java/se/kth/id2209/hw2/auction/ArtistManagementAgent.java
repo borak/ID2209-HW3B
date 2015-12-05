@@ -53,8 +53,9 @@ public class ArtistManagementAgent extends Agent {
     public static final String DF_NAME = "Artist-management-agent";
     private final Map<Integer, Auction> auctions = new HashMap();
     final Lock auctionsLock = new ReentrantLock();
-    private static final int auctionsStartDelay = 3000;
-    private static final int auctionsCFPDelay = 8000;
+    private static final int biddersLookupDelay = 8000;
+    private static final int auctionsStartDelay = 1000;
+    private static final int auctionsCFPDelay = 3000;
     private final SList<AID> bidders = new SList();
     private final Lock bidderLock = new ReentrantLock();
     private final Map<String, Location> containerMap = new HashMap();
@@ -116,9 +117,9 @@ public class ArtistManagementAgent extends Agent {
         });
 
         final SequentialBehaviour sb = new SequentialBehaviour();
-        sb.addSubBehaviour(new OneShotBehaviour() {
+        sb.addSubBehaviour(new WakerBehaviour(this, biddersLookupDelay) {
             @Override
-            public void action() {
+            public void onWake() {
                 requestContainers();
                 System.out.println("ARTIST ::::: REQUEST FOR CONTAINERS SENT.");
             }
@@ -146,14 +147,15 @@ public class ArtistManagementAgent extends Agent {
                 bidderLock.lock();
                 try {
                     for (Object o : result.toArray()) {
-                        bidders.add((AID) o);
+                        if(((AID) o).getName().contains("curator")) {
+                            bidders.add((AID) o);
+                        }
                     }
+                    System.out.println("ARTIST ::::: AGENTS FETCHED FROM CONTAINERS ="
+                        + result.size() + " BIDDERS =" + bidders.size());
                 } finally {
                     bidderLock.unlock();
                 }
-
-                System.out.println("ARTIST ::::: BIDDERS FETCHED FROM CONTAINERS ="
-                        + result.size() + " TOTAL =" + bidders.size());
             }
         });
         sb.addSubBehaviour(pbr);

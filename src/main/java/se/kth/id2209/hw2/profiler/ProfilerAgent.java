@@ -25,6 +25,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPANames;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.domain.JADEAgentManagement.QueryAgentsOnLocation;
+import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
 import jade.domain.mobility.MobilityOntology;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -96,6 +97,13 @@ public class ProfilerAgent extends Agent {
         }
 
         SequentialBehaviour seq = new SequentialBehaviour();
+        seq.addSubBehaviour(new OneShotBehaviour() {
+            @Override
+            public void action() {
+                requestContainers();
+                System.out.println("PROFILER ::::: REQUEST FOR CONTAINERS SENT.");
+            }
+        });
         seq.addSubBehaviour(new MobilityListener(this, containerMap));
         seq.addSubBehaviour(new WakerBehaviour(this, 1000) { 
             @Override
@@ -172,5 +180,22 @@ public class ProfilerAgent extends Agent {
     
     AID getCurator() {
         return curatorAgent;
+    }
+    
+    private void requestContainers() {
+        // Send a request to the AMS to obtain the Containers
+        Action action = new Action(getAMS(), new QueryPlatformLocationsAction());
+        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+        request.addReceiver(getAMS());
+        request.setOntology((MobilityOntology.getInstance().getName()));
+        request.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
+        request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+
+        try {
+            getContentManager().fillContent(request, action);
+        } catch (Codec.CodecException | OntologyException e) {
+            //e.printStackTrace();
+        }
+        send(request);
     }
 }

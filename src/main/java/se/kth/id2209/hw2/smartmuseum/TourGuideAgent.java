@@ -29,6 +29,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPANames;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.domain.JADEAgentManagement.QueryAgentsOnLocation;
+import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
 import jade.domain.mobility.MobilityOntology;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -85,6 +86,13 @@ public class TourGuideAgent extends Agent {
         getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
 
         SequentialBehaviour sb = new SequentialBehaviour();
+        sb.addSubBehaviour(new OneShotBehaviour() {
+            @Override
+            public void action() {
+                requestContainers();
+                System.out.println("TGA ::::: REQUEST FOR CONTAINERS SENT.");
+            }
+        });
         sb.addSubBehaviour(new MobilityListener(this, containerMap));
         sb.addSubBehaviour(new WakerBehaviour(this, 1000) { 
             @Override
@@ -216,5 +224,22 @@ public class TourGuideAgent extends Agent {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    private void requestContainers() {
+        // Send a request to the AMS to obtain the Containers
+        Action action = new Action(getAMS(), new QueryPlatformLocationsAction());
+        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+        request.addReceiver(getAMS());
+        request.setOntology((MobilityOntology.getInstance().getName()));
+        request.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
+        request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+
+        try {
+            getContentManager().fillContent(request, action);
+        } catch (Codec.CodecException | OntologyException e) {
+            //e.printStackTrace();
+        }
+        send(request);
     }
 }

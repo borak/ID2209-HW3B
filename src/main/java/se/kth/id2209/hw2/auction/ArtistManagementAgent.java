@@ -147,13 +147,6 @@ public class ArtistManagementAgent extends Agent {
                 try {
                     for (Object o : result.toArray()) {
                         bidders.add((AID) o);
-                        /*if(o instanceof AID && ((AID) o).equals(getAID())) {
-                         bidders.add((AID) o);
-                         } else if(o instanceof Agent && ((Agent) o).getAID().equals(getAID())) {
-                         bidders.add(((Agent) o).getAID());
-                         } else {
-                         System.out.println("COULD NOT ADD OBJECT " + o);
-                         }*/
                     }
                 } finally {
                     bidderLock.unlock();

@@ -1,24 +1,42 @@
 package se.kth.id2209.hw2.profiler;
 
+import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.OntologyException;
+import jade.content.onto.basic.Action;
+import jade.content.onto.basic.Result;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.Location;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.DataStore;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPANames;
+import jade.domain.JADEAgentManagement.JADEManagementOntology;
+import jade.domain.JADEAgentManagement.QueryAgentsOnLocation;
+import jade.domain.mobility.MobilityOntology;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.proto.states.MsgReceiver;
+import java.util.HashMap;
+import java.util.Map;
 import se.kth.id2209.hw2.exhibition.Artifact;
+import se.kth.id2209.hw2.exhibition.CuratorAgent;
+import se.kth.id2209.hw2.smartmuseum.TourGuideAgent;
+import static se.kth.id2209.hw2.smartmuseum.TourGuideAgent.CA_DF_NAME;
 import se.kth.id2209.hw2.util.DFUtilities;
+import se.kth.id2209.hw2.util.MobilityListener;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
@@ -38,6 +56,8 @@ public class ProfilerAgent extends Agent {
     private List<Artifact> lookedUpArtifacts;
     static final String ACL_LANGUAGE = "Java Serialized";
     public static final String DF_NAME = "Profiler-agent";
+    private final Map<String, Location> containerMap = new HashMap();
+    private AID curatorAgent;
 
     /**
      * Creates a user profile and registers itself to the DFService. Starts
@@ -56,6 +76,11 @@ public class ProfilerAgent extends Agent {
 
         profile = new UserProfile(22, "Programmer", UserProfile.GENDER.male,
                 interests, visitedItems);
+        
+        getContentManager().registerOntology(MobilityOntology.getInstance());
+        getContentManager().registerOntology(JADEManagementOntology.getInstance());
+        getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
+        
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
 
@@ -71,6 +96,17 @@ public class ProfilerAgent extends Agent {
         }
 
         SequentialBehaviour seq = new SequentialBehaviour();
+        seq.addSubBehaviour(new MobilityListener(this, containerMap));
+        seq.addSubBehaviour(new WakerBehaviour(this, 1000) { 
+            @Override
+            public void onWake() {
+                curatorAgent = DFUtilities.searchDF(ProfilerAgent.this, CuratorAgent.DF_NAME);
+                if(curatorAgent == null) {
+                    curatorAgent = fetchCuratorFromAnotherContainer();
+                }
+                System.out.println("PROFILER's ATTEMPT TO FETCH CURATOR = " + curatorAgent);
+            }
+        });
         seq.addSubBehaviour(new SendTourGuideRequestBehaviour(this, profile));
         seq.addSubBehaviour(new MsgReceiverBehaviour(ProfilerAgent.this, null, MsgReceiver.INFINITE,
                         new DataStore(), null));
@@ -108,5 +144,33 @@ public class ProfilerAgent extends Agent {
 
     void setRecommendedArtifacts(List<Integer> recommendedArtifacts) {
         this.recommendedArtifacts = recommendedArtifacts;
+    }
+    
+    private AID fetchCuratorFromAnotherContainer() {
+        QueryAgentsOnLocation agentAction = new QueryAgentsOnLocation();
+        agentAction.setLocation(here());
+        Action newAction = new Action(getAMS(), agentAction);
+        ACLMessage agentRequest = new ACLMessage(ACLMessage.REQUEST);
+        agentRequest.addReceiver(getAMS());
+        agentRequest.setOntology(JADEManagementOntology.getInstance().getName());
+        agentRequest.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
+        agentRequest.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+
+        try {
+            getContentManager().fillContent(agentRequest, newAction);
+            send(agentRequest);
+            
+            ACLMessage receivedMessage = blockingReceive(MessageTemplate.MatchSender(getAMS()));
+            Result r = (Result) getContentManager().extractContent(receivedMessage);
+            jade.util.leap.List list = (jade.util.leap.List) r.getValue();
+            return (AID)list.iterator().next();
+        } catch (Codec.CodecException | OntologyException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    AID getCurator() {
+        return curatorAgent;
     }
 }

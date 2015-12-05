@@ -1,6 +1,7 @@
 package se.kth.id2209.hw2.exhibition;
 
 import jade.core.AID;
+import jade.core.Location;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -31,6 +32,7 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                     || ontology.equalsIgnoreCase(Ontologies.CALL_FOR_PROPOSALS)
                     || ontology.equalsIgnoreCase(Ontologies.AUCTION_NO_BIDS)
                     || ontology.equalsIgnoreCase(Ontologies.AUCTION_WON)
+                    || ontology.equalsIgnoreCase(Ontologies.AUCTION_STOP)
                     || msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL
                     || msg.getPerformative() == ACLMessage.REJECT_PROPOSAL;
         }
@@ -78,14 +80,34 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
                 handleAuctionNoBids(msg);
             } else if (ontology.equalsIgnoreCase(Ontologies.AUCTION_WON)) {
                 handleAuctionWon(msg);
+                moveHome();
             } else if (msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
                 handleAcceptProposal(msg);
             } else if (msg.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
                 handleReject(msg);
+            } else if(ontology.equalsIgnoreCase(Ontologies.AUCTION_STOP)) {
+                moveHome();
             }
         } else {
             block();
         }
+    }
+    
+    private void moveHome() {
+        myAgent.addBehaviour(new OneShotBehaviour(myAgent) { 
+            @Override
+            public void action() {
+                CuratorAgent agent = (CuratorAgent)myAgent;
+                if(!agent.isClone()) {
+                    return;
+                }
+                Location home = agent.getHome();
+                System.out.println("ARTIST ::::: ATTEMPTING MOVING from=" + myAgent.here() + " to " + home);
+                if (home != null) {
+                    myAgent.doMove(home);
+                }
+            }
+        });
     }
 
     private void handleAuctionStart(ACLMessage msg) {

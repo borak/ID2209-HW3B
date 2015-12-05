@@ -38,6 +38,6 @@ class HandleArtifactRecommendation extends OneShotBehaviour {
             block();
         }
 
-        myAgent.addBehaviour(new ArtifactRequestBehaviour(getAgent(), content));
+        myAgent.addBehaviour(new ArtifactRequestBehaviour((ProfilerAgent)myAgent, content));
     }
 }

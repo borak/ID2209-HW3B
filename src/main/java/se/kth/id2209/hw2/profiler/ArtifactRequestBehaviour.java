@@ -23,18 +23,10 @@ class ArtifactRequestBehaviour extends OneShotBehaviour {
     private AID cAgent;
     private Integer artifactId;
 
-    public ArtifactRequestBehaviour(Agent a, Integer artifactId) {
+    public ArtifactRequestBehaviour(ProfilerAgent a, Integer artifactId) {
         super(a);
         this.artifactId = artifactId;
-        DFAgentDescription dfd = new DFAgentDescription();
-        ServiceDescription sd = new ServiceDescription();
-        sd.setType(CuratorAgent.DF_NAME);
-        dfd.addServices(sd);
-        AID[] aids = DFUtilities.searchDF(a, dfd);
-        if (aids.length < 1) {
-            throw new RuntimeException("Cannot find agent");
-        }
-        cAgent = aids[0];
+        cAgent = a.getCurator();
     }
 
     private void sendRequest(Integer artifactId) {

@@ -8,6 +8,8 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
@@ -88,7 +90,7 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
         }
     }
 
-    private void performCFP(Auction auction) {
+    private void performCFP(final Auction auction) {
         if (auction.getParticipants().isEmpty()) {
             System.err.println(myAgent.getAID() + " performing CFP but no participants was found.");
             return;
@@ -102,6 +104,24 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
             auction.CFPCounter++;
             myAgent.addBehaviour(new CFPBehaviour(auction, myAgent,
                     auction.getParticipants()));
+        } else {
+            myAgent.addBehaviour(new OneShotBehaviour(myAgent) {
+
+                @Override
+                public void action() {
+                    ACLMessage stoppingAuctionMsg = new ACLMessage(ACLMessage.INFORM);
+                    stoppingAuctionMsg.setOntology(Ontologies.AUCTION_STOP);
+                    try {
+                        stoppingAuctionMsg.setContentObject(auction);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    for (AID aid : auction.getParticipants()) {
+                        stoppingAuctionMsg.addReceiver(aid);
+                    }
+                    myAgent.send(stoppingAuctionMsg);
+                }
+            });
         }
     }
 
@@ -143,7 +163,27 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
                         auction, myAgent));
             }
         });
+        
+        // callback only on victory?
+        myAgent.addBehaviour(new OneShotBehaviour(myAgent) {
 
+                @Override
+                public void action() {
+                    ACLMessage stoppingAuctionMsg = new ACLMessage(ACLMessage.INFORM);
+                    stoppingAuctionMsg.setOntology(Ontologies.AUCTION_STOP);
+                    try {
+                        stoppingAuctionMsg.setContentObject(auction);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    for (AID aid : auction.getParticipants()) {
+                        if(!aid.equals(auction.getWinner())) {
+                            stoppingAuctionMsg.addReceiver(aid);
+                        }
+                    }
+                    myAgent.send(stoppingAuctionMsg);
+                }
+            });
     }
 
     private void sendNoBidsCall(Auction auction) {

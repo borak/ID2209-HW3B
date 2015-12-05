@@ -53,6 +53,7 @@ public class CuratorAgent extends Agent {
     private static int curatorId;
     private Map containerMap = new HashMap();
     private String containerName;
+    private Location home;
 
     /**
      * Initializes its state and the ArtGallery by checking and parsing a
@@ -64,7 +65,7 @@ public class CuratorAgent extends Agent {
         curatorId = UniqueCuratorIdGiver.createUniqueId();
         artGallery = ArtGallery.getInstance();
         containerName = getLocalName() + "-Agent-Container";
-
+        home = here();
         getContentManager().registerOntology(MobilityOntology.getInstance());
         getContentManager().registerOntology(JADEManagementOntology.getInstance());
         getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
@@ -114,16 +115,24 @@ public class CuratorAgent extends Agent {
                 if (dest != null) {
                     doMove(dest);
                 }
-                
+
                 //clone
-                pbr.addSubBehaviour(new OneShotBehaviour(myAgent) {
+                SequentialBehaviour seq = new SequentialBehaviour();
+                seq.addSubBehaviour(new OneShotBehaviour(myAgent) {
 
                     @Override
                     public void action() {
                         CuratorAgent.this.doClone(dest, getLocalName() + "_clone1");
+                    }
+                });
+                seq.addSubBehaviour(new OneShotBehaviour(myAgent) {
+
+                    @Override
+                    public void action() {
                         CuratorAgent.this.doClone(dest, getLocalName() + "_clone2");
                     }
                 });
+                addBehaviour(seq);
             }
         });
         sb.addSubBehaviour(pbr);
@@ -132,6 +141,14 @@ public class CuratorAgent extends Agent {
 
     int getCuratorId() {
         return curatorId;
+    }
+
+    Location getHome() {
+        return home;
+    }
+
+    boolean isClone() {
+        return getName().contains("clone");
     }
 
     /**
@@ -212,4 +229,26 @@ public class CuratorAgent extends Agent {
         return artIds;
     }
 
+    // WORKS BUT THROWS 999 errors
+    @Override
+    public void afterClone() {
+        if(getName().split("clone").length >= 3) {
+            System.err.println("DELETING CLONE " + getName());
+            try {
+                doDelete();
+            } catch(Exception e) {
+                
+            }
+        }
+        
+    }
+    
+    /* DOESNT WORK
+    @Override
+    public Object clone() throws CloneNotSupportedException { // throws CloneNotSupportedException
+        if(getName().split("clone").length >= 2) {
+            throw new CloneNotSupportedException("Do not clone a clone");
+        }
+        return super.clone();
+    }*/
 }

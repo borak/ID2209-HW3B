@@ -1,5 +1,10 @@
 package se.kth.id2209.hw2.smartmuseum;
 
+import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.OntologyException;
+import jade.content.onto.basic.Action;
+import jade.content.onto.basic.Result;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,22 +15,30 @@ import java.util.Map.Entry;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.Location;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.DataStore;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
+import jade.core.behaviours.WakerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPANames;
+import jade.domain.JADEAgentManagement.JADEManagementOntology;
+import jade.domain.JADEAgentManagement.QueryAgentsOnLocation;
+import jade.domain.mobility.MobilityOntology;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.proto.states.MsgReceiver;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import se.kth.id2209.hw2.exhibition.Artifact;
 import se.kth.id2209.hw2.profiler.UserProfile;
 import se.kth.id2209.hw2.util.DFUtilities;
+import se.kth.id2209.hw2.util.MobilityListener;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
@@ -44,6 +57,8 @@ public class TourGuideAgent extends Agent {
     Lock usersLock = new ReentrantLock();
     public static final String DF_NAME = "Tour-Guide-agent";
     public static final String CA_DF_NAME = "Curator-agent";
+    private final Map<String, Location> containerMap = new HashMap();
+    private AID curatorAgent;
 
     /**
      * Registers itself to the DFService and starts listening for incomming tour
@@ -64,12 +79,30 @@ public class TourGuideAgent extends Agent {
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
+        
+        getContentManager().registerOntology(MobilityOntology.getInstance());
+        getContentManager().registerOntology(JADEManagementOntology.getInstance());
+        getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
 
+        SequentialBehaviour sb = new SequentialBehaviour();
+        sb.addSubBehaviour(new MobilityListener(this, containerMap));
+        sb.addSubBehaviour(new WakerBehaviour(this, 1000) { 
+            @Override
+            public void onWake() {
+                curatorAgent = DFUtilities.searchDF(TourGuideAgent.this, CA_DF_NAME);
+                if(curatorAgent == null) {
+                    curatorAgent = fetchCuratorFromAnotherContainer();
+                }
+                System.out.println("TGA's ATTEMPT TO FETCH CURATOR = " + curatorAgent);
+            }
+        });
+        
         final ParallelBehaviour par = new ParallelBehaviour(ParallelBehaviour.WHEN_ALL);
         par.addSubBehaviour(new TGAMsgReceiverBehaviour(TourGuideAgent.this,
                 null, MsgReceiver.INFINITE, new DataStore(), null));
         par.addSubBehaviour(new PresentingRecommendationsBehaviour(this, 10000));
-        addBehaviour(par);
+        sb.addSubBehaviour(par);
+        addBehaviour(sb);
     }
 
     @SuppressWarnings("serial")
@@ -93,10 +126,10 @@ public class TourGuideAgent extends Agent {
                         for (String s : interests) {
                             genres.add(Artifact.GENRE.valueOf(s));
                         }
-                        AID caid = DFUtilities.searchDF(TourGuideAgent.this, CA_DF_NAME);
-                        if (caid != null) {
+                        
+                        if (curatorAgent != null) {
                             try {
-                                msg.addReceiver(caid);
+                                msg.addReceiver(curatorAgent);
                                 msg.setOntology(Ontologies.QUERY_ARTIFACTS);
                                 msg.setContentObject((Serializable) genres);
 
@@ -105,7 +138,9 @@ public class TourGuideAgent extends Agent {
                                     responses.put(aid, new ArrayList());
                                 }
 
-                                System.out.println(myAgent.getName() + " SENDING msg: " + msg.getOntology() + " to " + caid.getName());
+                                System.out.println(myAgent.getName() 
+                                        + " SENDING msg: " + msg.getOntology() 
+                                        + " to " + curatorAgent.getName());
                                 send(msg);
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -157,5 +192,29 @@ public class TourGuideAgent extends Agent {
 
     void setUsers(HashMap<AID, UserProfile> users) {
         this.users = users;
+    }
+    
+    private AID fetchCuratorFromAnotherContainer() {
+        QueryAgentsOnLocation agentAction = new QueryAgentsOnLocation();
+        agentAction.setLocation(here());
+        Action newAction = new Action(getAMS(), agentAction);
+        ACLMessage agentRequest = new ACLMessage(ACLMessage.REQUEST);
+        agentRequest.addReceiver(getAMS());
+        agentRequest.setOntology(JADEManagementOntology.getInstance().getName());
+        agentRequest.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
+        agentRequest.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+
+        try {
+            getContentManager().fillContent(agentRequest, newAction);
+            send(agentRequest);
+            
+            ACLMessage receivedMessage = blockingReceive(MessageTemplate.MatchSender(getAMS()));
+            Result r = (Result) getContentManager().extractContent(receivedMessage);
+            jade.util.leap.List list = (jade.util.leap.List) r.getValue();
+            return (AID)list.iterator().next();
+        } catch (Codec.CodecException | OntologyException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

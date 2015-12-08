@@ -8,9 +8,15 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import se.kth.id2209.hw2.util.DFUtilities;
 import se.kth.id2209.hw2.util.Ontologies;
 
 /**
@@ -22,6 +28,8 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
     private final Agent agent;
     private final Map<Integer, Auction> auctions;
     private float priceDecrementConstant = 0.90f;
+    private List<Auction> finishedAuctions = new ArrayList<Auction>();
+    private Lock fLock = new ReentrantLock();
 
     DutchAuctioneerBehaviour(Agent agent,
             Map<Integer, Auction> auctions) {
@@ -70,13 +78,46 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
             } else if (msg.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
                 handleRejectProposal(auction, msg);
             }
+            else if(msg.getOntology().equalsIgnoreCase(Ontologies.AUCTION_COMPLETE))
+            {
+                fLock.lock();
+                try
+                {
+                    try
+                    {
+
+                        finishedAuctions.add((Auction) msg.getContentObject());
+                    } catch (UnreadableException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    if (finishedAuctions.size() > 1)
+                    {
+                        int max = 0;
+                        Auction maxAuction = null;
+                        for (Auction a : finishedAuctions)
+                        {
+                            if (a.getCurrentPrice() > max)
+                            {
+                                max = a.getCurrentPrice();
+                                maxAuction = a;
+                            }
+                        }
+                        System.out.println("Highest price from auction " + maxAuction.getArtifact().getId() + " was: " + max);
+                    }
+                }
+                finally{
+                    fLock.unlock();
+
+                }
+            }
 
         } else {
             block();
         }
     }
     
-    private void moveHome() {
+    private void moveHome(final Auction a) {
         myAgent.addBehaviour(new OneShotBehaviour(myAgent) { 
             @Override
             public void action() {
@@ -84,7 +125,42 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
                 Location home = agent.getHome();
                 System.out.println("ARTIST ::::: ATTEMPTING MOVING from=" + myAgent.here() + " to " + home);
                 if (home != null) {
-                    myAgent.doMove(home);
+                    if(!home.toString().equalsIgnoreCase(myAgent.here().toString()))
+                    {
+                        myAgent.doMove(home);
+                    }
+                    notifyParent(a);
+                }
+            }
+        });
+    }
+
+    public void notifyParent(final Auction a) {
+
+        myAgent.addBehaviour(new OneShotBehaviour()
+        {
+            @Override
+            public void action()
+            {
+                AID[] artistManagement = DFUtilities.searchAllDF(myAgent, ArtistManagementAgent.DF_NAME);
+                for(AID aid: artistManagement)
+                {
+                    if(!aid.getName().contains("clone"))
+                    {
+                        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                        msg.setOntology(Ontologies.AUCTION_COMPLETE);
+                        msg.addReceiver(aid);
+                        try
+                        {
+                            msg.setContentObject(a);
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        myAgent.send(msg);
+                    }
+
+
                 }
             }
         });
@@ -131,7 +207,7 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
                         stoppingAuctionMsg.addReceiver(aid);
                     }
                     myAgent.send(stoppingAuctionMsg);
-                    moveHome();
+                    moveHome(auction);
                 }
             });
         }
@@ -173,7 +249,7 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
             public void action() {
                 myAgent.addBehaviour(new InformAuctionWonBehaviour(
                         auction, myAgent));
-                moveHome();
+                moveHome(auction);
             }
         });
         

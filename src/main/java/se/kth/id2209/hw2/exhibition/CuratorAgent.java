@@ -100,8 +100,12 @@ public class CuratorAgent extends Agent {
                 final Location dest = (Location) containerMap.get(containerName);
                 System.out.println("1 ATTEMPTING MOVING from=" + here() + " to " + dest);
                 if (dest != null) {
-                    doMove(dest);
-                    home = dest;
+                    if(!dest.equals(here()))
+                    {
+                        doMove(dest);
+                        if(home==null)
+                            home = dest;
+                    }
                 }
 
                 SequentialBehaviour seq = new SequentialBehaviour();

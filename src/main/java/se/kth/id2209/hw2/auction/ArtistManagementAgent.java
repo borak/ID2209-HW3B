@@ -38,6 +38,7 @@ import se.kth.id2209.hw2.exhibition.AuctionListenerBehaviour;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 import se.kth.id2209.hw2.util.DFUtilities;
 import se.kth.id2209.hw2.util.MobilityListener;
+import se.kth.id2209.hw2.util.Ontologies;
 import se.kth.id2209.hw2.util.SList;
 
 /**
@@ -50,7 +51,7 @@ public class ArtistManagementAgent extends Agent {
     public static final String DF_NAME = "Artist-management-agent";
     private final Map<Integer, Auction> auctions = new HashMap();
     final Lock auctionsLock = new ReentrantLock();
-    private static final int biddersLookupDelay = 0;
+    private static final int biddersLookupDelay = 3000;
     private static final int auctionsStartDelay = 1000;
     private static final int auctionsCFPDelay = 3000;
     private final SList<AID> bidders = new SList();
@@ -60,6 +61,7 @@ public class ArtistManagementAgent extends Agent {
     public final static String AUCTION1_CONTAINER_NAME = "auction-1-Container";
     public final static String AUCTION2_CONTAINER_NAME = "auction-2-Container";
     private Location home;
+
 
     @Override
     protected void setup() {
@@ -104,8 +106,12 @@ public class ArtistManagementAgent extends Agent {
                     myAgent.addBehaviour(new OneShotBehaviour(myAgent) {
                         @Override
                         public void action() {
-                            doMove(dest);
-                            home = dest;
+                            if(!dest.equals(here()))
+                            {
+                                doMove(dest);
+                                if(home==null)
+                                    home = dest;
+                            }
                         }
                     });
                     SequentialBehaviour seq = new SequentialBehaviour();
@@ -256,12 +262,7 @@ public class ArtistManagementAgent extends Agent {
         return home;
     }
     
-    @Override
-    public void afterMove() {
-        /*addBehaviour(new Behaviour() {
-            
-        });*/
-    }
+
 
     @Override
     public void afterClone() {

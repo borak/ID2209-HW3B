@@ -36,8 +36,8 @@ import jade.domain.mobility.MobilityOntology;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.wrapper.AgentContainer;
-import java.io.Serializable;
 import se.kth.id2209.hw2.exhibition.Artifact;
+import se.kth.id2209.hw2.exhibition.AuctionListenerBehaviour;
 import se.kth.id2209.hw2.exhibition.CuratorAgent;
 import se.kth.id2209.hw2.util.DFUtilities;
 import se.kth.id2209.hw2.util.MobilityListener;
@@ -53,13 +53,16 @@ public class ArtistManagementAgent extends Agent {
     public static final String DF_NAME = "Artist-management-agent";
     private final Map<Integer, Auction> auctions = new HashMap();
     final Lock auctionsLock = new ReentrantLock();
-    private static final int biddersLookupDelay = 8000;
+    private static final int biddersLookupDelay = 0;
     private static final int auctionsStartDelay = 1000;
     private static final int auctionsCFPDelay = 3000;
     private final SList<AID> bidders = new SList();
     private final Lock bidderLock = new ReentrantLock();
     private final Map<String, Location> containerMap = new HashMap();
     private final static String ARTIST_CONTAINER_NAME = "auctioneer-Agent-Container";
+    public final static String AUCTION1_CONTAINER_NAME = "auction-1-Container";
+    public final static String AUCTION2_CONTAINER_NAME = "auction-2-Container";
+    private Location home;
 
     @Override
     protected void setup() {
@@ -74,47 +77,23 @@ public class ArtistManagementAgent extends Agent {
             bidderLock.unlock();
         }
         Runtime runtime = Runtime.instance();
-        ProfileImpl p = new ProfileImpl();
-        p.setParameter("container-name", ARTIST_CONTAINER_NAME);
-        final AgentContainer curatorContainer = runtime.createAgentContainer(p);
+        ProfileImpl p1 = new ProfileImpl();
+        p1.setParameter("container-name", ARTIST_CONTAINER_NAME);
+        final AgentContainer curatorContainer = runtime.createAgentContainer(p1);
+        ProfileImpl p2 = new ProfileImpl();
+        p2.setParameter("container-name", AUCTION1_CONTAINER_NAME);
+        final AgentContainer auction1Container = runtime.createAgentContainer(p2);
+        ProfileImpl p3 = new ProfileImpl();
+        p3.setParameter("container-name", AUCTION2_CONTAINER_NAME);
+        final AgentContainer auction2Container = runtime.createAgentContainer(p3);
+
+
 
         getContentManager().registerOntology(MobilityOntology.getInstance());
         getContentManager().registerOntology(JADEManagementOntology.getInstance());
         getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
 
-        ParallelBehaviour pbr = new ParallelBehaviour(this,
-                ParallelBehaviour.WHEN_ALL);
-        pbr.addSubBehaviour(new DutchAuctioneerBehaviour(this, auctions));
-        pbr.addSubBehaviour(new WakerBehaviour(this, auctionsStartDelay) {
-            @Override
-            public void onWake() {
-                auctionsLock.lock();
-                try {
-                    for (Auction auc : auctions.values()) {
-                        ArtistManagementAgent.this.addBehaviour(
-                                new InformStartOfAuctionBehaviour(auc,
-                                        ArtistManagementAgent.this, bidders));
-                    }
-                } finally {
-                    auctionsLock.unlock();
-                }
-            }
-        });
-        pbr.addSubBehaviour(new WakerBehaviour(this, auctionsCFPDelay) {
-            @Override
-            public void onWake() {
-                auctionsLock.lock();
-                try {
-                    for (Auction auc : auctions.values()) {
-                        ArtistManagementAgent.this.addBehaviour(
-                                new CFPBehaviour(auc,
-                                        ArtistManagementAgent.this, bidders));
-                    }
-                } finally {
-                    auctionsLock.unlock();
-                }
-            }
-        });
+
 
         final SequentialBehaviour sb = new SequentialBehaviour();
         sb.addSubBehaviour(new WakerBehaviour(this, biddersLookupDelay) {
@@ -129,36 +108,36 @@ public class ArtistManagementAgent extends Agent {
             @Override
             public void action() {
                 final Location dest = (Location) containerMap.get(ARTIST_CONTAINER_NAME);
+                final Location cloneDest1 = (Location) containerMap.get(AUCTION1_CONTAINER_NAME);
+                final Location cloneDest2 = (Location) containerMap.get(AUCTION2_CONTAINER_NAME);
                 System.out.println("ARTIST ::::: ATTEMPTING MOVING from=" + here() + " to " + dest);
                 if (dest != null) {
-                    myAgent.addBehaviour(new OneShotBehaviour(myAgent) { // FÖrmodligen ett onödigt beteende. serialiseringsfel
+                    myAgent.addBehaviour(new OneShotBehaviour(myAgent) {
                         @Override
                         public void action() {
                             doMove(dest);
+                            home = dest;
                         }
                     });
-                }
-            }
-        });
-        sb.addSubBehaviour(new OneShotBehaviour(this) { // find the curators
-            @Override
-            public void action() {
-                jade.util.leap.List result = fetchBiddersFromOtherContainers();
-                bidderLock.lock();
-                try {
-                    for (Object o : result.toArray()) {
-                        if(((AID) o).getName().contains("curator")) {
-                            bidders.add((AID) o);
+                    SequentialBehaviour seq = new SequentialBehaviour();
+                    seq.addSubBehaviour(new OneShotBehaviour(myAgent) {
+
+                        @Override
+                        public void action() {
+                            ArtistManagementAgent.this.doClone(cloneDest1, getLocalName() + "_clone1");
                         }
-                    }
-                    System.out.println("ARTIST ::::: AGENTS FETCHED FROM CONTAINERS ="
-                        + result.size() + " BIDDERS =" + bidders.size());
-                } finally {
-                    bidderLock.unlock();
+                    });
+                    seq.addSubBehaviour(new OneShotBehaviour(myAgent) {
+
+                        @Override
+                        public void action() {
+                            ArtistManagementAgent.this.doClone(cloneDest2, getLocalName() + "_clone2");
+                        }
+                    });
+                    addBehaviour(seq);
                 }
             }
         });
-        sb.addSubBehaviour(pbr);
         addBehaviour(sb);
     }
 
@@ -281,5 +260,99 @@ public class ArtistManagementAgent extends Agent {
             e.printStackTrace();
         }
         return null;
+    }
+
+
+    @Override
+    public void afterClone() {
+        if(getName().split("clone").length >= 3) {
+            System.err.println("DELETING CLONE " + getName());
+            try {
+                doDelete();
+            } catch(Exception e) {
+
+            }
+        } else {
+            getContentManager().registerOntology(MobilityOntology.getInstance());
+            getContentManager().registerOntology(JADEManagementOntology.getInstance());
+            getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
+
+            ParallelBehaviour pbr = new ParallelBehaviour(this,
+                    ParallelBehaviour.WHEN_ALL);
+            pbr.addSubBehaviour(new DutchAuctioneerBehaviour(this, auctions));
+            pbr.addSubBehaviour(new WakerBehaviour(this, auctionsStartDelay) {
+                @Override
+                public void onWake() {
+                    auctionsLock.lock();
+                    try {
+                        int count = 0;
+                        for (Auction auc : auctions.values()) {
+                            ArtistManagementAgent.this.addBehaviour(
+                                    new InformStartOfAuctionBehaviour(auc,
+                                            ArtistManagementAgent.this, bidders));
+                                    count++;
+                                    if(count ==2)
+                                    {
+                                        break;
+                                    }
+                        }
+                    } finally {
+                        auctionsLock.unlock();
+                    }
+                }
+            });
+            pbr.addSubBehaviour(new WakerBehaviour(this, auctionsCFPDelay) {
+                @Override
+                public void onWake() {
+                    auctionsLock.lock();
+                    try {
+                        int count =0;
+                        for (Auction auc : auctions.values()) {
+                            ArtistManagementAgent.this.addBehaviour(
+                                    new CFPBehaviour(auc,
+                                            ArtistManagementAgent.this, bidders));
+                                count++;
+                            if(count==2)
+                            {
+                                break;
+                            }
+                        }
+                    } finally {
+                        auctionsLock.unlock();
+                    }
+                }
+            });
+
+            final SequentialBehaviour sb = new SequentialBehaviour();
+            sb.addSubBehaviour(new WakerBehaviour(this, biddersLookupDelay) {
+                @Override
+                public void onWake() {
+                    requestContainers();
+                    System.out.println("ARTIST ::::: REQUEST FOR CONTAINERS SENT.");
+                }
+            });
+            sb.addSubBehaviour(new MobilityListener(this, containerMap));
+
+            sb.addSubBehaviour(new OneShotBehaviour(this) { // find the curators
+                @Override
+                public void action() {
+                    jade.util.leap.List result = fetchBiddersFromOtherContainers();
+                    bidderLock.lock();
+                    try {
+                        for (Object o : result.toArray()) {
+                            if(((AID) o).getName().contains("curator")) {
+                                bidders.add((AID) o);
+                            }
+                        }
+                        System.out.println("ARTIST ::::: AGENTS FETCHED FROM CONTAINERS ="
+                                + result.size() + " BIDDERS =" + bidders.size());
+                    } finally {
+                        bidderLock.unlock();
+                    }
+                }
+            });
+            sb.addSubBehaviour(pbr);
+            addBehaviour(sb);
+        }
     }
 }

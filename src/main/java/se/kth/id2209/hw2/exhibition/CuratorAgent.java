@@ -1,5 +1,6 @@
 package se.kth.id2209.hw2.exhibition;
 
+import se.kth.id2209.hw2.auction.ArtistManagementAgent;
 import se.kth.id2209.hw2.util.MobilityListener;
 import java.io.File;
 import java.io.IOException;
@@ -104,18 +105,20 @@ public class CuratorAgent extends Agent {
                 }
 
                 SequentialBehaviour seq = new SequentialBehaviour();
+                final Location cloneDest1 = (Location) containerMap.get(ArtistManagementAgent.AUCTION1_CONTAINER_NAME);
+                final Location cloneDest2 = (Location) containerMap.get(ArtistManagementAgent.AUCTION2_CONTAINER_NAME);
                 seq.addSubBehaviour(new OneShotBehaviour(myAgent) {
 
                     @Override
                     public void action() {
-                        CuratorAgent.this.doClone(dest, getLocalName() + "_clone1");
+                        CuratorAgent.this.doClone(cloneDest1, getLocalName() + "_clone1");
                     }
                 });
                 seq.addSubBehaviour(new OneShotBehaviour(myAgent) {
 
                     @Override
                     public void action() {
-                        CuratorAgent.this.doClone(dest, getLocalName() + "_clone2");
+                        CuratorAgent.this.doClone(cloneDest2, getLocalName() + "_clone2");
                     }
                 });
                 addBehaviour(seq);
@@ -287,6 +290,13 @@ public class CuratorAgent extends Agent {
             getContentManager().registerOntology(MobilityOntology.getInstance());
             getContentManager().registerOntology(JADEManagementOntology.getInstance());
             getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
+
+            final ParallelBehaviour pbr = new ParallelBehaviour(this,
+                    ParallelBehaviour.WHEN_ALL);
+            pbr.addSubBehaviour(new ArtifactListenerBehaviour(this));
+            pbr.addSubBehaviour(new AuctionListenerBehaviour(this));
+
+            addBehaviour(pbr);
             System.out.println("CURATOR CLONED " + getLocalName());
         }
     }

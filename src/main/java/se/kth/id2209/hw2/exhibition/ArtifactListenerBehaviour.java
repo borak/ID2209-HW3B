@@ -45,7 +45,7 @@ class ArtifactListenerBehaviour extends CyclicBehaviour {
         ACLMessage msg = curator.receive(mt);
 
         if (msg != null) {
-        	System.out.println(curator.getName() + " RECIEVED message: " + msg.getOntology());
+//        	System.out.println(curator.getName() + " RECIEVED message: " + msg.getOntology());
             ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
             String ontology = msg.getOntology();
             if (ontology.equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION_ID)) {
@@ -74,7 +74,7 @@ class ArtifactListenerBehaviour extends CyclicBehaviour {
                 }
             }
             reply.addReceiver(msg.getSender());
-            System.out.println(curator.getName() + " SENDING msg: " + msg + " to " + msg.getSender().getName());
+//            System.out.println(curator.getName() + " SENDING msg: " + msg + " to " + msg.getSender().getName());
             curator.send(reply);
         } else {
             block();

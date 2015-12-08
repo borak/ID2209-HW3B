@@ -332,6 +332,7 @@ public class ArtistManagementAgent extends Agent {
                     try {
                         for (AID aid : fetchBidders()) {
                             bidders.add(aid);
+                            System.out.println("Bidders found: " + aid.getName());
                         }
                     } finally {
                         bidderLock.unlock();
@@ -340,24 +341,6 @@ public class ArtistManagementAgent extends Agent {
                 }
             });
 
-            sb.addSubBehaviour(new OneShotBehaviour(this) { // find the curators
-                @Override
-                public void action() {
-                    jade.util.leap.List result = fetchBiddersFromOtherContainers();
-                    bidderLock.lock();
-                    try {
-                        for (Object o : result.toArray()) {
-                            if(((AID) o).getName().contains("curator")) {
-                                bidders.add((AID) o);
-                            }
-                        }
-                        System.out.println("ARTIST ::::: AGENTS FETCHED FROM CONTAINERS ="
-                                + result.size() + " BIDDERS =" + bidders.size());
-                    } finally {
-                        bidderLock.unlock();
-                    }
-                }
-            });
             sb.addSubBehaviour(pbr);
             addBehaviour(sb);
         }

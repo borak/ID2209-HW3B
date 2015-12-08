@@ -40,8 +40,8 @@ public class CFPBehaviour extends OneShotBehaviour {
                 }
             }
             myAgent.send(msg);
-            System.out.println(myAgent.getName() + " SENDING message: "
-                    + msg.getOntology() + " " + auction);
+//            System.out.println(myAgent.getName() + " SENDING message: "
+//                    + msg.getOntology() + " " + auction);
 
             myAgent.addBehaviour(new WakerBehaviour(myAgent, timeout) {
                 int cfpcounter = auction.CFPCounter;

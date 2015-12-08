@@ -78,9 +78,9 @@ public class CuratorAgent extends Agent {
         ProfileImpl p = new ProfileImpl();
         p.setParameter("container-name", containerName);
         AgentContainer curatorContainer = runtime.createAgentContainer(p);
-        addBehaviour(new OneShotBehaviour() {
+        addBehaviour(new WakerBehaviour(this,3000) {
             @Override
-            public void action() {
+            public void onWake() {
                 requestContainers();
 
             }

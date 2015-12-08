@@ -237,6 +237,7 @@ public class ArtistManagementAgent extends Agent {
 
     AID[] fetchBidders() {
         return DFUtilities.searchAllDF(this, CuratorAgent.DF_NAME);
+
     }
 
     private jade.util.leap.List fetchBiddersFromOtherContainers() {
@@ -327,11 +328,17 @@ public class ArtistManagementAgent extends Agent {
             sb.addSubBehaviour(new WakerBehaviour(this, biddersLookupDelay) {
                 @Override
                 public void onWake() {
-                    requestContainers();
+                    bidderLock.lock();
+                    try {
+                        for (AID aid : fetchBidders()) {
+                            bidders.add(aid);
+                        }
+                    } finally {
+                        bidderLock.unlock();
+                    }
                     System.out.println("ARTIST ::::: REQUEST FOR CONTAINERS SENT.");
                 }
             });
-            sb.addSubBehaviour(new MobilityListener(this, containerMap));
 
             sb.addSubBehaviour(new OneShotBehaviour(this) { // find the curators
                 @Override

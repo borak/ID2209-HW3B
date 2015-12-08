@@ -290,6 +290,7 @@ public class CuratorAgent extends Agent {
             getContentManager().registerOntology(MobilityOntology.getInstance());
             getContentManager().registerOntology(JADEManagementOntology.getInstance());
             getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
+            registerService();
 
             final ParallelBehaviour pbr = new ParallelBehaviour(this,
                     ParallelBehaviour.WHEN_ALL);

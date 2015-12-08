@@ -9,11 +9,8 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.Location;
 import jade.core.ProfileImpl;
-import jade.core.behaviours.ParallelBehaviour;
-import jade.core.behaviours.WakerBehaviour;
+import jade.core.behaviours.*;
 import jade.core.Runtime;
-import jade.core.behaviours.OneShotBehaviour;
-import jade.core.behaviours.SequentialBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
@@ -68,14 +65,6 @@ public class ArtistManagementAgent extends Agent {
     protected void setup() {
         registerService();
         initAuctions();
-        bidderLock.lock();
-        try {
-            for (AID aid : fetchBidders()) {
-                bidders.add(aid);
-            }
-        } finally {
-            bidderLock.unlock();
-        }
         Runtime runtime = Runtime.instance();
         ProfileImpl p1 = new ProfileImpl();
         p1.setParameter("container-name", ARTIST_CONTAINER_NAME);
@@ -278,6 +267,8 @@ public class ArtistManagementAgent extends Agent {
             getContentManager().registerOntology(JADEManagementOntology.getInstance());
             getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL);
 
+            registerService();
+
             ParallelBehaviour pbr = new ParallelBehaviour(this,
                     ParallelBehaviour.WHEN_ALL);
             pbr.addSubBehaviour(new DutchAuctioneerBehaviour(this, auctions));
@@ -325,20 +316,39 @@ public class ArtistManagementAgent extends Agent {
             });
 
             final SequentialBehaviour sb = new SequentialBehaviour();
-            sb.addSubBehaviour(new WakerBehaviour(this, biddersLookupDelay) {
+            sb.addSubBehaviour(new Behaviour(this)
+            {
                 @Override
-                public void onWake() {
+                public void action()
+                {
                     bidderLock.lock();
                     try {
                         for (AID aid : fetchBidders()) {
-                            bidders.add(aid);
-                            System.out.println("Bidders found: " + aid.getName());
+                            if(getName().contains("clone")) {
+
+                                bidders.add(aid);
+                                System.out.println("Bidders found: " + aid.getName());
+                            }
                         }
                     } finally {
                         bidderLock.unlock();
                     }
                     System.out.println("ARTIST ::::: REQUEST FOR CONTAINERS SENT.");
                 }
+
+                @Override
+                public boolean done()
+                {
+                    bidderLock.lock();
+                    try
+                    {
+                        return bidders.size() >= 2;
+                    } finally
+                    {
+                        bidderLock.unlock();
+                    }
+                }
+
             });
 
             sb.addSubBehaviour(pbr);

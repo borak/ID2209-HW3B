@@ -17,7 +17,7 @@ import se.kth.id2209.hw2.util.Ontologies;
  * performs appropriate responses.
  *
  */
-class ArtifactListenerBehaviour extends CyclicBehaviour {
+class   ArtifactListenerBehaviour extends CyclicBehaviour {
     AID travelGuide, profiler;
     CuratorAgent curator;
     MessageTemplate mt = new MessageTemplate(new MatchExpression() {
@@ -45,7 +45,6 @@ class ArtifactListenerBehaviour extends CyclicBehaviour {
         ACLMessage msg = curator.receive(mt);
 
         if (msg != null) {
-//        	System.out.println(curator.getName() + " RECIEVED message: " + msg.getOntology());
             ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
             String ontology = msg.getOntology();
             if (ontology.equalsIgnoreCase(Ontologies.ARTIFACT_RECOMMENDATION_ID)) {
@@ -74,7 +73,6 @@ class ArtifactListenerBehaviour extends CyclicBehaviour {
                 }
             }
             reply.addReceiver(msg.getSender());
-//            System.out.println(curator.getName() + " SENDING msg: " + msg + " to " + msg.getSender().getName());
             curator.send(reply);
         } else {
             block();

@@ -148,7 +148,7 @@ public class ArtistManagementAgent extends Agent {
         try {
             getContentManager().fillContent(request, action);
         } catch (Codec.CodecException | OntologyException e) {
-            //e.printStackTrace();
+
         }
         send(request);
     }

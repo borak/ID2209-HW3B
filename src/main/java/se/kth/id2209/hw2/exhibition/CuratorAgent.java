@@ -33,8 +33,6 @@ import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.domain.JADEAgentManagement.QueryPlatformLocationsAction;
 import jade.domain.mobility.MobileAgentDescription;
 import jade.domain.mobility.MobilityOntology;
-//import jade.domain.mobility.MobilityOntology;
-import jade.domain.mobility.MoveAction;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentContainer;
 import se.kth.id2209.hw2.exhibition.Artifact.GENRE;
@@ -100,12 +98,9 @@ public class CuratorAgent extends Agent {
                 final Location dest = (Location) containerMap.get(containerName);
                 System.out.println("1 ATTEMPTING MOVING from=" + here() + " to " + dest);
                 if (dest != null) {
-                    if(!dest.equals(here()))
-                    {
-                        doMove(dest);
-                        if(home==null)
-                            home = dest;
-                    }
+                    doMove(dest);
+                    if(home==null)
+                        home = dest;
                 }
 
                 SequentialBehaviour seq = new SequentialBehaviour();
@@ -260,7 +255,6 @@ public class CuratorAgent extends Agent {
         try {
             DFService.deregister(this);
         } catch (FIPAException fe) {
-            //fe.printStackTrace();
         }
         System.out.println("Agent " + getAID().getName() + " is terminating.");
     }

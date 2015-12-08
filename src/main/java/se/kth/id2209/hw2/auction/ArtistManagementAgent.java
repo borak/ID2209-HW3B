@@ -335,7 +335,7 @@ public class ArtistManagementAgent extends Agent {
                     bidderLock.lock();
                     try {
                         for (AID aid : fetchBidders()) {
-                            if(getName().contains("clone")) {
+                            if(aid.getName().contains("clone") && !bidders.contains(aid)) {
 
                                 bidders.add(aid);
                                 System.out.println("Bidders found: " + aid.getName());

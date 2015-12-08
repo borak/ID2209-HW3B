@@ -251,7 +251,17 @@ public class ArtistManagementAgent extends Agent {
         }
         return null;
     }
-
+    
+    Location getHome() {
+        return home;
+    }
+    
+    @Override
+    public void afterMove() {
+        /*addBehaviour(new Behaviour() {
+            
+        });*/
+    }
 
     @Override
     public void afterClone() {
@@ -283,7 +293,7 @@ public class ArtistManagementAgent extends Agent {
                                     new InformStartOfAuctionBehaviour(auc,
                                             ArtistManagementAgent.this, bidders));
                                     count++;
-                                    if(count ==2)
+                                    if(count ==1)
                                     {
                                         break;
                                     }
@@ -304,7 +314,7 @@ public class ArtistManagementAgent extends Agent {
                                     new CFPBehaviour(auc,
                                             ArtistManagementAgent.this, bidders));
                                 count++;
-                            if(count==2)
+                            if(count==1)
                             {
                                 break;
                             }

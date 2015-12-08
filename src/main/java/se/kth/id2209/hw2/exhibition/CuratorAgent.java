@@ -66,7 +66,6 @@ public class CuratorAgent extends Agent {
         curatorId = UniqueCuratorIdGiver.createUniqueId();
         artGallery = ArtGallery.getInstance();
         containerName = getLocalName() + "-Agent-Container";
-        home = here();
         
         registerService();
         
@@ -102,6 +101,7 @@ public class CuratorAgent extends Agent {
                 System.out.println("1 ATTEMPTING MOVING from=" + here() + " to " + dest);
                 if (dest != null) {
                     doMove(dest);
+                    home = dest;
                 }
 
                 SequentialBehaviour seq = new SequentialBehaviour();

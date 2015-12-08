@@ -2,6 +2,7 @@ package se.kth.id2209.hw2.auction;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.Location;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -45,11 +46,6 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
             } catch (Exception e) {
                 e.printStackTrace();
                 System.err.println(myAgent.getLocalName() + ": received (AUCTION) from " + msg.getSender().getLocalName());
-                /*try {
-                    System.err.println(myAgent.getName() + ": GOT AUCTION=" + (Auction) msg.getContentObject());
-                } catch(Exception ex) {
-                    
-                }*/
             }
             final Auction auction = auctions.get(item);
 
@@ -79,6 +75,21 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
             block();
         }
     }
+    
+    private void moveHome() {
+        myAgent.addBehaviour(new OneShotBehaviour(myAgent) { 
+            @Override
+            public void action() {
+                ArtistManagementAgent agent = (ArtistManagementAgent)myAgent;
+                Location home = agent.getHome();
+                System.out.println("ARTIST ::::: ATTEMPTING MOVING from=" + myAgent.here() + " to " + home);
+                if (home != null) {
+                    myAgent.doMove(home);
+                }
+            }
+        });
+    }
+
 
     private void handleRejectProposal(Auction auction, ACLMessage msg) {
         auction.addParticipantWhoRejected(msg.getSender());
@@ -120,6 +131,7 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
                         stoppingAuctionMsg.addReceiver(aid);
                     }
                     myAgent.send(stoppingAuctionMsg);
+                    moveHome();
                 }
             });
         }
@@ -161,6 +173,7 @@ class DutchAuctioneerBehaviour extends CyclicBehaviour {
             public void action() {
                 myAgent.addBehaviour(new InformAuctionWonBehaviour(
                         auction, myAgent));
+                moveHome();
             }
         });
         

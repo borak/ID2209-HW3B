@@ -98,9 +98,6 @@ public class AuctionListenerBehaviour extends CyclicBehaviour {
             @Override
             public void action() {
                 CuratorAgent agent = (CuratorAgent)myAgent;
-                if(!agent.isClone()) {
-                    return;
-                }
                 Location home = agent.getHome();
                 System.out.println("CURATOR ::::: ATTEMPTING MOVING from=" + myAgent.here() + " to " + home);
                 if (home != null) {
